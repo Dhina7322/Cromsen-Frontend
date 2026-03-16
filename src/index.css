@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #162d3a;
+  --accent: #2497cc;
+  --action: #2497cc;
+  --secondary: #f9f9f9;
+  --neutral-dark: #2f2f2f;
+}
+
+body {
+  @apply bg-white text-neutral-dark font-sans;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-serif;
+}
+
+.brand-font {
+  font-family: 'Cinzel', serif;
+}
+
+.btn-primary {
+  background-color: var(--action);
+  @apply text-white px-8 py-3 rounded-md transition-all duration-300 uppercase tracking-wider text-sm font-medium;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary);
+}
+
+.btn-accent {
+  background-color: var(--accent);
+  @apply text-white px-8 py-3 rounded-md transition-all duration-300 hover:opacity-90 uppercase tracking-wider text-sm font-medium;
+}
+
+.btn-outline {
+  border: 1px solid var(--action);
+  color: var(--action);
+  @apply px-8 py-3 rounded-md transition-all duration-300 hover:text-white uppercase tracking-wider text-sm font-medium;
+}
+
+.btn-outline:hover {
+  background-color: var(--action);
+}
+
+.section-padding {
+  @apply py-20 px-4 md:px-8 lg:px-16;
+}

@@ -1,0 +1,217 @@
+import React, { useState, useEffect } from "react";
+import { 
+  ShoppingCart, 
+  Search, 
+  Eye, 
+  Truck, 
+  CheckCircle, 
+  XCircle, 
+  Clock,
+  ChevronRight,
+  MoreVertical,
+  X
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { useOutletContext } from "react-router-dom";
+
+const API = "/api";
+
+export default function OrdersTab() {
+  const { showToast } = useOutletContext();
+  const [orders, setOrders] = useState([]);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const statuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+
+  useEffect(() => {
+    fetchOrders();
+  }, [statusFilter]);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}/orders`, {
+        params: { status: statusFilter === "All" ? "" : statusFilter, limit: 100 } // Fetch more for local filtering/display
+      });
+      setOrders(res.data.orders || []);
+      setTotalOrders(res.data.total || 0);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredOrders = orders.filter(o => {
+    const matchesSearch = o._id.includes(searchTerm) || (o.user?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All" || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const updateOrderStatus = async (id, status) => {
+    try {
+      await axios.put(`${API}/orders/${id}`, { status });
+      showToast("success", `Order marked as ${status}`);
+      fetchOrders();
+      if (selectedOrder && selectedOrder._id === id) {
+        setSelectedOrder({ ...selectedOrder, status });
+      }
+    } catch (err) {
+      showToast("error", "Failed to update order status");
+    }
+  };
+
+  return (
+    <div className="section-gap">
+      <div className="spill-row">
+        {statuses.map(s => (
+          <button 
+            key={s} 
+            className={`spill ${statusFilter === s ? 'spill--on' : ''}`}
+            onClick={() => setStatusFilter(s)}
+          >
+            {s}
+            <span className="spill-cnt">
+              {s === "All" ? orders.length : orders.filter(o => o.status === s).length}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <div className="searchbox">
+            <Search size={16} />
+            <input 
+              type="text" 
+              placeholder="Search by Order ID or Customer..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th style={{ textAlign: 'right' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.map(o => (
+              <tr key={o._id}>
+                <td><span className="order-id">#{o._id.slice(-8)}</span></td>
+                <td className="date-cell">{new Date(o.createdAt).toLocaleDateString()}</td>
+                <td>
+                  <div className="cust-name">{o.user?.name || o.guestEmail || "Guest"}</div>
+                  <div className="cust-phone">{o.shippingAddress?.phone}</div>
+                </td>
+                <td>{o.items?.length || 0} Products</td>
+                <td className="amt">₹{o.totalAmount}</td>
+                <td>
+                   <span className={`status-tag s-${o.status?.toLowerCase()}`}>
+                     <i></i> {o.status}
+                   </span>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                   <div className="row-acts">
+                     <button className="icon-btn" onClick={() => setSelectedOrder(o)} title="View Details"><Eye size={14}/></button>
+                     <select 
+                       className="inline-select"
+                       value={o.status}
+                       onChange={(e) => updateOrderStatus(o._id, e.target.value)}
+                     >
+                       {statuses.slice(1).map(s => <option key={s} value={s}>{s}</option>)}
+                     </select>
+                   </div>
+                </td>
+              </tr>
+            ))}
+            {filteredOrders.length === 0 && <tr><td colSpan="7" className="empty-row">No orders found matching criteria</td></tr>}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Order Detail Modal */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <div className="modal-overlay">
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal">
+              <div className="modal-head">
+                 <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
+                 <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18}/></button>
+              </div>
+              <div className="om-body">
+                <div className="om-left">
+                  <div className="om-section-title">Order Items</div>
+                  <div className="activity-list" style={{ padding: 0 }}>
+                    {selectedOrder.items?.map((item, idx) => (
+                      <div key={idx} className="om-item">
+                         <div className="om-item-ph">{item.name[0]}</div>
+                         <div className="om-item-info">
+                            <div className="om-item-name">{item.name}</div>
+                            <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
+                         </div>
+                         <div className="om-item-total">₹{item.quantity * item.price}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: '24px' }}>
+                    <div className="om-section-title">Shipping Address</div>
+                    <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', fontSize: '13px' }}>
+                       <strong>{selectedOrder.shippingAddress?.name}</strong><br/>
+                       {selectedOrder.shippingAddress?.address}<br/>
+                       {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.zip}<br/>
+                       Phone: {selectedOrder.shippingAddress?.phone}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="om-right">
+                   <div className="om-section-title">Order Summary</div>
+                   <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
+                   <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
+                   <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
+
+                   <div style={{ marginTop: '24px' }}>
+                     <div className="om-section-title">Update Status</div>
+                     <div className="om-status-btns">
+                        {statuses.slice(1).map(s => (
+                          <button 
+                            key={s}
+                            disabled={selectedOrder.status === s}
+                            className={`od-st-btn ${selectedOrder.status === s ? 'od-st-btn--on' : ''}`}
+                            onClick={() => updateOrderStatus(selectedOrder._id, s)}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                     </div>
+                   </div>
+                </div>
+              </div>
+              <div className="modal-foot">
+                 <button className="btn-secondary" onClick={() => window.print()}>Print Invoice</button>
+                 <button className="btn-primary" onClick={() => setSelectedOrder(null)}>Close</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

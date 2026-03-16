@@ -1,0 +1,35 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import DashboardOverview from "./DashboardOverview";
+import { useOutletContext } from "react-router-dom";
+
+export default function DashboardOverviewWrapper() {
+  const { showToast } = useOutletContext();
+  const [stats, setStats] = useState({ products: 0, categories: 0, orders: 0, users: 0, recentOrders: [], lowStock: [] });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("/api/admin/stats");
+        setStats({
+          products: res.data.totalProducts,
+          categories: res.data.totalCategories,
+          orders: res.data.totalOrders,
+          users: res.data.totalUsers,
+          recentOrders: res.data.recentOrders || [],
+          lowStock: res.data.lowStock || []
+        });
+      } catch (err) {
+        showToast("error", "Failed to load dashboard statistics");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [showToast]);
+
+  if (loading) return null; // Parent handles spinner
+
+  return <DashboardOverview stats={stats} />;
+}
