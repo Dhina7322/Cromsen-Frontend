@@ -78,7 +78,7 @@ const Footer = () => {
       {/* Copyright Footer */}
       <div className="bg-primary text-center py-4 text-white text-xs uppercase tracking-[0.2em] opacity-90">
         <div className="container mx-auto max-w-[1200px] px-5">
-          &copy; {new Date().getFullYear()} Cromsen. Developed according to reference.
+          &copy; {new Date().getFullYear()} Cromsen. Developed according to reference....
         </div>
       </div>
     </>
