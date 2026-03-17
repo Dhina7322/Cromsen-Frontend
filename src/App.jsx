@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import Cart from './pages/Cart';
 import Services from './pages/Services';
 import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
 
 import { useLocation } from 'react-router-dom';
 
@@ -63,6 +64,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/my-orders" element={<Orders />} />
           
           {/* Admin Routes Consolidated */}
           <Route path="/admin/login" element={<AdminLogin />} />
