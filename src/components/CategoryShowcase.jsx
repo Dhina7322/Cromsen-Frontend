@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { useState, useEffect } from 'react';
 import { getCategories } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 
 const CategoryShowcase = () => {
   const [categories, setCategories] = useState([]);
@@ -38,11 +39,17 @@ const CategoryShowcase = () => {
               className="group flex flex-col items-center text-center w-full"
             >
               <div className="w-full aspect-square mb-4 overflow-hidden bg-gray-100 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                <img 
-                  src={cat.image} 
-                  alt={cat.name} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+                {cat.image ? (
+                  <img 
+                    src={getImageUrl(cat.image)} 
+                    alt={cat.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col justify-center items-center text-gray-400 group-hover:scale-105 transition-transform duration-300">
+                    <span className="text-2xl font-serif">{cat.name.charAt(0)}</span>
+                  </div>
+                )}
               </div>
               <h3 className="text-xs font-sans font-bold tracking-wide text-neutral-dark group-hover:text-action transition-colors">{cat.name}</h3>
             </Link>

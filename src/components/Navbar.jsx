@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Search, ShoppingCart, User, Shield, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { getProducts, getCategories } from '../services/api';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
+  
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState({ products: [], categories: [] });
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const searchRef = useRef(null);
+
   const location = useLocation();
   const navigate = useNavigate();
   const { cartCount } = useCart();
@@ -18,24 +26,46 @@ const Navbar = () => {
   const isHomePage = location.pathname === '/';
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (searchQuery.length >= 2) {
-        try {
-          const res = await fetch(`/api/products/search?q=${searchQuery}`);
-          const data = await res.json();
-          setSuggestions(data);
-          setShowSuggestions(true);
-        } catch (err) {
-          console.error('Suggestions error:', err);
-        }
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 300);
+    // Fetch products and categories for the search dropdown
+    getProducts().then(res => {
+      const p = res?.products || res;
+      setProducts(Array.isArray(p) ? p : []);
+    }).catch(console.error);
+    
+    getCategories().then(res => {
+      const c = res?.categories || res;
+      setCategories(Array.isArray(c) ? c : []);
+    }).catch(console.error);
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const q = searchQuery.toLowerCase();
+      setFilteredSuggestions({
+        products: products.filter(p => p.name?.toLowerCase().includes(q)).slice(0, 5),
+        categories: categories.filter(c => c.name?.toLowerCase().includes(q)).slice(0, 3),
+      });
+      setShowCategoryDropdown(false);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+      setFilteredSuggestions({ products: [], categories: [] });
+      if (document.activeElement === searchRef.current?.querySelector('input')) {
+        setShowCategoryDropdown(true);
+      }
+    }
+  }, [searchQuery, products, categories]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+        setShowCategoryDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,14 +82,8 @@ const Navbar = () => {
       navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       setShowSuggestions(false);
+      setShowCategoryDropdown(false);
     }
-  };
-
-  const handleSuggestionClick = (name) => {
-    navigate(`/shop?search=${encodeURIComponent(name)}`);
-    setSearchQuery('');
-    setSuggestions([]);
-    setShowSuggestions(false);
   };
 
   const navLinks = [
@@ -112,41 +136,159 @@ const Navbar = () => {
 
           {/* Right: Search, Login, Register, Cart */}
           <div className="hidden lg:flex items-center space-x-6 text-white text-xs font-sans uppercase tracking-widest font-bold">
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-              <input 
-                type="text" 
-                placeholder="Search products..." 
-                value={searchQuery}
-                onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-white/10 border border-white/20 text-white rounded-full py-1.5 pl-4 pr-10 text-[10px] w-48 focus:outline-none focus:border-action transition-colors placeholder:text-gray-400 normal-case tracking-normal"
-              />
-              <button type="submit" className="absolute right-3 text-gray-300 hover:text-white transition-colors">
-                <Search size={14} />
-              </button>
+            <div className="relative flex items-center" ref={searchRef}>
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+                <input 
+                  type="text" 
+                  placeholder="Search products..." 
+                  value={searchQuery}
+                  onFocus={() => {
+                    if (searchQuery.trim().length === 0) {
+                      setShowCategoryDropdown(true);
+                      setShowSuggestions(false);
+                    } else {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-white/10 border border-white/20 text-white rounded-full py-2 pl-4 pr-10 text-[11px] w-56 lg:w-64 focus:outline-none focus:border-action transition-all placeholder:text-gray-400 normal-case tracking-normal focus:bg-white/20"
+                />
+                <button type="submit" className="absolute right-3 text-gray-300 hover:text-white transition-colors">
+                  <Search size={16} />
+                </button>
+              </form>
 
               <AnimatePresence>
-                {showSuggestions && suggestions.length > 0 && (
+                {/* 1. Browse Categories Dropdown (When empty) */}
+                {showCategoryDropdown && !showSuggestions && categories.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 w-full mt-2 bg-primary border border-white/10 rounded-lg shadow-2xl overflow-hidden z-[60]"
+                    className="absolute top-full right-0 w-80 mt-3 bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden z-[60] border border-gray-100 font-sans tracking-normal normal-case"
                   >
-                    {suggestions.map((name, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleSuggestionClick(name)}
-                        className="w-full text-left px-4 py-2.5 text-[10px] text-gray-300 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-0 lowercase tracking-wide"
-                      >
-                        {name}
-                      </button>
-                    ))}
+                    <div className="bg-gray-50 px-5 py-3 border-b border-gray-100 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary">
+                      <Search size={14} /> Browse Categories
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 p-3">
+                      {categories.slice(0, 6).map((c) => (
+                        <div 
+                          key={c._id} 
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                          onClick={() => { navigate(`/shop?category=${c._id}`); setShowCategoryDropdown(false); }}
+                        >
+                          <div className="relative w-10 h-10 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                             {getImageUrl(c.image) ? (
+                                <>
+                                  <img 
+                                    src={getImageUrl(c.image)} 
+                                    alt={c.name} 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => { e.target.style.display='none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display='flex'; }}
+                                  />
+                                  <div className="w-full h-full items-center justify-center text-xs font-bold text-gray-400 hidden absolute inset-0 bg-gray-100">{c.name?.charAt(0)}</div>
+                                </>
+                             ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">{c.name?.charAt(0)}</div>
+                             )}
+                          </div>
+                          <span className="text-sm font-medium line-clamp-2">{c.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div 
+                      className="bg-gray-50 px-5 py-3 border-t border-gray-100 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-action cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => { navigate('/shop'); setShowCategoryDropdown(false); }}
+                    >
+                      <Search size={14} /> View all categories
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 2. Search Suggestions Dropdown (When typing) */}
+                {showSuggestions && (filteredSuggestions.products.length > 0 || filteredSuggestions.categories.length > 0) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full right-0 w-96 mt-3 bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden z-[60] border border-gray-100 max-h-[80vh] flex flex-col font-sans tracking-normal normal-case"
+                  >
+                    <div className="overflow-y-auto custom-scrollbar">
+                      {filteredSuggestions.categories.length > 0 && (
+                        <div className="border-b border-gray-100 p-2">
+                          <div className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-3 py-2">Categories</div>
+                          {filteredSuggestions.categories.map((c) => (
+                            <div 
+                              key={c._id}
+                              onClick={() => { navigate(`/shop?category=${c._id}`); setSearchQuery(""); setShowSuggestions(false); }}
+                              className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                            >
+                              <div className="relative w-10 h-10 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                {getImageUrl(c.image) ? (
+                                  <>
+                                    <img 
+                                      src={getImageUrl(c.image)} 
+                                      alt={c.name} 
+                                      className="w-full h-full object-cover" 
+                                      onError={(e) => { e.target.style.display='none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display='flex'; }}
+                                    />
+                                    <div className="w-full h-full items-center justify-center text-xs font-bold text-gray-400 hidden absolute inset-0 bg-gray-100">{c.name?.charAt(0)}</div>
+                                  </>
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">{c.name?.charAt(0)}</div>
+                                )}
+                              </div>
+                              <div className="flex-grow">
+                                <div className="text-sm font-medium text-primary">{c.name}</div>
+                                <div className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">in Categories</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {filteredSuggestions.products.length > 0 && (
+                        <div className="p-2">
+                          <div className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-3 py-2">Products</div>
+                          {filteredSuggestions.products.map((p) => {
+                            const oos = p.stock <= 0;
+                            return (
+                              <div 
+                                key={p._id}
+                                onClick={() => { navigate(`/product/${p._id}`); setSearchQuery(""); setShowSuggestions(false); }}
+                                className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                              >
+                                <div className="relative w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                  {getImageUrl(p.image || p.images?.[0]) ? (
+                                    <img src={getImageUrl(p.image || p.images?.[0])} alt={p.name} className={`w-full h-full object-cover ${oos ? 'opacity-40' : ''}`} />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-sm font-bold text-gray-400">{p.name.charAt(0)}</div>
+                                  )}
+                                </div>
+                                <div className="flex-grow pr-2">
+                                  <div className="text-sm font-medium text-primary line-clamp-1 truncate" style={{ opacity: oos ? 0.6 : 1 }}>{p.name}</div>
+                                  <div className="text-xs font-bold mt-1" style={{ color: oos ? '#ef4444' : '#d4960a' }}>
+                                    {oos ? 'Out of Stock' : `₹${p.price}`}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div 
+                      className="bg-gray-50 px-5 py-4 border-t border-gray-100 flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-action cursor-pointer hover:bg-gray-100 transition-colors shrink-0"
+                      onClick={handleSearchSubmit}
+                    >
+                      <span className="flex items-center gap-2"><Search size={14} /> View all results for "{searchQuery}"</span>
+                      <span className="text-xl leading-none">→</span>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </form>
+            </div>
 
             {userRole === 'admin' && (
               <Link to="/admin" className="text-action hover:text-white transition-colors flex items-center gap-1">
@@ -241,44 +383,167 @@ const Navbar = () => {
             style={{ top: topOffset + 60 }}
           >
             <div className="flex flex-col p-6 space-y-6">
-              <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full">
-                <input 
-                  type="text" 
-                  placeholder="Search products..." 
-                  value={searchQuery}
-                  onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-white/10 border border-white/20 text-white rounded py-2 pl-4 pr-10 text-sm w-full focus:outline-none focus:border-action transition-colors placeholder:text-gray-400"
-                />
-                <button type="submit" className="absolute right-3 text-gray-300 hover:text-white transition-colors">
-                  <Search size={18} />
-                </button>
+              <div className="relative" ref={searchRef}>
+                <form onSubmit={(e) => { handleSearchSubmit(e); setIsOpen(false); }} className="relative flex items-center w-full">
+                  <input 
+                    type="text" 
+                    placeholder="Search products..." 
+                    value={searchQuery}
+                    onFocus={() => {
+                      if (searchQuery.trim().length === 0) {
+                        setShowCategoryDropdown(true);
+                        setShowSuggestions(false);
+                      } else {
+                        setShowSuggestions(true);
+                      }
+                    }}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-white/10 border border-white/20 text-white rounded py-2 pl-4 pr-10 text-sm w-full focus:outline-none focus:border-action transition-colors placeholder:text-gray-400 normal-case tracking-normal"
+                  />
+                  <button type="submit" className="absolute right-3 text-gray-300 hover:text-white transition-colors">
+                    <Search size={18} />
+                  </button>
+                </form>
 
                 <AnimatePresence>
-                  {showSuggestions && suggestions.length > 0 && (
+                  {/* 1. Mobile Browse Categories Dropdown (When empty) */}
+                  {showCategoryDropdown && !showSuggestions && categories.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 w-full mt-2 bg-primary border border-white/10 rounded-lg shadow-2xl overflow-hidden z-[60]"
+                      className="absolute top-full left-0 w-full mt-2 bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden z-[60] border border-gray-100 font-sans tracking-normal normal-case"
                     >
-                      {suggestions.map((name, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => {
-                            handleSuggestionClick(name);
-                            setIsOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-0"
-                        >
-                          {name}
-                        </button>
-                      ))}
+                      <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary">
+                        <Search size={14} /> Browse Categories
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 p-3">
+                        {categories.slice(0, 4).map((c) => (
+                          <div 
+                            key={c._id} 
+                            className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors text-center"
+                            onClick={() => { navigate(`/shop?category=${c._id}`); setShowCategoryDropdown(false); setIsOpen(false); }}
+                          >
+                            <div className="relative w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                               {getImageUrl(c.image) ? (
+                                  <>
+                                    <img 
+                                      src={getImageUrl(c.image)} 
+                                      alt={c.name} 
+                                      className="w-full h-full object-cover" 
+                                      onError={(e) => { e.target.style.display='none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display='flex'; }}
+                                    />
+                                    <div className="w-full h-full items-center justify-center text-xs font-bold text-gray-400 hidden absolute inset-0 bg-gray-100">{c.name?.charAt(0)}</div>
+                                  </>
+                               ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">{c.name?.charAt(0)}</div>
+                               )}
+                            </div>
+                            <span className="text-xs font-medium line-clamp-1">{c.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div 
+                        className="bg-gray-50 px-4 py-3 border-t border-gray-100 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-action cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => { navigate('/shop'); setShowCategoryDropdown(false); setIsOpen(false); }}
+                      >
+                        <Search size={14} /> View all categories
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* 2. Mobile Search Suggestions Dropdown (When typing) */}
+                  {showSuggestions && (filteredSuggestions.products.length > 0 || filteredSuggestions.categories.length > 0) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full left-0 w-full mt-2 bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden z-[60] border border-gray-100 max-h-[60vh] flex flex-col font-sans tracking-normal normal-case"
+                    >
+                      <div className="overflow-y-auto custom-scrollbar">
+                        {filteredSuggestions.categories.length > 0 && (
+                          <div className="border-b border-gray-100 p-2">
+                            <div className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-3 py-2">Categories</div>
+                            {filteredSuggestions.categories.map((c) => (
+                              <div 
+                                key={c._id}
+                                onClick={() => { navigate(`/shop?category=${c._id}`); setSearchQuery(""); setShowSuggestions(false); setIsOpen(false); }}
+                                className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                              >
+                                <div className="relative w-10 h-10 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                  {getImageUrl(c.image) ? (
+                                    <>
+                                      <img 
+                                        src={getImageUrl(c.image)} 
+                                        alt={c.name} 
+                                        className="w-full h-full object-cover" 
+                                        onError={(e) => { e.target.style.display='none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display='flex'; }}
+                                      />
+                                      <div className="w-full h-full items-center justify-center text-xs font-bold text-gray-400 hidden absolute inset-0 bg-gray-100">{c.name?.charAt(0)}</div>
+                                    </>
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">{c.name?.charAt(0)}</div>
+                                  )}
+                                </div>
+                                <div className="flex-grow">
+                                  <div className="text-sm font-medium text-primary">{c.name}</div>
+                                  <div className="text-[10px] text-gray-400 uppercase tracking-widest mt-0.5">in Categories</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {filteredSuggestions.products.length > 0 && (
+                          <div className="p-2">
+                            <div className="text-[10px] uppercase tracking-widest font-bold text-gray-400 px-3 py-2">Products</div>
+                            {filteredSuggestions.products.map((p) => {
+                              const oos = p.stock <= 0;
+                              return (
+                                <div 
+                                  key={p._id}
+                                  onClick={() => { navigate(`/product/${p._id}`); setSearchQuery(""); setShowSuggestions(false); setIsOpen(false); }}
+                                  className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                >
+                                  <div className="relative w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                    {getImageUrl(p.image || p.images?.[0]) ? (
+                                      <>
+                                        <img 
+                                          src={getImageUrl(p.image || p.images?.[0])} 
+                                          alt={p.name} 
+                                          className={`w-full h-full object-cover ${oos ? 'opacity-40' : ''}`} 
+                                          onError={(e) => { e.target.style.display='none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display='flex'; }}
+                                        />
+                                        <div className="w-full h-full items-center justify-center text-sm font-bold text-gray-400 hidden absolute inset-0 bg-gray-100">{p.name?.charAt(0)}</div>
+                                      </>
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-sm font-bold text-gray-400">{p.name?.charAt(0)}</div>
+                                    )}
+                                  </div>
+                                  <div className="flex-grow pr-2">
+                                    <div className="text-sm font-medium text-primary line-clamp-1 truncate" style={{ opacity: oos ? 0.6 : 1 }}>{p.name}</div>
+                                    <div className="text-xs font-bold mt-1" style={{ color: oos ? '#ef4444' : '#d4960a' }}>
+                                      {oos ? 'Out of Stock' : `₹${p.price}`}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div 
+                        className="bg-gray-50 px-5 py-4 border-t border-gray-100 flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-action cursor-pointer hover:bg-gray-100 transition-colors shrink-0"
+                        onClick={(e) => { handleSearchSubmit(e); setIsOpen(false); }}
+                      >
+                        <span className="flex items-center gap-2"><Search size={14} /> View all results for "{searchQuery}"</span>
+                        <span className="text-xl leading-none">→</span>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </form>
+              </div>
               
               <div className="flex flex-col space-y-4">
                 {navLinks.map((link) => (

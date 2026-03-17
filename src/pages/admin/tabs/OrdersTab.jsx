@@ -14,6 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
+import { getImageUrl } from "../../../utils/imageUtils";
 
 const API = "/api";
 
@@ -24,6 +25,7 @@ export default function OrdersTab() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [enrichedItems, setEnrichedItems] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
 
   const statuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
@@ -31,6 +33,32 @@ export default function OrdersTab() {
   useEffect(() => {
     fetchOrders();
   }, [statusFilter]);
+
+  // When an order is selected, enrich items with product images (for older orders that may not have image stored)
+  useEffect(() => {
+    if (!selectedOrder) { setEnrichedItems([]); return; }
+    const items = selectedOrder.items || [];
+    // If all items already have images, skip fetching
+    if (items.every(it => it.image)) {
+      setEnrichedItems(items);
+      return;
+    }
+    (async () => {
+      const enriched = await Promise.all(items.map(async (item) => {
+        if (item.image) return item;
+        const productId = item.product?._id || item.product;
+        if (!productId) return item;
+        try {
+          const res = await axios.get(`${API}/products/${productId}`);
+          const product = res.data;
+          return { ...item, image: product.image || product.images?.[0] || '' };
+        } catch {
+          return item;
+        }
+      }));
+      setEnrichedItems(enriched);
+    })();
+  }, [selectedOrder]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -158,9 +186,23 @@ export default function OrdersTab() {
                 <div className="om-left">
                   <div className="om-section-title">Order Items</div>
                   <div className="activity-list" style={{ padding: 0 }}>
-                    {selectedOrder.items?.map((item, idx) => (
+                    {enrichedItems.map((item, idx) => (
                       <div key={idx} className="om-item">
-                         <div className="om-item-ph">{item.name[0]}</div>
+                         <div className="om-item-ph" style={{ position: 'relative', overflow: 'hidden' }}>
+                            {getImageUrl(item.image || item.images?.[0]) ? (
+                              <>
+                                <img 
+                                  src={getImageUrl(item.image || item.images?.[0])} 
+                                  alt={item.name} 
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
+                                  onError={(e) => { e.target.style.display='none'; }}
+                                />
+                                <span style={{ position: 'relative', zIndex: 0 }}>{item.name?.[0]}</span>
+                              </>
+                            ) : (
+                              item.name?.[0]
+                            )}
+                         </div>
                          <div className="om-item-info">
                             <div className="om-item-name">{item.name}</div>
                             <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
@@ -215,3 +257,4 @@ export default function OrdersTab() {
     </div>
   );
 }
+

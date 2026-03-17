@@ -3,6 +3,7 @@ import { getProducts, getCategories } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, X, ChevronDown } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -145,9 +146,14 @@ const Shop = () => {
                     <li key={cat._id || cat.name}>
                       <button 
                         onClick={() => handleCategoryChange(cat._id || cat.name)}
-                        className={`w-full text-left px-3 py-2 text-sm rounded transition-all font-sans ${activeCategory === (cat._id || cat.name) ? 'bg-action text-white font-bold shadow-sm' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
+                        className={`w-full text-left px-3 py-2 text-sm rounded transition-all font-sans flex items-center space-x-3 ${activeCategory === (cat._id || cat.name) ? 'bg-action text-white font-bold shadow-sm' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
                       >
-                        {cat.name}
+                        {cat.image && (
+                          <div className={`w-6 h-6 rounded overflow-hidden flex-shrink-0 bg-white ${activeCategory === (cat._id || cat.name) ? 'opacity-90' : 'opacity-70 group-hover:opacity-100'}`}>
+                            <img src={getImageUrl(cat.image)} alt={cat.name} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <span>{cat.name}</span>
                       </button>
                     </li>
                   ))}
