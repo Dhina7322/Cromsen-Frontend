@@ -27,7 +27,7 @@ const Navbar = () => {
 
   useEffect(() => {
     // Fetch products and categories for the search dropdown
-    getProducts().then(res => {
+    getProducts({ limit: 1000 }).then(res => {
       const p = res?.products || res;
       setProducts(Array.isArray(p) ? p : []);
     }).catch(console.error);

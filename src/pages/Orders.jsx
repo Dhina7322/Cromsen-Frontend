@@ -28,8 +28,12 @@ const STATUS_COLORS = {
 };
 
 const PAYMENT_LABELS = {
-  cod:"Cash on Delivery", card:"Credit / Debit Card",
-  upi:"UPI", netbanking:"Net Banking",
+  cod: "Cash on Delivery",
+  card: "Credit / Debit Card",
+  upi: "UPI / GPay / PhonePe",
+  netbanking: "Net Banking",
+  wallet: "Mobile Wallet",
+  razorpay: "Online Payment",
 };
 
 const CANCEL_REASONS = [
@@ -141,7 +145,11 @@ function TrackingBar({ order }) {
 
   const currentIdx = STATUS_IDX[status] ?? 0;
   const getStepDate = (step, i) => {
-    if (order[step.key]) return { date: order[step.key], isEstimate: false };
+    // Favor actual backend timestamps: processingAt, shippedAt, etc.
+    const actualDate = order[step.key];
+    if (actualDate) return { date: actualDate, isEstimate: false };
+    
+    // Fallbacks
     if (step.key === "deliveredAt" && order.expectedDelivery) return { date: order.expectedDelivery, isEstimate: i > currentIdx };
     if (step.key === "outForDeliveryAt" && order.expectedDelivery) return { date: addDays(order.expectedDelivery, -1), isEstimate: i > currentIdx };
     return { date: addDays(order.createdAt || new Date(), step.offset), isEstimate: true };
@@ -324,8 +332,18 @@ export default function Orders() {
           const address  = order.address || order.shippingAddress || {};
           const shortId  = orderId?.slice(-8).toUpperCase();
           const col      = STATUS_COLORS[status] || STATUS_COLORS.Pending;
-          const isPaid   = order.paymentMethod && order.paymentMethod !== "cod";
+          const isPaid   = (order.paymentMethod && order.paymentMethod !== "cod") || (order.paymentInfo?.status === "Paid");
           const deliveryDate = order.expectedDelivery ? new Date(order.expectedDelivery) : addDays(order.createdAt, 5);
+          
+          // Determine friendly payment method string
+          let methodLabel = PAYMENT_LABELS[order.paymentMethod] || "Cash on Delivery";
+          if (order.paymentInfo?.method) {
+            const m = order.paymentInfo.method.toLowerCase();
+            const details = order.paymentInfo.methodDetails || {};
+            if (m === 'card' && details.card?.network) methodLabel = `${details.card.network} Card (**** ${details.card.last4})`;
+            else if (m === 'upi' && details.vpa) methodLabel = `UPI (GPay/PhonePe: ${details.vpa})`;
+            else methodLabel = PAYMENT_LABELS[m] || order.paymentInfo.method;
+          }
 
           return (
             <div key={orderId} className={`ord-card${isExpanded ? " ord-card--expanded" : ""}`}>
@@ -342,11 +360,11 @@ export default function Orders() {
                     <span>{products.length} item{products.length !== 1 ? "s" : ""}</span>
                   </div>
                 </div>
-                <div className="ord-card-header-right">
-                  <div className="ord-total">Rs.{Number(order.totalAmount || 0).toLocaleString()}</div>
-                  <div className="ord-payment-label">{PAYMENT_LABELS[order.paymentMethod] || "Cash on Delivery"}</div>
-                  <div className={`ord-chevron${isExpanded ? " ord-chevron--up" : ""}`}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
-                </div>
+                  <div className="ord-card-header-right">
+                    <div className="ord-total">Rs.{Number(order.totalAmount || 0).toLocaleString()}</div>
+                    <div className="ord-payment-label">{methodLabel}</div>
+                    <div className={`ord-chevron${isExpanded ? " ord-chevron--up" : ""}`}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+                  </div>
               </div>
 
               <div className="ord-thumb-strip">
@@ -410,7 +428,8 @@ export default function Orders() {
                     <div className="ord-info-card">
                       <div className="ord-info-card-title">Payment Info</div>
                       <div className="ord-info-card-body">
-                        <p><strong>{PAYMENT_LABELS[order.paymentMethod] || "Cash on Delivery"}</strong></p>
+                        <p><strong>{methodLabel}</strong></p>
+                        {order.paymentInfo?.id && <p className="text-[10px] text-gray-400 mt-1">ID: {order.paymentInfo.id}</p>}
                         <p style={{ marginTop: 6, fontWeight: 600, color: isPaid ? "#22c55e" : "#f59e0b" }}>{isPaid ? "Payment Received" : "Pay on Delivery"}</p>
                       </div>
                     </div>
