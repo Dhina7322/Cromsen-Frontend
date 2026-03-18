@@ -6,5 +6,5 @@ export const getImageUrl = (filename) => {
   }
   // Otherwise, prepend the backend URL for uploaded files
   // Using the same URL format used in the Admin dashboard
-  return `/uploads/${filename}`;
+  return `http://localhost:5001/uploads/${filename}`;
 };

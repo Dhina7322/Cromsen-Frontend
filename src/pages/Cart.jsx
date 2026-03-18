@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, ImageIcon } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
@@ -42,14 +43,30 @@ const Cart = () => {
 
             {cartItems.map((item) => (
               <div key={item._id} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-6 border-b border-gray-100 bg-white p-4 md:p-0 md:bg-transparent shadow-sm md:shadow-none rounded-lg md:rounded-none">
-                {/* Product Info */}
                 <div className="col-span-1 md:col-span-6 flex items-center space-x-6">
-                  <Link to={`/product/${item._id}`} className="shrink-0 w-24 h-24 overflow-hidden rounded bg-gray-100 block">
-                    <img 
-                      src={item.images?.[0] || 'https://via.placeholder.com/150'} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" 
-                    />
+                  <Link to={`/product/${item._id}`} className="shrink-0 w-24 h-24 overflow-hidden rounded bg-gray-100 block border border-gray-200 relative">
+                    {getImageUrl(item.image || item.images?.[0]) ? (
+                      <>
+                        <img 
+                          src={getImageUrl(item.image || item.images?.[0])} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" 
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextElementSibling) {
+                              e.target.nextElementSibling.style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div className="w-full h-full flex-col items-center justify-center text-gray-300 transition-transform duration-500 hover:scale-110 hidden absolute inset-0 bg-gray-100">
+                          <ImageIcon size={28} className="opacity-50" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 transition-transform duration-500 hover:scale-110">
+                        <ImageIcon size={28} className="opacity-50" />
+                      </div>
+                    )}
                   </Link>
                   <div className="flex flex-col">
                     <span className="text-[10px] text-accent uppercase tracking-widest font-bold mb-1">

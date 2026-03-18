@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart, Eye, ImageIcon } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -20,6 +21,9 @@ const ProductCard = ({ product }) => {
   const displayedPrice = Number(product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice) || 0);
   const originalPrice = Number(product.retailPrice || 0);
 
+  // Get the product image URL if it exists
+  const imageUrl = getImageUrl(product.image || product.images?.[0]);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 15 }}
@@ -27,14 +31,21 @@ const ProductCard = ({ product }) => {
       viewport={{ once: true }}
       className="group relative flex flex-col items-center text-center"
     >
-      <div className="relative w-full aspect-[4/5] overflow-hidden bg-gray-50 mb-4 group cursor-pointer">
-        <Link to={`/product/${product._id}`} className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-          <img 
-            src={product.images?.[0] || 'https://images.unsplash.com/photo-1544457070-4cd773b4d71e?q=80&w=2000&auto=format&fit=crop&blur=10'} 
-            alt={product.name} 
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          />
+      <div className="relative w-full aspect-[4/5] overflow-hidden bg-gray-50 mb-4 group cursor-pointer border border-gray-100">
+        <Link to={`/product/${product._id}`} className="w-full h-full bg-gray-50 flex items-center justify-center text-gray-400">
+          {imageUrl ? (
+            <img 
+              src={imageUrl} 
+              alt={product.name} 
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 transition-transform duration-700 ease-out group-hover:scale-105">
+              <ImageIcon size={48} className="opacity-50 mb-2" />
+              <span className="text-xs font-sans uppercase tracking-widest font-bold opacity-50">No Image</span>
+            </div>
+          )}
         </Link>
         
         {/* Hover Actions - Slide up from bottom */}

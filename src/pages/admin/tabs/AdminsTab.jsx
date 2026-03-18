@@ -7,7 +7,8 @@ import {
   X,
   Save,
   ShieldCheck,
-  Key
+  Key,
+  Pencil
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -19,10 +20,15 @@ export default function AdminsTab() {
   const { user: currentUser, showToast } = useOutletContext();
   const [subAdmins, setSubAdmins] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Form State
+  // Form State — Create
   const [formData, setFormData] = useState({ username: "", password: "" });
+
+  // Form State — Edit
+  const [editData, setEditData] = useState({ username: "", password: "" });
 
   useEffect(() => {
     fetchSubAdmins();
@@ -48,6 +54,31 @@ export default function AdminsTab() {
       fetchSubAdmins();
     } catch (err) {
       showToast("error", err.response?.data?.message || "Failed to create sub-admin");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEditModal = (admin) => {
+    setEditTarget(admin);
+    setEditData({ username: admin.username, password: "" });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload = { username: editData.username };
+      if (editData.password.trim()) payload.password = editData.password;
+
+      await axios.put(`${API}/admin/subadmins/${editTarget._id}`, payload);
+      showToast("success", "Sub-admin updated successfully");
+      setIsEditModalOpen(false);
+      setEditTarget(null);
+      fetchSubAdmins();
+    } catch (err) {
+      showToast("error", err.response?.data?.message || "Failed to update sub-admin");
     } finally {
       setLoading(false);
     }
@@ -89,6 +120,7 @@ export default function AdminsTab() {
                  </tr>
                </thead>
                <tbody>
+                  {/* Super Admin Row — always protected */}
                   <tr>
                     <td>
                       <div className="cust-cell">
@@ -101,6 +133,8 @@ export default function AdminsTab() {
                        <span className="text-gray-400 text-xs italic">Protected</span>
                     </td>
                   </tr>
+
+                  {/* Sub-Admin Rows */}
                   {subAdmins.map(admin => (
                     <tr key={admin._id}>
                       <td>
@@ -111,7 +145,22 @@ export default function AdminsTab() {
                       </td>
                       <td><span className="p-role p-role--sub">Sub Admin</span></td>
                       <td style={{ textAlign: 'right' }}>
-                         <button className="icon-btn danger" onClick={() => handleDelete(admin._id)}><Trash2 size={14}/></button>
+                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                           <button
+                             className="icon-btn"
+                             title="Edit sub-admin"
+                             onClick={() => openEditModal(admin)}
+                           >
+                             <Pencil size={14}/>
+                           </button>
+                           <button
+                             className="icon-btn danger"
+                             title="Remove sub-admin"
+                             onClick={() => handleDelete(admin._id)}
+                           >
+                             <Trash2 size={14}/>
+                           </button>
+                         </div>
                       </td>
                     </tr>
                   ))}
@@ -145,6 +194,7 @@ export default function AdminsTab() {
         </div>
       </div>
 
+      {/* ── Create Modal ── */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="modal-overlay">
@@ -157,11 +207,23 @@ export default function AdminsTab() {
                  <div className="modal-body">
                     <div className="fg">
                        <label>Username</label>
-                       <input required type="text" placeholder="e.g. manager_1" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} />
+                       <input
+                         required
+                         type="text"
+                         placeholder="e.g. manager_1"
+                         value={formData.username}
+                         onChange={e => setFormData({...formData, username: e.target.value})}
+                       />
                     </div>
                     <div className="fg">
                        <label>Password</label>
-                       <input required type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                       <input
+                         required
+                         type="password"
+                         placeholder="••••••••"
+                         value={formData.password}
+                         onChange={e => setFormData({...formData, password: e.target.value})}
+                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-2">New admins will have full access to manage store data but cannot manage other admins.</p>
                  </div>
@@ -169,6 +231,52 @@ export default function AdminsTab() {
                     <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
                     <button type="submit" className="btn-primary" disabled={loading}>
                        <UserPlus size={16} /> {loading ? 'Creating...' : 'Create Admin Account'}
+                    </button>
+                 </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Edit Modal ── */}
+      <AnimatePresence>
+        {isEditModalOpen && editTarget && (
+          <div className="modal-overlay">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="modal modal--sm">
+              <div className="modal-head">
+                 <h2>Edit Sub-Admin</h2>
+                 <button className="icon-btn" onClick={() => { setIsEditModalOpen(false); setEditTarget(null); }}>
+                   <X size={18}/>
+                 </button>
+              </div>
+              <form onSubmit={handleEdit}>
+                 <div className="modal-body">
+                    <div className="fg">
+                       <label>Username</label>
+                       <input
+                         required
+                         type="text"
+                         placeholder="e.g. manager_1"
+                         value={editData.username}
+                         onChange={e => setEditData({...editData, username: e.target.value})}
+                       />
+                    </div>
+                    <div className="fg">
+                       <label>New Password</label>
+                       <input
+                         type="password"
+                         placeholder="Leave blank to keep current password"
+                         value={editData.password}
+                         onChange={e => setEditData({...editData, password: e.target.value})}
+                       />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">Leave the password field empty if you only want to update the username.</p>
+                 </div>
+                 <div className="modal-foot">
+                    <button type="button" className="btn-cancel" onClick={() => { setIsEditModalOpen(false); setEditTarget(null); }}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={loading}>
+                       <Save size={16} /> {loading ? 'Saving...' : 'Save Changes'}
                     </button>
                  </div>
               </form>

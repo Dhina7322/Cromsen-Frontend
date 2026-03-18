@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Truck, CreditCard, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Truck, CreditCard, ArrowLeft, CheckCircle2, ImageIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -68,7 +69,8 @@ const Checkout = () => {
               product: item._id,
               name: item.name,
               quantity: item.quantity,
-              price: item.price
+              price: item.price,
+              image: item.image || item.images?.[0] || ''
             })),
             totalAmount: cartTotal,
             shippingAddress: { ...shippingData }
@@ -104,7 +106,8 @@ const Checkout = () => {
                   product: item._id,
                   name: item.name,
                   quantity: item.quantity,
-                  price: item.price
+                  price: item.price,
+                  image: item.image || item.images?.[0] || ''
                 })),
                 totalAmount: cartTotal,
                 shippingAddress: {
@@ -236,8 +239,30 @@ const Checkout = () => {
               <div className="max-h-60 overflow-y-auto mb-8 pr-2 custom-scrollbar">
                 {cartItems.map((item) => (
                   <div key={item._id} className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded bg-gray-50 overflow-hidden shrink-0 border border-gray-100">
-                      <img src={item.images?.[0] || 'https://via.placeholder.com/150'} alt={item.name} className="w-full h-full object-cover" />
+                    <div className="w-16 h-16 rounded bg-gray-50 overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center relative">
+                      {getImageUrl(item.image || item.images?.[0]) ? (
+                        <>
+                          <img 
+                            src={getImageUrl(item.image || item.images?.[0])} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              // Target the next sibling (the fallback div)
+                              if (e.target.nextElementSibling) {
+                                e.target.nextElementSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div className="w-full h-full items-center justify-center text-gray-300 hidden absolute inset-0 bg-gray-50">
+                            <ImageIcon size={20} className="opacity-50" />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <ImageIcon size={20} className="opacity-50" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-grow">
                       <p className="text-sm font-serif text-primary font-bold line-clamp-1">{item.name}</p>

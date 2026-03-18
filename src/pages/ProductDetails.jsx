@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProductById } from '../services/api';
-import { ShoppingCart, ChevronRight, Truck, ShieldCheck, RefreshCw } from 'lucide-react';
+import { ShoppingCart, ChevronRight, Truck, ShieldCheck, RefreshCw, ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -43,6 +44,9 @@ const ProductDetails = () => {
   const displayedPrice = Number(product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice) || 0);
   const originalPrice = Number(product.retailPrice || 0);
 
+  // Get the main product image URL
+  const mainImageUrl = getImageUrl(product.image || product.images?.[0]);
+
   return (
     <div className="pt-32 pb-20">
       <div className="container mx-auto max-w-[1200px] px-5">
@@ -61,13 +65,20 @@ const ProductDetails = () => {
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-gray-100"
+              className="bg-gray-100 flex items-center justify-center min-h-[400px]"
             >
-              <img 
-                src={product.images?.[0] || 'https://images.unsplash.com/photo-1544457070-4cd773b4d71e?q=80&w=2000&auto=format&fit=crop&blur=10'} 
-                alt={product.name} 
-                className="w-full h-auto object-cover"
-              />
+              {mainImageUrl ? (
+                <img 
+                  src={mainImageUrl} 
+                  alt={product.name} 
+                  className="w-full h-auto object-cover"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-gray-300 py-32">
+                  <ImageIcon size={64} className="opacity-50 mb-4" />
+                  <span className="text-sm font-sans uppercase tracking-widest font-bold opacity-50">No Image Available</span>
+                </div>
+              )}
             </motion.div>
             <div className="grid grid-cols-4 gap-4">
               {(product.images || []).map((img, idx) => (
