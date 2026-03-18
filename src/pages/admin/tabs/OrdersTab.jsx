@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { 
-  ShoppingCart, 
-  Search, 
-  Eye, 
-  Truck, 
-  CheckCircle, 
-  XCircle, 
+import {
+  ShoppingCart,
+  Search,
+  Eye,
+  Truck,
+  CheckCircle,
+  XCircle,
   Clock,
   ChevronRight,
   MoreVertical,
@@ -28,7 +28,7 @@ export default function OrdersTab() {
   const [enrichedItems, setEnrichedItems] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
 
-  const statuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+  const statuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Refund Tracking", "Refund Processed", "Refund Delivered", "Abandoned"];
 
   useEffect(() => {
     fetchOrders();
@@ -98,8 +98,8 @@ export default function OrdersTab() {
     <div className="section-gap">
       <div className="spill-row">
         {statuses.map(s => (
-          <button 
-            key={s} 
+          <button
+            key={s}
             className={`spill ${statusFilter === s ? 'spill--on' : ''}`}
             onClick={() => setStatusFilter(s)}
           >
@@ -115,9 +115,9 @@ export default function OrdersTab() {
         <div className="toolbar-left">
           <div className="searchbox">
             <Search size={16} />
-            <input 
-              type="text" 
-              placeholder="Search by Order ID or Customer..." 
+            <input
+              type="text"
+              placeholder="Search by Order ID or Customer..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -150,21 +150,21 @@ export default function OrdersTab() {
                 <td>{o.items?.length || 0} Products</td>
                 <td className="amt">₹{o.totalAmount}</td>
                 <td>
-                   <span className={`status-tag s-${o.status?.toLowerCase()}`}>
-                     <i></i> {o.status}
-                   </span>
+                  <span className={`status-tag s-${o.status?.toLowerCase()}`}>
+                    <i></i> {o.status}
+                  </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                   <div className="row-acts">
-                     <button className="icon-btn" onClick={() => setSelectedOrder(o)} title="View Details"><Eye size={14}/></button>
-                     <select 
-                       className="inline-select"
-                       value={o.status}
-                       onChange={(e) => updateOrderStatus(o._id, e.target.value)}
-                     >
-                       {statuses.slice(1).map(s => <option key={s} value={s}>{s}</option>)}
-                     </select>
-                   </div>
+                  <div className="row-acts">
+                    <button className="icon-btn" onClick={() => setSelectedOrder(o)} title="View Details"><Eye size={14} /></button>
+                    <select
+                      className="inline-select"
+                      value={o.status}
+                      onChange={(e) => updateOrderStatus(o._id, e.target.value)}
+                    >
+                      {statuses.slice(1).map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -179,8 +179,8 @@ export default function OrdersTab() {
           <div className="modal-overlay">
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal">
               <div className="modal-head">
-                 <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
-                 <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18}/></button>
+                <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
+                <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18} /></button>
               </div>
               <div className="om-body">
                 <div className="om-left">
@@ -188,26 +188,26 @@ export default function OrdersTab() {
                   <div className="activity-list" style={{ padding: 0 }}>
                     {enrichedItems.map((item, idx) => (
                       <div key={idx} className="om-item">
-                         <div className="om-item-ph" style={{ position: 'relative', overflow: 'hidden' }}>
-                            {getImageUrl(item.image || item.images?.[0]) ? (
-                              <>
-                                <img 
-                                  src={getImageUrl(item.image || item.images?.[0])} 
-                                  alt={item.name} 
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
-                                  onError={(e) => { e.target.style.display='none'; }}
-                                />
-                                <span style={{ position: 'relative', zIndex: 0 }}>{item.name?.[0]}</span>
-                              </>
-                            ) : (
-                              item.name?.[0]
-                            )}
-                         </div>
-                         <div className="om-item-info">
-                            <div className="om-item-name">{item.name}</div>
-                            <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
-                         </div>
-                         <div className="om-item-total">₹{item.quantity * item.price}</div>
+                        <div className="om-item-ph" style={{ position: 'relative', overflow: 'hidden' }}>
+                          {getImageUrl(item.image || item.images?.[0]) ? (
+                            <>
+                              <img
+                                src={getImageUrl(item.image || item.images?.[0])}
+                                alt={item.name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                              <span style={{ position: 'relative', zIndex: 0 }}>{item.name?.[0]}</span>
+                            </>
+                          ) : (
+                            item.name?.[0]
+                          )}
+                        </div>
+                        <div className="om-item-info">
+                          <div className="om-item-name">{item.name}</div>
+                          <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
+                        </div>
+                        <div className="om-item-total">₹{item.quantity * item.price}</div>
                       </div>
                     ))}
                   </div>
@@ -215,40 +215,40 @@ export default function OrdersTab() {
                   <div style={{ marginTop: '24px' }}>
                     <div className="om-section-title">Shipping Address</div>
                     <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '8px', fontSize: '13px' }}>
-                       <strong>{selectedOrder.shippingAddress?.name}</strong><br/>
-                       {selectedOrder.shippingAddress?.address}<br/>
-                       {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.zip}<br/>
-                       Phone: {selectedOrder.shippingAddress?.phone}
+                      <strong>{selectedOrder.shippingAddress?.name}</strong><br />
+                      {selectedOrder.shippingAddress?.address}<br />
+                      {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.zip}<br />
+                      Phone: {selectedOrder.shippingAddress?.phone}
                     </div>
                   </div>
                 </div>
 
                 <div className="om-right">
-                   <div className="om-section-title">Order Summary</div>
-                   <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
-                   <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
-                   <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
+                  <div className="om-section-title">Order Summary</div>
+                  <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
+                  <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
+                  <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
 
-                   <div style={{ marginTop: '24px' }}>
-                     <div className="om-section-title">Update Status</div>
-                     <div className="om-status-btns">
-                        {statuses.slice(1).map(s => (
-                          <button 
-                            key={s}
-                            disabled={selectedOrder.status === s}
-                            className={`od-st-btn ${selectedOrder.status === s ? 'od-st-btn--on' : ''}`}
-                            onClick={() => updateOrderStatus(selectedOrder._id, s)}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                     </div>
-                   </div>
+                  <div style={{ marginTop: '24px' }}>
+                    <div className="om-section-title">Update Status</div>
+                    <div className="om-status-btns">
+                      {statuses.slice(1).map(s => (
+                        <button
+                          key={s}
+                          disabled={selectedOrder.status === s}
+                          className={`od-st-btn ${selectedOrder.status === s ? 'od-st-btn--on' : ''}`}
+                          onClick={() => updateOrderStatus(selectedOrder._id, s)}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="modal-foot">
-                 <button className="btn-secondary" onClick={() => window.print()}>Print Invoice</button>
-                 <button className="btn-primary" onClick={() => setSelectedOrder(null)}>Close</button>
+                <button className="btn-secondary" onClick={() => window.print()}>Print Invoice</button>
+                <button className="btn-primary" onClick={() => setSelectedOrder(null)}>Close</button>
               </div>
             </motion.div>
           </div>
