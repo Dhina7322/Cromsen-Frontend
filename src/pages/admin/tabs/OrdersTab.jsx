@@ -139,35 +139,50 @@ export default function OrdersTab() {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map(o => (
+            {filteredOrders.map(o => {
+              const isStruck = o.status === "Cancelled" || o.status.includes("Refund") || o.status === "Abandoned";
+              const tdStyle = isStruck ? { textDecoration: 'line-through', color: '#ef4444', opacity: 0.8 } : {};
+              
+              const getAvailableStatuses = (status) => {
+                if (status === "Abandoned") return ["Abandoned"];
+                if (status.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+                return ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+              };
+              
+              const availableOptions = getAvailableStatuses(o.status);
+
+              return (
               <tr key={o._id}>
-                <td><span className="order-id">#{o._id.slice(-8)}</span></td>
-                <td className="date-cell">{new Date(o.createdAt).toLocaleDateString()}</td>
-                <td>
-                  <div className="cust-name">{o.user?.name || o.guestEmail || "Guest"}</div>
-                  <div className="cust-phone">{o.shippingAddress?.phone}</div>
+                <td style={tdStyle}><span className="order-id">#{o._id.slice(-8)}</span></td>
+                <td className="date-cell" style={tdStyle}>{new Date(o.createdAt).toLocaleDateString()}</td>
+                <td style={tdStyle}>
+                  <div className="cust-name" style={isStruck ? { color: '#ef4444'} : {}}>{o.user?.name || o.guestEmail || "Guest"}</div>
+                  <div className="cust-phone" style={isStruck ? { color: '#ef4444'} : {}}>{o.shippingAddress?.phone}</div>
                 </td>
-                <td>{o.items?.length || 0} Products</td>
-                <td className="amt">₹{o.totalAmount}</td>
-                <td>
-                  <span className={`status-tag s-${o.status?.toLowerCase()}`}>
+                <td style={tdStyle}>{o.items?.length || 0} Products</td>
+                <td className="amt" style={tdStyle}>₹{o.totalAmount}</td>
+                <td style={tdStyle}>
+                  <span className={`status-tag s-${o.status?.toLowerCase().replace(' ', '-')}`} style={isStruck ? { textDecoration: 'none' } : {}}>
                     <i></i> {o.status}
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
                   <div className="row-acts">
                     <button className="icon-btn" onClick={() => setSelectedOrder(o)} title="View Details"><Eye size={14} /></button>
+                    <button className="icon-btn" onClick={() => { setSelectedOrder(o); setTimeout(() => window.print(), 300); }} title="Print Invoice">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    </button>
                     <select
                       className="inline-select"
                       value={o.status}
                       onChange={(e) => updateOrderStatus(o._id, e.target.value)}
                     >
-                      {statuses.slice(1).map(s => <option key={s} value={s}>{s}</option>)}
+                      {availableOptions.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                 </td>
               </tr>
-            ))}
+            )})}
             {filteredOrders.length === 0 && <tr><td colSpan="7" className="empty-row">No orders found matching criteria</td></tr>}
           </tbody>
         </table>
@@ -229,10 +244,24 @@ export default function OrdersTab() {
                   <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
                   <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
 
+                  {selectedOrder.cancelReason && (
+                    <div style={{ marginTop: '24px', background: '#fef2f2', border: '1px solid #fee2e2', padding: '12px', borderRadius: '8px' }}>
+                      <div className="om-section-title" style={{ color: '#ef4444', marginBottom: '8px' }}>Cancellation Reason</div>
+                      <div style={{ fontSize: '13px', color: '#b91c1c' }}>{selectedOrder.cancelReason}</div>
+                    </div>
+                  )}
+
                   <div style={{ marginTop: '24px' }}>
                     <div className="om-section-title">Update Status</div>
                     <div className="om-status-btns">
-                      {statuses.slice(1).map(s => (
+                      {(() => {
+                        const getAvailableStatuses = (status) => {
+                          if (status === "Abandoned") return ["Abandoned"];
+                          if (status.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+                          return ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+                        };
+                        return getAvailableStatuses(selectedOrder.status);
+                      })().map(s => (
                         <button
                           key={s}
                           disabled={selectedOrder.status === s}
