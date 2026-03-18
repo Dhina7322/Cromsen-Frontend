@@ -175,7 +175,7 @@ const Navbar = () => {
                         <div 
                           key={c._id} 
                           className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                          onClick={() => { navigate(`/shop?category=${c._id}`); setShowCategoryDropdown(false); }}
+                          onClick={() => { navigate(`/shop?category=${c.name?.toLowerCase().replace(/[\s_]+/g, '-')}`); setShowCategoryDropdown(false); }}
                         >
                           <div className="relative w-10 h-10 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                              {getImageUrl(c.image) ? (
@@ -220,7 +220,7 @@ const Navbar = () => {
                           {filteredSuggestions.categories.map((c) => (
                             <div 
                               key={c._id}
-                              onClick={() => { navigate(`/shop?category=${c._id}`); setSearchQuery(""); setShowSuggestions(false); }}
+                              onClick={() => { navigate(`/shop?category=${c.name?.toLowerCase().replace(/[\s_]+/g, '-')}`); setSearchQuery(""); setShowSuggestions(false); }}
                               className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                             >
                               <div className="relative w-10 h-10 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
@@ -428,7 +428,7 @@ const Navbar = () => {
                           <div 
                             key={c._id} 
                             className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors text-center"
-                            onClick={() => { navigate(`/shop?category=${c._id}`); setShowCategoryDropdown(false); setIsOpen(false); }}
+                            onClick={() => { navigate(`/shop?category=${c.name?.toLowerCase().replace(/[\s_]+/g, '-')}`); setShowCategoryDropdown(false); setIsOpen(false); }}
                           >
                             <div className="relative w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
                                {getImageUrl(c.image) ? (
@@ -473,7 +473,7 @@ const Navbar = () => {
                             {filteredSuggestions.categories.map((c) => (
                               <div 
                                 key={c._id}
-                                onClick={() => { navigate(`/shop?category=${c._id}`); setSearchQuery(""); setShowSuggestions(false); setIsOpen(false); }}
+                                onClick={() => { navigate(`/shop?category=${c.name?.toLowerCase().replace(/[\s_]+/g, '-')}`); setSearchQuery(""); setShowSuggestions(false); setIsOpen(false); }}
                                 className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                               >
                                 <div className="relative w-10 h-10 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
