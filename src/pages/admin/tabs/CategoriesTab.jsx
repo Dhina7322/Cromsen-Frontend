@@ -19,17 +19,18 @@ const API = "/api";
 export default function CategoriesTab() {
   const { showToast } = useOutletContext();
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [assigningCat, setAssigningCat] = useState(null);
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
   const [loading, setLoading] = useState(false);
   const [expandedCats, setExpandedCats] = useState({});
 
   // Form States
   const [catForm, setCatForm] = useState({ name: "", description: "" });
-  const [subForm, setSubForm] = useState({ name: "", category: "" });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   // Track the existing image filename so we can send it on update if no new file chosen
@@ -42,12 +43,12 @@ export default function CategoriesTab() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [cRes, scRes] = await Promise.all([
+      const [cRes, pRes] = await Promise.all([
         axios.get(`${API}/categories`),
-        axios.get(`${API}/subcategories`)
+        axios.get(`${API}/products?limit=1000`)
       ]);
       setCategories(cRes.data);
-      setSubCategories(scRes.data);
+      setProducts(pRes.data.products || pRes.data);
     } catch (err) {
       showToast("error", "Failed to load categories");
     } finally {
@@ -79,20 +80,20 @@ export default function CategoriesTab() {
     setIsCatModalOpen(true);
   };
 
-  const handleOpenSubModal = (sub = null, catId = "") => {
-    if (sub) {
-      setEditingItem(sub);
-      setSubForm({ name: sub.name, category: sub.category?._id || sub.category });
-      setImagePreview(sub.image ? `/uploads/${sub.image}` : "");
-      setExistingImageFilename(sub.image || "");
-    } else {
-      setEditingItem(null);
-      setSubForm({ name: "", category: catId });
-      setImagePreview("");
-      setExistingImageFilename("");
-    }
-    setImageFile(null);
-    setIsSubModalOpen(true);
+  const handleOpenAssignModal = (cat) => {
+    setAssigningCat(cat);
+    // Find products already in this category
+    const existingIds = products
+      .filter(p => (p.category?._id || p.category) === cat._id)
+      .map(p => p._id);
+    setSelectedProductIds(existingIds);
+    setIsAssignModalOpen(true);
+  };
+
+  const toggleProductSelection = (prodId) => {
+    setSelectedProductIds(prev => 
+      prev.includes(prodId) ? prev.filter(id => id !== prodId) : [...prev, prodId]
+    );
   };
 
   const handleImageChange = (e) => {
@@ -135,31 +136,19 @@ export default function CategoriesTab() {
     }
   };
 
-  const submitSubCategory = async (e) => {
+  const submitAssignProducts = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const data = new FormData();
-    data.append("name", subForm.name);
-    data.append("category", subForm.category);
-
-    if (imageFile) {
-      data.append("image", imageFile);
-    } else if (editingItem && existingImageFilename) {
-      data.append("existingImage", existingImageFilename);
-    }
-
     try {
-      if (editingItem) {
-        await axios.put(`${API}/subcategories/${editingItem._id}`, data);
-        showToast("success", "Sub-category updated");
-      } else {
-        await axios.post(`${API}/subcategories`, data);
-        showToast("success", "Sub-category created");
-      }
-      setIsSubModalOpen(false);
+      await axios.put(`${API}/products/bulk-category`, {
+        categoryId: assigningCat._id,
+        productIds: selectedProductIds
+      });
+      showToast("success", "Products assigned successfully");
+      setIsAssignModalOpen(false);
       fetchData();
     } catch (err) {
-      showToast("error", "Failed to save sub-category");
+      showToast("error", "Failed to assign products");
     } finally {
       setLoading(false);
     }
@@ -215,7 +204,7 @@ export default function CategoriesTab() {
                 <div style={{ marginLeft: '8px' }}>
                   <div className="cust-name">{cat.name}</div>
                   <div className="cust-phone">
-                    {subCategories.filter(s => (s.category?._id || s.category) === cat._id).length} Sub-categories
+                    {products.filter(p => (p.category?._id || p.category) === cat._id).length} Products Assigned
                   </div>
                 </div>
                 <div style={{ marginLeft: '12px', color: 'var(--text3)' }}>
@@ -223,8 +212,8 @@ export default function CategoriesTab() {
                 </div>
               </div>
               <div className="panel-actions">
-                <button className="topbar-btn" onClick={() => handleOpenSubModal(null, cat._id)}>
-                  <Plus size={14} /> Add Sub
+                <button className="topbar-btn" onClick={() => handleOpenAssignModal(cat)}>
+                  <Plus size={14} /> Assign Products
                 </button>
                 <button className="icon-btn" onClick={() => handleOpenCatModal(cat)}><Edit2 size={14} /></button>
                 <button className="icon-btn danger" onClick={() => handleDelete('categories', cat._id)}><Trash2 size={14} /></button>
@@ -242,37 +231,31 @@ export default function CategoriesTab() {
                   <div className="tbl-wrap" style={{ border: 'none', borderRadius: 0 }}>
                     <table className="tbl">
                       <tbody style={{ background: '#fcfcfc' }}>
-                        {subCategories
-                          .filter(s => (s.category?._id || s.category) === cat._id)
-                          .map(sub => (
-                            <tr key={sub._id}>
+                        {products
+                          .filter(p => (p.category?._id || p.category) === cat._id)
+                          .map(prod => (
+                            <tr key={prod._id}>
                               <td style={{ paddingLeft: '60px' }}>
                                 <div className="prod-cell">
-                                  {sub.image ? (
+                                  {prod.image || (prod.images && prod.images[0]) ? (
                                     <img
-                                      src={`/uploads/${sub.image}`}
+                                      src={prod.image?.startsWith('http') ? prod.image : `/uploads/${prod.image || prod.images[0]}`}
                                       alt=""
                                       className="prod-thumb"
                                       style={{ width: 30, height: 30 }}
                                     />
                                   ) : (
-                                    <div className="prod-thumb-ph" style={{ width: 30, height: 30, fontSize: 10 }}>S</div>
+                                    <div className="prod-thumb-ph" style={{ width: 30, height: 30, fontSize: 10 }}>P</div>
                                   )}
-                                  <span style={{ fontSize: '13px', fontWeight: 500 }}>{sub.name}</span>
-                                </div>
-                              </td>
-                              <td style={{ textAlign: 'right' }}>
-                                <div className="row-acts">
-                                  <button className="icon-btn" onClick={() => handleOpenSubModal(sub)}><Edit2 size={12} /></button>
-                                  <button className="icon-btn danger" onClick={() => handleDelete('subcategories', sub._id)}><Trash2 size={12} /></button>
+                                  <span style={{ fontSize: '13px', fontWeight: 500 }}>{prod.name}</span>
                                 </div>
                               </td>
                             </tr>
                           ))}
-                        {subCategories.filter(s => (s.category?._id || s.category) === cat._id).length === 0 && (
+                        {products.filter(p => (p.category?._id || p.category) === cat._id).length === 0 && (
                           <tr>
                             <td colSpan="2" className="empty-row" style={{ fontSize: '12px', padding: '20px' }}>
-                              No sub-categories yet
+                              No products assigned yet
                             </td>
                           </tr>
                         )}
@@ -356,68 +339,43 @@ export default function CategoriesTab() {
         )}
       </AnimatePresence>
 
-      {/* Sub-Category Modal */}
+      {/* Assign Products Modal */}
       <AnimatePresence>
-        {isSubModalOpen && (
+        {isAssignModalOpen && (
           <div className="modal-overlay">
-            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="modal modal--sm">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="modal modal--md">
               <div className="modal-head">
-                <h2>{editingItem ? 'Edit Sub-Category' : 'New Sub-Category'}</h2>
-                <button className="icon-btn" onClick={() => setIsSubModalOpen(false)}><X size={18} /></button>
+                <h2>Assign Products to {assigningCat?.name}</h2>
+                <button className="icon-btn" onClick={() => setIsAssignModalOpen(false)}><X size={18} /></button>
               </div>
-              <form onSubmit={submitSubCategory}>
-                <div className="modal-body">
-                  <div className="fg">
-                    <label>Parent Category</label>
-                    <select
-                      required
-                      value={subForm.category}
-                      onChange={e => setSubForm({ ...subForm, category: e.target.value })}
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-                    </select>
-                  </div>
-                  <div className="fg">
-                    <label>Sub-Category Name</label>
-                    <input
-                      required
-                      type="text"
-                      value={subForm.name}
-                      onChange={e => setSubForm({ ...subForm, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="fg">
-                    <label>Sub-Category Image</label>
-                    <div className="upload-wrap">
-                      <label className="upload-box">
-                        <input type="file" accept="image/*" className="hidden-input" onChange={handleImageChange} />
-                        {imagePreview
-                          ? <img src={imagePreview} className="upload-preview" alt="preview" />
-                          : <ImageIcon size={20} />
-                        }
+              <form onSubmit={submitAssignProducts}>
+                <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text3)', marginBottom: '16px' }}>
+                    Select the products you want to assign to this category. Unselecting a product will remove it from the category.
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {products.map(p => (
+                      <label key={p._id} className="flex items-center gap-3 p-2 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedProductIds.includes(p._id)}
+                          onChange={() => toggleProductSelection(p._id)}
+                          className="w-4 h-4 text-action bg-gray-100 border-gray-300 rounded focus:ring-action"
+                        />
+                        {p.image || (p.images && p.images[0]) ? (
+                           <img src={p.image?.startsWith('http') ? p.image : `/uploads/${p.image || p.images[0]}`} className="w-8 h-8 rounded object-cover" />
+                        ) : (
+                           <div className="w-8 h-8 rounded bg-gray-200" />
+                        )}
+                        <span className="text-sm">{p.name} <span className="text-[10px] text-gray-400">({p.sku || 'No SKU'})</span></span>
                       </label>
-                      {imagePreview && (
-                        <button
-                          type="button"
-                          className="icon-btn danger"
-                          style={{ marginTop: 6 }}
-                          onClick={() => {
-                            setImageFile(null);
-                            setImagePreview("");
-                            setExistingImageFilename("");
-                          }}
-                        >
-                          <X size={12} /> Remove image
-                        </button>
-                      )}
-                    </div>
+                    ))}
                   </div>
                 </div>
                 <div className="modal-foot">
-                  <button type="button" className="btn-cancel" onClick={() => setIsSubModalOpen(false)}>Cancel</button>
+                  <button type="button" className="btn-cancel" onClick={() => setIsAssignModalOpen(false)}>Cancel</button>
                   <button type="submit" className="btn-primary" disabled={loading}>
-                    {loading ? 'Saving...' : 'Save Sub-Category'}
+                    {loading ? 'Saving Update...' : 'Save Assignments'}
                   </button>
                 </div>
               </form>

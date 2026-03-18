@@ -42,7 +42,7 @@ const RoleSelector = ({ onSelect }) => {
       </div>
       
       <div className="absolute bottom-12 left-0 right-0 text-center flex flex-col items-center gap-4">
-         <h1 className="text-white font-brand text-2xl tracking-[0.4em] uppercase opacity-50">Cromsen</h1>
+         <img src="/logo.png" alt="Cromsen" className="h-6 w-auto object-contain brightness-0 invert opacity-50" />
          <button 
            onClick={() => onSelect('admin')}
            className="text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition-colors"

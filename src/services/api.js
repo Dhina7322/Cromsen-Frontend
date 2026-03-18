@@ -77,19 +77,6 @@
     return response.data;
   };
 
-  // SubCategory API
-  export const getSubCategories = async () => {
-    const response = await api.get('/subcategories');
-    return response.data;
-  };
-
-  export const createSubCategory = async (formData) => {
-    const response = await api.post('/subcategories', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return response.data;
-  };
-
   // Admin Auth
   export const adminLogin = (credentials) => api.post('/admin/login', credentials);
   export const getAdminStats = () => api.get('/admin/stats');

@@ -107,12 +107,7 @@ const Navbar = () => {
           
           {/* Left: Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0">
-              <div className="w-3 h-3 rounded-full bg-action" />
-            </div>
-            <span className="text-xs font-brand font-bold tracking-[0.18em] uppercase text-white leading-tight">
-              Cromsen
-            </span>
+            <img src="../../assets/logo.png" alt="Cromsen Importers" className="h-8 lg:h-10 w-auto object-contain brightness-0 invert" />
           </Link>
 
           {/* Center: Navigation Menu */}
@@ -319,23 +314,25 @@ const Navbar = () => {
                         {firstName}
                       </span>
                       
-                      <div className="absolute top-full right-0 mt-2 w-40 bg-primary border border-white/10 rounded-lg shadow-xl py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all translate-y-2 group-hover:translate-y-0">
-                        <Link
-                          to="/my-orders"
-                          className="w-full block text-left px-4 py-2 text-[10px] text-gray-300 hover:text-white hover:bg-white/5"
-                        >
-                          My Orders
-                        </Link>
-                        <button 
-                          onClick={() => {
-                            localStorage.removeItem('userInfo');
-                            localStorage.removeItem('userRole');
-                            window.location.reload();
-                          }}
-                          className="w-full text-left px-4 py-2 text-[10px] text-gray-300 hover:text-white hover:bg-white/5"
-                        >
-                          Logout
-                        </button>
+                      <div className="absolute top-full right-0 pt-2 w-40 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all translate-y-2 group-hover:translate-y-0">
+                        <div className="bg-primary border border-white/10 rounded-lg shadow-xl py-2">
+                          <Link
+                            to="/my-orders"
+                            className="w-full block text-left px-4 py-2 text-[10px] text-gray-300 hover:text-white hover:bg-white/5"
+                          >
+                            My Orders
+                          </Link>
+                          <button 
+                            onClick={() => {
+                              localStorage.removeItem('userInfo');
+                              localStorage.removeItem('userRole');
+                              window.location.reload();
+                            }}
+                            className="w-full text-left px-4 py-2 text-[10px] text-gray-300 hover:text-white hover:bg-white/5"
+                          >
+                            Logout
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

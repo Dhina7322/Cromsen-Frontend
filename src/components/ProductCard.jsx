@@ -1,18 +1,30 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Eye, ImageIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ShoppingCart, Eye, ImageIcon, Zap } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const role = localStorage.getItem('userRole');
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Use price provided by backend (which is role-aware) or fallback
+    const rawPrice = product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice);
+    const priceToUse = Number(rawPrice) || 0;
+    addToCart({ ...product, price: priceToUse });
+    navigate('/checkout');
+  };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Use price provided by backend (which is role-aware) or fallback
     const rawPrice = product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice);
     const priceToUse = Number(rawPrice) || 0;
     addToCart({ ...product, price: priceToUse });
@@ -51,11 +63,11 @@ const ProductCard = ({ product }) => {
         {/* Hover Actions - Slide up from bottom */}
         <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out flex space-x-2 opacity-0 group-hover:opacity-100 bg-gradient-to-t from-black/50 to-transparent pt-12">
           <button 
-            onClick={handleAddToCart}
+            onClick={handleBuyNow}
             className="flex-grow bg-[#2f2f2f] text-white py-3 text-[10px] uppercase tracking-widest font-bold hover:bg-action transition-colors flex items-center justify-center space-x-2"
           >
-            <ShoppingCart size={14} />
-            <span>Add to Cart</span>
+            <Zap size={14} />
+            <span>Buy Now</span>
           </button>
           <Link 
             to={`/product/${product._id}`} 
@@ -72,7 +84,7 @@ const ProductCard = ({ product }) => {
             {product.name}
           </h3>
         </Link>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center w-full pb-3">
           <p className="text-action font-bold text-sm tracking-tight">
             ₹{(!isNaN(displayedPrice) && displayedPrice > 0) ? displayedPrice.toFixed(2) : '0.00'}
           </p>
@@ -81,6 +93,14 @@ const ProductCard = ({ product }) => {
               MRP: ₹{originalPrice.toFixed(2)}
             </p>
           )}
+          <button 
+            onClick={handleAddToCart}
+            className="w-full mt-3 py-2 bg-white border border-gray-200 text-gray-800 text-[11px] font-bold uppercase tracking-widest hover:bg-action hover:border-action hover:text-white transition-colors shrink-0 flex items-center justify-center space-x-2"
+            title="Add to Cart"
+          >
+            <ShoppingCart size={14} />
+            <span>Add to Cart</span>
+          </button>
         </div>
       </div>
     </motion.div>

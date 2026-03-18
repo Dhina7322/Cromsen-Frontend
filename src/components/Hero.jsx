@@ -32,15 +32,7 @@ const categories = [
     heading: 'Elegant\nAccessories',
     subheading: 'Rods, rings, tiebacks and more — the finishing touches that matter.',
   },
-  {
-    id: 'wallpapers',
-    name: 'Wallpapers',
-    description: 'Stunning wallpapers that bring texture, depth, and personality to any wall in your home.',
-    href: '/shop?category=wallpapers',
-    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2070&auto=format&fit=crop',
-    heading: 'Beautiful\nWallpapers',
-    subheading: 'Transform your walls with designs that tell your unique story.',
-  },
+
 ];
 
 // Preload all images so they're cached before AnimatePresence swaps them
@@ -119,9 +111,8 @@ const CategorySelector = ({ activeId, onSelect }) => (
         <button
           key={cat.id}
           onClick={() => onSelect(idx)}
-          className={`group text-left px-8 py-6 border-b border-white/10 transition-all duration-300 ${
-            isActive ? 'bg-white/10' : 'hover:bg-white/5'
-          }`}
+          className={`group text-left px-8 py-6 border-b border-white/10 transition-all duration-300 ${isActive ? 'bg-white/10' : 'hover:bg-white/5'
+            }`}
         >
           {/* Name — also acts as link */}
           <Link
@@ -130,9 +121,8 @@ const CategorySelector = ({ activeId, onSelect }) => (
             className="block"
           >
             <h3
-              className={`text-xl md:text-2xl font-serif mb-1 transition-colors ${
-                isActive ? 'text-white' : 'text-white/75 group-hover:text-white'
-              }`}
+              className={`text-xl md:text-2xl font-serif mb-1 transition-colors ${isActive ? 'text-white' : 'text-white/75 group-hover:text-white'
+                }`}
             >
               {cat.name}
             </h3>
@@ -140,16 +130,14 @@ const CategorySelector = ({ activeId, onSelect }) => (
 
           {/* Orange / grey underline */}
           <div
-            className={`h-[2px] w-8 mb-3 transition-all duration-300 ${
-              isActive ? 'bg-[#f1703b]' : 'bg-white/25'
-            }`}
+            className={`h-[2px] w-8 mb-3 transition-all duration-300 ${isActive ? 'bg-[#f1703b]' : 'bg-white/25'
+              }`}
           />
 
           {/* Description */}
           <p
-            className={`text-xs font-sans leading-relaxed transition-colors ${
-              isActive ? 'text-white/80' : 'text-white/45 group-hover:text-white/65'
-            }`}
+            className={`text-xs font-sans leading-relaxed transition-colors ${isActive ? 'text-white/80' : 'text-white/45 group-hover:text-white/65'
+              }`}
           >
             {cat.description}
           </p>
@@ -195,12 +183,12 @@ const HeroSection = () => {
 
       {/* Right side category panel - Absolute to screen edge */}
       <div className="absolute right-0 top-0 h-full w-[280px] z-20 bg-black/55 backdrop-blur-[2px] border-l border-white/5 hidden lg:block">
-         <CategorySelector activeId={active.id} onSelect={setActiveIndex} />
+        <CategorySelector activeId={active.id} onSelect={setActiveIndex} />
       </div>
 
       {/* Mobile panel container fallback for smaller screens */}
       <div className="lg:hidden absolute right-0 top-0 h-full w-[220px] bg-black/60 backdrop-blur-sm z-20">
-         <CategorySelector activeId={active.id} onSelect={setActiveIndex} />
+        <CategorySelector activeId={active.id} onSelect={setActiveIndex} />
       </div>
 
       {/* Mobile slide dots */}
@@ -209,9 +197,8 @@ const HeroSection = () => {
           <button
             key={idx}
             onClick={() => setActiveIndex(idx)}
-            className={`rounded-full transition-all duration-300 ${
-              idx === activeIndex ? 'w-6 h-2 bg-[#f1703b]' : 'w-2 h-2 bg-white/50'
-            }`}
+            className={`rounded-full transition-all duration-300 ${idx === activeIndex ? 'w-6 h-2 bg-[#f1703b]' : 'w-2 h-2 bg-white/50'
+              }`}
           />
         ))}
       </div>

@@ -30,7 +30,7 @@ const getImageUrl = (filename) => {
 };
 
 // ── CSV Helpers ───────────────────────────────────────────────────────────────
-const CSV_PROD_HEADERS = ["sku", "name", "retailPrice", "wholesalePrice", "description", "category", "subCategory", "stock"];
+const CSV_PROD_HEADERS = ["sku", "name", "retailPrice", "wholesalePrice", "description", "category", "stock"];
 
 const parseCSV = (text) => {
   const lines = text.trim().split("\n").map(l => l.trim()).filter(Boolean);
@@ -69,7 +69,7 @@ const generateSKU = (name, cat) => {
 };
 
 // ── Bulk Import Modal ─────────────────────────────────────────────────────────
-const BulkImportModal = ({ onClose, categories, subCategories, onImportDone, showToast }) => {
+const BulkImportModal = ({ onClose, categories, onImportDone, showToast }) => {
   const [step, setStep] = useState("upload");
   const [csvRows, setCsvRows] = useState([]);
   const [errors, setErrors] = useState([]);
@@ -80,13 +80,6 @@ const BulkImportModal = ({ onClose, categories, subCategories, onImportDone, sho
   const catNameToId = (name) => {
     if (!name) return null;
     return categories.find(c => c.name.toLowerCase() === name.trim().toLowerCase())?._id || null;
-  };
-  const subCatNameToId = (name, catId) => {
-    if (!name) return null;
-    return subCategories.find(s =>
-      s.name.toLowerCase() === name.trim().toLowerCase() &&
-      (!catId || (s.category?._id || s.category) === catId)
-    )?._id || null;
   };
 
   const handleFile = (file) => {
@@ -111,7 +104,6 @@ const BulkImportModal = ({ onClose, categories, subCategories, onImportDone, sho
 
     for (const row of csvRows) {
       const catId = catNameToId(row.category);
-      const subCatId = subCatNameToId(row.subcategory || row.subCategory, catId);
       try {
         const fd = new FormData();
         const catName = categories.find(c => c._id === catId)?.name || "";
@@ -121,7 +113,6 @@ const BulkImportModal = ({ onClose, categories, subCategories, onImportDone, sho
         fd.append("wholesalePrice", Number(row.wholesaleprice || row.wholesalePrice) || 0);
         fd.append("description", row.description?.trim() || "");
         if (catId) fd.append("category", catId);
-        if (subCatId) fd.append("subCategory", subCatId);
         fd.append("stock", Number(row.stock) || 0);
         await axios.post(`${API}/products`, fd, { headers: { 'x-user-role': 'admin' } });
         done++;
@@ -138,11 +129,10 @@ const BulkImportModal = ({ onClose, categories, subCategories, onImportDone, sho
 
   const downloadTemplate = () => {
     const exCat = categories[0]?.name || "Electronics";
-    const exSub = subCategories[0]?.name || "Mobiles";
     downloadCSV("products_template.csv", [{
       sku: "ELC-SAMP-1234", name: "Sample Product", retailPrice: "999",
       wholesalePrice: "799", description: "Description here",
-      category: exCat, subCategory: exSub, stock: "50"
+      category: exCat, stock: "50"
     }], CSV_PROD_HEADERS);
   };
 
@@ -163,7 +153,7 @@ const BulkImportModal = ({ onClose, categories, subCategories, onImportDone, sho
                 </button>
                 <p style={{ fontSize: 12, color: "var(--text3)", margin: 0 }}>
                   Columns: <code style={{ background: "var(--card2)", padding: "1px 5px", borderRadius: 4 }}>
-                    sku, name, retailPrice, wholesalePrice, description, category, subCategory, stock
+                    sku, name, retailPrice, wholesalePrice, description, category, stock
                   </code>
                 </p>
               </div>
@@ -304,7 +294,6 @@ const ExportModal = ({ onClose, filteredProducts, showToast }) => {
         wholesalePrice: p.wholesalePrice || 0,
         description: p.description || "",
         category: p.category?.name || "",
-        subCategory: p.subCategory?.name || "",
         stock: p.stock ?? 0
       })),
       CSV_PROD_HEADERS
@@ -358,7 +347,6 @@ export default function InventoryTab() {
   const { showToast } = useOutletContext();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -368,7 +356,7 @@ export default function InventoryTab() {
 
   const [formData, setFormData] = useState({
     name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
-    category: "", subCategory: "", stock: "", isActive: true, featured: false
+    category: "", stock: "", isActive: true, featured: false
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -389,12 +377,10 @@ export default function InventoryTab() {
 
   const fetchSupportData = async () => {
     try {
-      const [cRes, scRes] = await Promise.all([
-        axios.get(`${API}/categories`, adminHeaders),
-        axios.get(`${API}/subcategories`, adminHeaders)
+      const [cRes] = await Promise.all([
+        axios.get(`${API}/categories`, adminHeaders)
       ]);
       setCategories(cRes.data);
-      setSubCategories(scRes.data);
     } catch (err) {
       console.error("Support data error:", err);
     }
@@ -413,7 +399,6 @@ export default function InventoryTab() {
         description: product.description, retailPrice: product.retailPrice,
         wholesalePrice: product.wholesalePrice,
         category: product.category?._id || product.category,
-        subCategory: product.subCategory?._id || product.subCategory || "",
         stock: product.stock, isActive: product.isActive ?? true,
         featured: product.featured || false
       });
@@ -422,7 +407,7 @@ export default function InventoryTab() {
       setEditingProduct(null);
       setFormData({
         name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
-        category: "", subCategory: "", stock: "", isActive: true, featured: false
+        category: "", stock: "", isActive: true, featured: false
       });
       setImagePreview("");
     }
@@ -629,16 +614,6 @@ export default function InventoryTab() {
                       </select>
                     </div>
                     <div className="fg">
-                      <label>Sub Category</label>
-                      <select value={formData.subCategory}
-                        onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}>
-                        <option value="">None</option>
-                        {subCategories
-                          .filter(sc => sc.category?._id === formData.category || sc.category === formData.category)
-                          .map(sc => <option key={sc._id} value={sc._id}>{sc.name}</option>)}
-                      </select>
-                    </div>
-                    <div className="fg">
                       <label>Stock Count</label>
                       <input required type="number" value={formData.stock}
                         onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
@@ -695,7 +670,6 @@ export default function InventoryTab() {
         <BulkImportModal
           onClose={() => setShowImport(false)}
           categories={categories}
-          subCategories={subCategories}
           onImportDone={fetchProducts}
           showToast={showToast}
         />

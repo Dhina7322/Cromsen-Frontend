@@ -44,12 +44,7 @@ const Footer = () => {
               </div>
 
               <div className="flex flex-col items-center shrink-0">
-                 <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center mb-4">
-                   <div className="w-3 h-3 rounded-full bg-action" />
-                 </div>
-                 <span className="text-xs font-brand font-bold tracking-[0.2em] uppercase text-primary">
-                   Cromsen Importers
-                 </span>
+                 <img src="/logo.png" alt="Cromsen Importers" className="h-12 w-auto object-contain" />
               </div>
 
               <div className="flex flex-col items-center md:items-end text-center md:text-right">
