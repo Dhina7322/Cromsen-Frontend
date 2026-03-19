@@ -13,26 +13,51 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { useOutletContext } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { getImageUrl } from "../../../utils/imageUtils";
 
 const API = "/api";
 
 export default function OrdersTab() {
   const { showToast } = useOutletContext();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = new URLSearchParams(location.search);
+  const initialStatus = searchParams.get("status") || "All";
+
   const [orders, setOrders] = useState([]);
   const [totalOrders, setTotalOrders] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [enrichedItems, setEnrichedItems] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
 
-  const statuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Refund Tracking", "Refund Processed", "Refund Delivered", "Abandoned"];
+  const mainStatuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+  const subStatuses = ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+
+  useEffect(() => {
+    const s = searchParams.get("status");
+    if (s && s !== statusFilter) {
+      setStatusFilter(s);
+    } else if (!s && statusFilter === "Abandoned") { // reset if came from abandoned back to general orders
+      setStatusFilter("All");
+    }
+  }, [location.search]);
 
   useEffect(() => {
     fetchOrders();
   }, [statusFilter]);
+
+  const handleStatusFilterChange = (s) => {
+    setStatusFilter(s);
+    if (s === "Abandoned") {
+      navigate("?status=Abandoned");
+    } else {
+      navigate("?");
+    }
+  };
 
   // When an order is selected, enrich items with product images (for older orders that may not have image stored)
   useEffect(() => {
@@ -77,7 +102,7 @@ export default function OrdersTab() {
 
   const filteredOrders = orders.filter(o => {
     const matchesSearch = o._id.includes(searchTerm) || (o.user?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "All" || o.status === statusFilter;
+    const matchesStatus = statusFilter === "All" ? o.status !== "Abandoned" : o.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -96,20 +121,38 @@ export default function OrdersTab() {
 
   return (
     <div className="section-gap">
-      <div className="spill-row">
-        {statuses.map(s => (
-          <button
-            key={s}
-            className={`spill ${statusFilter === s ? 'spill--on' : ''}`}
-            onClick={() => setStatusFilter(s)}
-          >
-            {s}
-            <span className="spill-cnt">
-              {s === "All" ? orders.length : orders.filter(o => o.status === s).length}
-            </span>
-          </button>
-        ))}
-      </div>
+      {statusFilter !== "Abandoned" && (
+        <>
+          <div className="spill-row">
+            {mainStatuses.map(s => (
+              <button
+                key={s}
+                className={`spill ${statusFilter === s ? 'spill--on' : ''}`}
+                onClick={() => handleStatusFilterChange(s)}
+              >
+                {s}
+                <span className="spill-cnt">
+                  {s === "All" ? orders.filter(o => o.status !== "Abandoned").length : orders.filter(o => o.status === s).length}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="spill-row" style={{ marginTop: '12px' }}>
+            {subStatuses.map(s => (
+              <button
+                key={s}
+                className={`spill ${statusFilter === s ? 'spill--on' : ''}`}
+                onClick={() => handleStatusFilterChange(s)}
+              >
+                {s}
+                <span className="spill-cnt">
+                  {orders.filter(o => o.status === s).length}
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="toolbar">
         <div className="toolbar-left">

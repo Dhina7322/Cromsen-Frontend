@@ -167,7 +167,14 @@ export default function AdminDashboard() {
           <SidebarLink to="/admin" icon={<Layout size={18}/>} label="Dashboard" active={location.pathname === "/admin"} />
           <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Inventory" active={location.pathname === "/admin/inventory"} />
           <SidebarLink to="/admin/categories" icon={<Layers size={18}/>} label="Categories" active={location.pathname === "/admin/categories"} />
-          <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders"} badge={0} />
+          <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders" && !location.search.includes("status=Abandoned")} badge={0} />
+          <AnimatePresence>
+            {location.pathname.startsWith("/admin/orders") && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
+                <SidebarLink to="/admin/orders?status=Abandoned" icon={<XCircle size={16}/>} label="Abandoned Orders" active={location.pathname === "/admin/orders" && location.search.includes("status=Abandoned")} style={{ marginLeft: "20px", fontSize: "0.9em", paddingLeft: "12px", borderLeft: "2px solid rgba(255,255,255,0.2)" }} />
+              </motion.div>
+            )}
+          </AnimatePresence>
           <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Inquiries" active={location.pathname === "/admin/inquiries"} />
           <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
         </nav>
@@ -212,9 +219,9 @@ export default function AdminDashboard() {
   );
 }
 
-function SidebarLink({ to, icon, label, active, badge }) {
+function SidebarLink({ to, icon, label, active, badge, style }) {
   return (
-    <Link to={to} className={`sb-item ${active ? 'sb-item--on' : ''}`}>
+    <Link to={to} className={`sb-item ${active ? 'sb-item--on' : ''}`} style={style}>
       {icon}<span>{label}</span>{badge > 0 && <span className="sb-badge sb-badge--red">{badge}</span>}
     </Link>
   );

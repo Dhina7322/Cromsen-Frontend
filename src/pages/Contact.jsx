@@ -62,7 +62,7 @@ const Contact = () => {
                     <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Visit Us</h3>
                   </div>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    123 Design District<br />Luxury Way, NY 10001
+                    No. 164, Trichy Road,<br />Opposite Ocean Restaurant,<br />Selvarajapuram, Coimbatore - 641103.
                   </p>
                 </div>
 
@@ -72,7 +72,7 @@ const Contact = () => {
                     <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Call Us</h3>
                   </div>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    +1 (234) 567-890<br />+1 (234) 890-123
+                    +91-98422 33645<br />99444 30314
                   </p>
                 </div>
 
@@ -82,7 +82,7 @@ const Contact = () => {
                     <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Email Us</h3>
                   </div>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    info@cromsen.com<br />support@cromsen.com
+                    cscromsen@gmail.com
                   </p>
                 </div>
 
@@ -92,7 +92,7 @@ const Contact = () => {
                     <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Opening Hours</h3>
                   </div>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    Mon - Fri: 9:00 - 18:00<br />Sat: 10:00 - 15:00
+                    Mon - Sat: 9:00 - 18:00<br />Sun: Closed
                   </p>
                 </div>
               </div>
@@ -197,16 +197,15 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Map Placeholder */}
-      <section className="h-[500px] w-full bg-gray-200 flex items-center justify-center relative overflow-hidden">
-        <img 
-          src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2066&auto=format&fit=crop" 
-          alt="Map" 
-          className="w-full h-full object-cover opacity-50 grayscale"
-        />
-        <div className="absolute inset-x-0 bottom-0 bg-white/80 backdrop-blur-sm p-4 text-center">
-            <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Find us in the Design District</p>
-        </div>
+      {/* Map Section */}
+      <section className="h-[500px] w-full relative overflow-hidden">
+        <iframe 
+          src="https://maps.google.com/maps?q=164,%20Trichy%20Rd,%20opp.%20Ocean%20Restaurent,%20Selvaraja%20Puram,%20Coimbatore,%20Kannampalayam,%20Tamil%20Nadu%20641103&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+          className="w-full h-full border-0" 
+          allowFullScreen="" 
+          loading="lazy" 
+          referrerPolicy="no-referrer-when-downgrade"
+        ></iframe>
       </section>
     </div>
   );

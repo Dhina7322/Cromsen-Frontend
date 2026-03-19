@@ -296,7 +296,7 @@ const Navbar = () => {
               </Link>
             )}
             
-            <div className="flex flex-col items-center">
+            {/* <div className="flex flex-col items-center">
                <span className="text-[8px] opacity-40 leading-none">Price Tier:</span>
                <button 
                  onClick={() => { localStorage.removeItem('userRole'); window.location.reload(); }}
@@ -304,7 +304,7 @@ const Navbar = () => {
                >
                  {userRole === 'dealer' ? 'Dealer' : userRole === 'admin' ? 'Admin' : 'Retail'} <RefreshCw size={8} />
                </button>
-            </div>
+            </div> */}
 
             {localStorage.getItem('userInfo') ? (() => {
               try {
