@@ -15,7 +15,20 @@ const STATUS_STEPS = [
 
 const STATUS_IDX = {
   "Pending": 0, "Processing": 1, "Shipped": 2,
-  "Out for Delivery": 3, "Delivered": 4, "Cancelled": -1,
+  "Out for Delivery": 3, "Delivered": 4, "Cancelled": -1, "Refund Tracking": -1,
+};
+
+const REFUND_STEPS = [
+  { label: "Cancelled",        key: "cancelledAt",       offset: 0 },
+  { label: "Refund Initiated", key: "refundInitiatedAt", offset: 0 },
+  { label: "Refund Processed", key: "refundProcessedAt", offset: 3 },
+  { label: "Refund Delivered", key: "refundDeliveredAt", offset: 5 },
+];
+
+const REFUND_IDX = {
+  "Refund Tracking": 1,
+  "Refund Processed": 2,
+  "Refund Delivered": 3,
 };
 
 const STATUS_COLORS = {
@@ -25,6 +38,10 @@ const STATUS_COLORS = {
   "Out for Delivery":{ color: "#fb923c", bg: "rgba(251,146,60,0.15)"  },
   Delivered:         { color: "#22c55e", bg: "rgba(34,197,94,0.15)"   },
   Cancelled:         { color: "#f87171", bg: "rgba(248,113,113,0.15)" },
+  "Refund Tracking": { color: "#ef4444", bg: "rgba(239,68,68,0.15)"  },
+  "Refund Processed":{ color: "#eab308", bg: "rgba(234,179,8,0.15)"   },
+  "Refund Delivered":{ color: "#22c55e", bg: "rgba(34,197,94,0.15)"   },
+  Abandoned:         { color: "#6b7280", bg: "rgba(107,114,128,0.15)" },
 };
 
 const PAYMENT_LABELS = {
@@ -128,14 +145,16 @@ function CancelModal({ order, onClose, onConfirm, loading }) {
 
 function TrackingBar({ order }) {
   const status = order.status || "Pending";
-  if (status === "Cancelled") {
+  
+  // Show plain cancelled box only if literally 'Cancelled'
+  if (status === "Cancelled" || status === "Abandoned") {
     return (
       <div className="ord-cancelled-box">
         <div className="ord-cancelled-x">X</div>
         <div>
-          <div className="ord-cancelled-title">Order Cancelled</div>
+          <div className="ord-cancelled-title">Order {status}</div>
           <div className="ord-cancelled-sub">
-            {order.cancelledAt ? `Cancelled on ${fmtFull(order.cancelledAt)}` : "This order has been cancelled"}
+            {order.cancelledAt ? `${status} on ${fmtFull(order.cancelledAt)}` : `This order has been ${status.toLowerCase()}`}
             {order.cancelReason && <div style={{ marginTop: 4, color: "#f87171", fontSize: 13 }}>Reason: {order.cancelReason}</div>}
           </div>
         </div>
@@ -143,13 +162,19 @@ function TrackingBar({ order }) {
     );
   }
 
-  const currentIdx = STATUS_IDX[status] ?? 0;
+  const isRefund = REFUND_IDX[status] !== undefined;
+  const currentIdx = isRefund ? REFUND_IDX[status] : (STATUS_IDX[status] ?? 0);
+  const stepsToUse = isRefund ? REFUND_STEPS : STATUS_STEPS;
+
   const getStepDate = (step, i) => {
-    // Favor actual backend timestamps: processingAt, shippedAt, etc.
     const actualDate = order[step.key];
     if (actualDate) return { date: actualDate, isEstimate: false };
     
-    // Fallbacks
+    if (isRefund) {
+      const baseDate = order.cancelledAt || order.createdAt || new Date();
+      return { date: addDays(baseDate, step.offset), isEstimate: i > currentIdx };
+    }
+
     if (step.key === "deliveredAt" && order.expectedDelivery) return { date: order.expectedDelivery, isEstimate: i > currentIdx };
     if (step.key === "outForDeliveryAt" && order.expectedDelivery) return { date: addDays(order.expectedDelivery, -1), isEstimate: i > currentIdx };
     return { date: addDays(order.createdAt || new Date(), step.offset), isEstimate: true };
@@ -157,7 +182,7 @@ function TrackingBar({ order }) {
 
   return (
     <div className="ord-timeline">
-      {STATUS_STEPS.map((step, i) => {
+      {stepsToUse.map((step, i) => {
         const done  = i < currentIdx, active = i === currentIdx, future = i > currentIdx;
         const { date, isEstimate } = getStepDate(step, i);
         return (
@@ -234,7 +259,7 @@ export default function Orders() {
       let list   = Array.isArray(raw) ? raw : [];
       if (list.length > 0 && userEmail) {
         const mine = list.filter(o => {
-          const oEmail = (o.email || o.customerEmail || o.user?.email || o.shippingAddress?.email || "").toLowerCase().trim();
+          const oEmail = (o.email || o.customerEmail || o.guestEmail || o.user?.email || o.shippingAddress?.email || "").toLowerCase().trim();
           return oEmail === userEmail.toLowerCase().trim();
         });
         if (mine.length > 0) list = mine;
@@ -255,11 +280,11 @@ export default function Orders() {
     try {
       // Use PUT /api/orders/:id - same endpoint as admin uses
       await axios.put(`/api/orders/${orderId}`, { 
-        status: "Cancelled",
+        status: "Refund Tracking",
         cancelReason: reason,
         cancelledAt: new Date().toISOString()
       });
-      setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: "Cancelled", cancelReason: reason, cancelledAt: new Date().toISOString() } : o));
+      setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: "Refund Tracking", cancelReason: reason, cancelledAt: new Date().toISOString() } : o));
       onSuccess();
     } catch (err) {
       alert("Failed to cancel order. Please try again.");
@@ -268,7 +293,7 @@ export default function Orders() {
     }
   };
 
-  const FILTERS = ["All","Pending","Processing","Shipped","Out for Delivery","Delivered","Cancelled"];
+  const FILTERS = ["All","Pending","Processing","Shipped","Out for Delivery","Delivered","Refund Tracking"];
   const filteredOrders = activeFilter === "All" ? orders : orders.filter(o => o.status === activeFilter);
 
   if (loading) return (
@@ -377,7 +402,7 @@ export default function Orders() {
                   ))}
                   {products.length > 5 && <div className="ord-thumb ord-thumb-more">+{products.length - 5}</div>}
                 </div>
-                {status !== "Cancelled" && (
+                {status !== "Cancelled" && status !== "Refund Tracking" && (
                   <div className={`ord-eta${status === "Delivered" ? " ord-eta--done" : ""}`}>
                     {status === "Delivered" ? <>Delivered on {fmtShort(order.deliveredAt || deliveryDate)}</>
                       : <>Delivery by <strong>{fmtShort(deliveryDate)}</strong></>}
@@ -446,7 +471,7 @@ export default function Orders() {
                   <div className="ord-actions">
                     <button className="ord-action-btn ord-action-btn--ghost" onClick={() => navigate("/shop")}>Continue Shopping</button>
                     {status === "Delivered" && <button className="ord-action-btn ord-action-btn--primary">Rate and Review</button>}
-                    {status !== "Cancelled" && status !== "Delivered" && (
+                    {status !== "Cancelled" && status !== "Refund Tracking" && status !== "Delivered" && (
                       <button className="ord-action-btn ord-action-btn--danger" onClick={(e) => { e.stopPropagation(); setCancelTarget(order); }}>Cancel Order</button>
                     )}
                   </div>

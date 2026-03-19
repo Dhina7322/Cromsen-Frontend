@@ -10,7 +10,11 @@ import {
   Shield,
   Layers,
   CheckCircle,
-  XCircle
+  XCircle,
+  HelpCircle,
+  Bell,
+  X,
+  Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Outlet, Link, useLocation } from "react-router-dom";
@@ -19,15 +23,28 @@ import "../../styles/admin.css";
 
 const API = "/api";
 
-export default function AdminDashboardLayout() {
+export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState({ name: "Admin", role: "main" });
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState(null);
+  const [showToastMsg, setShowToastMsg] = useState({ show: false, type: "success", text: "" });
+  const [newOrderNotify, setNewOrderNotify] = useState(null);
+  const [lastOrderCount, setLastOrderCount] = useState(null);
   
   // Stats are shared or managed by OverviewTab, but we can keep basic stats here for topbar if needed
   const [orderCount, setOrderCount] = useState(0);
+
+  let user = { name: "Admin", role: "main" };
+  try {
+    const sessionUser = sessionStorage.getItem("cromsen_user");
+    const sessionRole = sessionStorage.getItem("cromsen_role");
+    if (sessionUser) {
+      user = { name: sessionUser, role: sessionRole || "sub" };
+    }
+  } catch (e) {
+    console.error("Session data error", e);
+  }
 
   useEffect(() => {
     const isAuth = sessionStorage.getItem("cromsen_auth");
@@ -35,27 +52,39 @@ export default function AdminDashboardLayout() {
       navigate("/admin/login");
       return;
     }
-    const storedUser = sessionStorage.getItem("cromsen_user");
-    const storedRole = sessionStorage.getItem("cromsen_role");
-    setUser({ name: storedUser || "Admin", role: storedRole || "sub" });
+    // The user state is now a local constant, so no setUser here.
     
-    // Fetch basic stats for the badge in sidebar
-    const fetchStats = async () => {
-      try {
-        const res = await axios.get(`${API}/admin/stats`);
-        setOrderCount(res.data.totalOrders || 0);
-      } catch (err) {
-        console.error("Layout stats error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
+    // Initial fetch to get baseline count and other stats
+    fetchOrderCount();
+    
+    // Polling every 15 seconds
+    const interval = setInterval(fetchOrderCount, 15000);
+    return () => clearInterval(interval);
   }, [navigate]);
 
-  const showToast = (type, message) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
+  const fetchOrderCount = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/stats`); // Assuming this endpoint provides totalOrders
+      const currentCount = res.data.totalOrders || 0;
+      setOrderCount(currentCount); // Update for the topbar display
+
+      if (lastOrderCount !== null && currentCount > lastOrderCount) {
+        // New order detected! Fetch the latest order details
+        const latestOrderRes = await axios.get(`${API}/orders`, { params: { limit: 1 } });
+        setNewOrderNotify(latestOrderRes.data.orders?.[0]);
+        // Audio notification could go here
+      }
+      setLastOrderCount(currentCount);
+    } catch (err) {
+      console.error("Poll error:", err);
+    } finally {
+      setLoading(false); // Set loading to false after initial fetch
+    }
+  };
+
+  const showToast = (type, text) => {
+    setShowToastMsg({ show: true, type, text });
+    setTimeout(() => setShowToastMsg({ show: false, type: "success", text: "" }), 3000);
   };
 
   const handleLogout = () => {
@@ -71,6 +100,60 @@ export default function AdminDashboardLayout() {
 
   return (
     <div className="admin-root admin-theme">
+      {showToastMsg.show && (
+        <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className={`toast toast--${showToastMsg.type}`}>
+          {showToastMsg.type === "success" ? <CheckCircle size={14}/> : <XCircle size={14}/>}
+          {showToastMsg.text}
+        </motion.div>
+      )}
+
+      {/* New Order Notification Popup */}
+      <AnimatePresence>
+        {newOrderNotify && (
+          <motion.div 
+            initial={{ opacity: 0, y: 100, x: 100 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-[2000] w-80 bg-white rounded-2xl shadow-2xl border-2 border-orange border-l-[6px] overflow-hidden"
+          >
+            <div className="p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div className="bg-orange/10 p-2 rounded-lg text-orange">
+                  <Bell size={20} className="animate-bounce" />
+                </div>
+                <button 
+                  onClick={() => setNewOrderNotify(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900 text-base">New Order Placed!</h4>
+                <p className="text-sm text-gray-500 mt-1">
+                   Order <span className="font-mono text-orange font-bold">#{newOrderNotify._id?.slice(-8).toUpperCase()}</span> just arrived.
+                </p>
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Amount</p>
+                    <p className="font-bold text-gray-900">₹{newOrderNotify.totalAmount}</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setNewOrderNotify(null);
+                      navigate("/admin/orders");
+                    }}
+                    className="bg-orange text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-orange-600 transition-colors"
+                  >
+                    <ShoppingCart size={14} /> View Orders
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="brand-logo">C</div>
@@ -84,7 +167,15 @@ export default function AdminDashboardLayout() {
           <SidebarLink to="/admin" icon={<Layout size={18}/>} label="Dashboard" active={location.pathname === "/admin"} />
           <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Inventory" active={location.pathname === "/admin/inventory"} />
           <SidebarLink to="/admin/categories" icon={<Layers size={18}/>} label="Categories" active={location.pathname === "/admin/categories"} />
-          <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders"} badge={0} />
+          <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders" && !location.search.includes("status=Abandoned")} badge={0} />
+          <AnimatePresence>
+            {location.pathname.startsWith("/admin/orders") && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
+                <SidebarLink to="/admin/orders?status=Abandoned" icon={<XCircle size={16}/>} label="Abandoned Orders" active={location.pathname === "/admin/orders" && location.search.includes("status=Abandoned")} style={{ marginLeft: "20px", fontSize: "0.9em", paddingLeft: "12px", borderLeft: "2px solid rgba(255,255,255,0.2)" }} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Inquiries" active={location.pathname === "/admin/inquiries"} />
           <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
         </nav>
         {user.role === "main" && (
@@ -124,22 +215,13 @@ export default function AdminDashboardLayout() {
           )}
         </section>
       </main>
-
-      <AnimatePresence>
-        {toast && (
-          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className={`toast toast--${toast.type}`}>
-            {toast.type === "success" ? <CheckCircle size={14}/> : <XCircle size={14}/>}
-            {toast.message}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
 
-function SidebarLink({ to, icon, label, active, badge }) {
+function SidebarLink({ to, icon, label, active, badge, style }) {
   return (
-    <Link to={to} className={`sb-item ${active ? 'sb-item--on' : ''}`}>
+    <Link to={to} className={`sb-item ${active ? 'sb-item--on' : ''}`} style={style}>
       {icon}<span>{label}</span>{badge > 0 && <span className="sb-badge sb-badge--red">{badge}</span>}
     </Link>
   );
