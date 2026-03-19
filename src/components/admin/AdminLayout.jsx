@@ -23,13 +23,9 @@ const AdminLayout = ({ children }) => {
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
       {/* Sidebar */}
       <aside className="w-64 bg-primary text-white flex flex-col shadow-xl z-20">
-        <div className="p-6 flex items-center gap-3 border-b border-white/10">
-          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0">
-            <div className="w-3 h-3 rounded-full bg-action" />
-          </div>
-          <span className="text-sm font-brand font-bold tracking-[0.15em] uppercase leading-tight">
-            Cromsen Admin
-          </span>
+        <div className="p-6 flex flex-col items-center gap-2 border-b border-white/10">
+          <img src="/logo.png" alt="Cromsen Admin" className="h-8 w-auto object-contain brightness-0 invert" />
+          <span className="text-[9px] font-sans font-bold text-gray-400 uppercase tracking-widest leading-none">Admin</span>
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">

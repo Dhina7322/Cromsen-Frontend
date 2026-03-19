@@ -35,7 +35,7 @@ const CategoryShowcase = () => {
           {categories.slice(0, 10).map((cat, idx) => (
             <Link 
               key={cat._id || cat.name || idx} 
-              to={`/shop?category=${cat._id || cat.name}`}
+              to={`/shop?category=${cat.name.toLowerCase().replace(/[\s_]+/g, '-')}`}
               className="group flex flex-col items-center text-center w-full"
             >
               <div className="w-full aspect-square mb-4 overflow-hidden bg-gray-100 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
