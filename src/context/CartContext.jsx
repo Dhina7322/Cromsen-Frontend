@@ -17,10 +17,6 @@ const getCartKey = () => {
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
-<<<<<<< Updated upstream
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
-=======
     try {
       const key = getCartKey();
       const savedCart = localStorage.getItem(key);
@@ -29,7 +25,6 @@ export const CartProvider = ({ children }) => {
     } catch {
       return [];
     }
->>>>>>> Stashed changes
   });
 
   // Re-load cart when login/logout changes the user

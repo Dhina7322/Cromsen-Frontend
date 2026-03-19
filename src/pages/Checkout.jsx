@@ -262,37 +262,7 @@ const Checkout = () => {
         }
       });
 
-      // 2. Handle Mock Order (if keys are missing)
-      if (order.mock) {
-        const mockVerifyRes = await axios.post('/api/payment/verify-payment', {
-          razorpay_order_id: order.id,
-          razorpay_payment_id: "pay_mock_" + Date.now(),
-          razorpay_signature: "mock_signature",
-          orderDetails: {
-            user: shippingData.email,
-            items: cartItems.map(item => ({
-              product: item._id,
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              image: item.image || item.images?.[0] || ''
-            })),
-            totalAmount: cartTotal,
-            shippingAddress: { ...shippingData }
-          }
-        });
-
-        if (mockVerifyRes.status === 200) {
-          if (exchangeContext) {
-            await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: "Replacement Completed" });
-            localStorage.removeItem('exchangeContext');
-          }
-          setOrderComplete(true);
-          setNewOrderId(mockVerifyRes.data.orderId);
-          clearCart();
-          return;
-        }
-      }
+      // Removed mock order handling - now forcing real Razorpay flow
 
       // 3. Options for Real Razorpay
       const options = {
