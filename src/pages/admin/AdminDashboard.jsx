@@ -34,6 +34,8 @@ export default function AdminDashboard() {
   
   // Stats are shared or managed by OverviewTab, but we can keep basic stats here for topbar if needed
   const [orderCount, setOrderCount] = useState(0);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+  const [inquiriesCount, setInquiriesCount] = useState(0);
 
   let user = { name: "Admin", role: "main" };
   try {
@@ -67,6 +69,19 @@ export default function AdminDashboard() {
       const res = await axios.get(`${API}/admin/stats`); // Assuming this endpoint provides totalOrders
       const currentCount = res.data.totalOrders || 0;
       setOrderCount(currentCount); // Update for the topbar display
+
+      // Fetch pending orders for badge
+      try {
+        const pendingRes = await axios.get(`${API}/orders`, { params: { status: "Pending" } });
+        setPendingOrdersCount(pendingRes.data.orders?.length || pendingRes.data.length || 0);
+      } catch (e) {}
+
+      // Fetch active inquiries for badge
+      try {
+        const inqRes = await axios.get(`${API}/inquiries`);
+        const inqList = inqRes.data.inquiries || inqRes.data || [];
+        setInquiriesCount(inqList.length);
+      } catch (e) {}
 
       if (lastOrderCount !== null && currentCount > lastOrderCount) {
         // New order detected! Fetch the latest order details
@@ -167,7 +182,7 @@ export default function AdminDashboard() {
           <SidebarLink to="/admin" icon={<Layout size={18}/>} label="Dashboard" active={location.pathname === "/admin"} />
           <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Inventory" active={location.pathname === "/admin/inventory"} />
           <SidebarLink to="/admin/categories" icon={<Layers size={18}/>} label="Categories" active={location.pathname === "/admin/categories"} />
-          <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders" && !location.search.includes("status=Abandoned")} badge={0} />
+          <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders" && !location.search.includes("status=Abandoned")} badge={location.pathname.startsWith("/admin/orders") ? 0 : pendingOrdersCount} />
           <AnimatePresence>
             {location.pathname.startsWith("/admin/orders") && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
@@ -175,7 +190,7 @@ export default function AdminDashboard() {
               </motion.div>
             )}
           </AnimatePresence>
-          <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Inquiries" active={location.pathname === "/admin/inquiries"} />
+          <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Inquiries" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
           <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
         </nav>
         {user.role === "main" && (
