@@ -35,7 +35,7 @@ export default function OrdersTab() {
   const [statusFilter, setStatusFilter] = useState(initialStatus);
 
   const mainStatuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
-  const subStatuses = ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+  const subStatuses = ["Refund Tracking", "Refund Processed", "Refund Delivered", "Replacement Requested", "Replacement Processed", "Replacement Delivered"];
 
   useEffect(() => {
     const s = searchParams.get("status");
@@ -119,6 +119,19 @@ export default function OrdersTab() {
     }
   };
 
+  const updateOrderDelivery = async (id, newDate) => {
+    try {
+      await axios.put(`${API}/orders/${id}`, { expectedDelivery: newDate });
+      showToast("success", "Expected delivery updated");
+      fetchOrders();
+      if (selectedOrder && selectedOrder._id === id) {
+        setSelectedOrder({ ...selectedOrder, expectedDelivery: newDate });
+      }
+    } catch (err) {
+      showToast("error", "Failed to update expected delivery");
+    }
+  };
+
   return (
     <div className="section-gap">
       {statusFilter !== "Abandoned" && (
@@ -188,7 +201,8 @@ export default function OrdersTab() {
               
               const getAvailableStatuses = (status) => {
                 if (status === "Abandoned") return ["Abandoned"];
-                if (status.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+                if (status?.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+                if (status?.includes("Replacement")) return ["Replacement Requested", "Replacement Processed", "Replacement Delivered"];
                 return ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
               };
               
@@ -289,8 +303,20 @@ export default function OrdersTab() {
 
                   {selectedOrder.cancelReason && (
                     <div style={{ marginTop: '24px', background: '#fef2f2', border: '1px solid #fee2e2', padding: '12px', borderRadius: '8px' }}>
-                      <div className="om-section-title" style={{ color: '#ef4444', marginBottom: '8px' }}>Cancellation Reason</div>
+                      <div className="om-section-title" style={{ color: '#ef4444', marginBottom: '8px' }}>Cancellation/Replace Reason</div>
                       <div style={{ fontSize: '13px', color: '#b91c1c' }}>{selectedOrder.cancelReason}</div>
+                    </div>
+                  )}
+
+                  {selectedOrder.status !== 'Delivered' && selectedOrder.status !== 'Cancelled' && !selectedOrder.status?.includes("Refund") && !selectedOrder.status?.includes("Replacement") && selectedOrder.status !== "Abandoned" && (
+                    <div style={{ marginTop: '24px' }}>
+                      <div className="om-section-title">Expected Delivery Date</div>
+                      <input 
+                        type="date"
+                        className="bg-white border border-gray-200 text-sm px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-orange/50 transition-shadow"
+                        value={selectedOrder.expectedDelivery ? selectedOrder.expectedDelivery.split('T')[0] : ''}
+                        onChange={(e) => updateOrderDelivery(selectedOrder._id, e.target.value)}
+                      />
                     </div>
                   )}
 
@@ -300,7 +326,8 @@ export default function OrdersTab() {
                       {(() => {
                         const getAvailableStatuses = (status) => {
                           if (status === "Abandoned") return ["Abandoned"];
-                          if (status.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+                          if (status?.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
+                          if (status?.includes("Replacement")) return ["Replacement Requested", "Replacement Processed", "Replacement Delivered"];
                           return ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
                         };
                         return getAvailableStatuses(selectedOrder.status);

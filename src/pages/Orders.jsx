@@ -31,6 +31,18 @@ const REFUND_IDX = {
   "Refund Delivered": 3,
 };
 
+const REPLACE_STEPS = [
+  { label: "Replacement Requested", key: "replacementRequestedAt", offset: 0 },
+  { label: "Replacement Processed", key: "replacementProcessedAt", offset: 2 },
+  { label: "Replacement Delivered", key: "replacementDeliveredAt", offset: 5 },
+];
+
+const REPLACE_IDX = {
+  "Replacement Requested": 0,
+  "Replacement Processed": 1,
+  "Replacement Delivered": 2,
+};
+
 const STATUS_COLORS = {
   Pending:           { color: "#f59e0b", bg: "rgba(245,158,11,0.15)"  },
   Processing:        { color: "#38bdf8", bg: "rgba(56,189,248,0.15)"  },
@@ -41,6 +53,9 @@ const STATUS_COLORS = {
   "Refund Tracking": { color: "#ef4444", bg: "rgba(239,68,68,0.15)"  },
   "Refund Processed":{ color: "#eab308", bg: "rgba(234,179,8,0.15)"   },
   "Refund Delivered":{ color: "#22c55e", bg: "rgba(34,197,94,0.15)"   },
+  "Replacement Requested": { color: "#8b5cf6", bg: "rgba(139,92,246,0.15)" },
+  "Replacement Processed": { color: "#6366f1", bg: "rgba(99,102,241,0.15)" },
+  "Replacement Delivered": { color: "#22c55e", bg: "rgba(34,197,94,0.15)" },
   Abandoned:         { color: "#6b7280", bg: "rgba(107,114,128,0.15)" },
 };
 
@@ -61,6 +76,15 @@ const CANCEL_REASONS = [
   "I found a better price elsewhere",
   "Delivery time is too long",
   "Duplicate order placed by mistake",
+  "Other reason",
+];
+
+const REPLACE_REASONS = [
+  "Item is defective or broken",
+  "Item does not match description",
+  "Missing parts or accessories",
+  "Received wrong item",
+  "Quality is not as expected",
   "Other reason",
 ];
 
@@ -143,6 +167,73 @@ function CancelModal({ order, onClose, onConfirm, loading }) {
   );
 }
 
+function ReplaceModal({ order, onClose, onConfirm, loading }) {
+  const [step, setStep] = useState(1);
+  const [selected, setSelected] = useState("");
+  const [other, setOther] = useState("");
+  const reason = selected === "Other reason" ? other : selected;
+
+  return (
+    <div className="ord-modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="ord-modal">
+        {step === 1 && (<>
+          <div className="ord-modal-header">
+            <div className="ord-modal-icon" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </div>
+            <div><h3 className="ord-modal-title">Return Item</h3><p className="ord-modal-sub">Order #{order._id?.slice(-8).toUpperCase()}</p></div>
+            <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <p className="ord-modal-body-text">Please select a reason for the return:</p>
+          <div className="ord-reason-list">
+            {REPLACE_REASONS.map((r) => (
+              <label key={r} className={`ord-reason-item${selected === r ? " ord-reason-item--selected" : ""}`}>
+                <input type="radio" name="replace-reason" value={r} checked={selected === r} onChange={() => setSelected(r)} className="ord-reason-radio" />
+                <span className="ord-reason-custom-radio" /><span className="ord-reason-label">{r}</span>
+              </label>
+            ))}
+          </div>
+          {selected === "Other reason" && (
+            <textarea className="ord-reason-textarea" placeholder="Please describe the issue..." value={other} onChange={e => setOther(e.target.value)} rows={3} />
+          )}
+          <div className="ord-modal-footer">
+            <button className="ord-modal-btn ord-modal-btn--ghost" onClick={onClose}>Cancel</button>
+            <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={!selected || (selected === "Other reason" && !other.trim())} onClick={() => setStep(2)}>Continue</button>
+          </div>
+        </>)}
+
+        {step === 2 && (<>
+          <div className="ord-modal-header">
+            <div className="ord-modal-icon" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </div>
+            <div><h3 className="ord-modal-title">Confirm Request</h3><p className="ord-modal-sub">Review your replacement request</p></div>
+            <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div className="ord-confirm-box">
+            <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
+            <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
+            <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
+          </div>
+          <div className="ord-modal-footer">
+            <button className="ord-modal-btn ord-modal-btn--ghost" onClick={() => setStep(1)}>Back</button>
+            <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={loading} onClick={() => onConfirm(order._id, reason, () => setStep(3))}>{loading ? <span className="ord-modal-spinner" /> : "Submit Request"}</button>
+          </div>
+        </>)}
+
+        {step === 3 && (
+          <div className="ord-modal-done">
+            <div className="ord-modal-done-icon" style={{ color: "#8b5cf6" }}><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 15 15"/></svg></div>
+            <h3>Request Submitted</h3>
+            <p>Your return request has been received. Our team will contact you shortly.</p>
+            <button className="ord-modal-btn ord-modal-btn--primary" style={{ marginTop: 20, background: "#8b5cf6" }} onClick={onClose}>Done</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TrackingBar({ order }) {
   const status = order.status || "Pending";
   
@@ -163,13 +254,19 @@ function TrackingBar({ order }) {
   }
 
   const isRefund = REFUND_IDX[status] !== undefined;
-  const currentIdx = isRefund ? REFUND_IDX[status] : (STATUS_IDX[status] ?? 0);
-  const stepsToUse = isRefund ? REFUND_STEPS : STATUS_STEPS;
+  const isReplace = REPLACE_IDX[status] !== undefined;
+  const currentIdx = isReplace ? REPLACE_IDX[status] : (isRefund ? REFUND_IDX[status] : (STATUS_IDX[status] ?? 0));
+  const stepsToUse = isReplace ? REPLACE_STEPS : (isRefund ? REFUND_STEPS : STATUS_STEPS);
 
   const getStepDate = (step, i) => {
     const actualDate = order[step.key];
     if (actualDate) return { date: actualDate, isEstimate: false };
     
+    if (isReplace) {
+      const baseDate = order.replacementRequestedAt || order.deliveredAt || order.createdAt || new Date();
+      return { date: addDays(baseDate, step.offset), isEstimate: i > currentIdx };
+    }
+
     if (isRefund) {
       const baseDate = order.cancelledAt || order.createdAt || new Date();
       return { date: addDays(baseDate, step.offset), isEstimate: i > currentIdx };
@@ -224,6 +321,8 @@ export default function Orders() {
   const [activeFilter, setActiveFilter]   = useState("All");
   const [cancelTarget, setCancelTarget]   = useState(null);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [replaceTarget, setReplaceTarget] = useState(null);
+  const [replaceLoading, setReplaceLoading] = useState(false);
 
   // Enrich order items with product images fetched from API (for old orders without image field)
   const enrichWithImages = async (orderList) => {
@@ -293,7 +392,7 @@ export default function Orders() {
     }
   };
 
-  const FILTERS = ["All","Pending","Processing","Shipped","Out for Delivery","Delivered","Refund Tracking"];
+  const FILTERS = ["All","Pending","Processing","Shipped","Out for Delivery","Delivered","Refund Tracking","Replacement Requested"];
   const filteredOrders = activeFilter === "All" ? orders : orders.filter(o => o.status === activeFilter);
 
   if (loading) return (
@@ -324,6 +423,18 @@ export default function Orders() {
   return (
     <div className="ord-page">
       {cancelTarget && <CancelModal order={cancelTarget} onClose={() => setCancelTarget(null)} onConfirm={handleCancelConfirm} loading={cancelLoading} />}
+      {replaceTarget && <ReplaceModal order={replaceTarget} onClose={() => setReplaceTarget(null)} onConfirm={async (id, reason, cb) => {
+        setReplaceLoading(true);
+        try {
+          await axios.put(`/api/orders/${id}`, { 
+            status: "Replacement Requested",
+            cancelReason: reason,
+            replacementRequestedAt: new Date().toISOString()
+          });
+          setOrders(prev => prev.map(o => o._id === id ? { ...o, status: "Replacement Requested", cancelReason: reason, replacementRequestedAt: new Date().toISOString() } : o));
+          cb();
+        } catch(e) { alert("Failed to process replacement."); } finally { setReplaceLoading(false); }
+      }} loading={replaceLoading} />}
 
       <div className="ord-header">
         <div className="ord-header-left">
@@ -357,11 +468,14 @@ export default function Orders() {
           const address  = order.address || order.shippingAddress || {};
           const shortId  = orderId?.slice(-8).toUpperCase();
           const col      = STATUS_COLORS[status] || STATUS_COLORS.Pending;
-          const isPaid   = (order.paymentMethod && order.paymentMethod !== "cod") || (order.paymentInfo?.status === "Paid");
+          
+          const actualMethod = (order.paymentInfo?.method || order.paymentMethod || "cod").toLowerCase();
+          const isPaid   = actualMethod !== "cod" || (order.paymentInfo?.status === "Paid");
           const deliveryDate = order.expectedDelivery ? new Date(order.expectedDelivery) : addDays(order.createdAt, 5);
           
           // Determine friendly payment method string
-          let methodLabel = PAYMENT_LABELS[order.paymentMethod] || "Cash on Delivery";
+          const rawMethod = order.paymentMethod || "";
+          let methodLabel = PAYMENT_LABELS[rawMethod.toLowerCase()] || rawMethod || "Cash on Delivery";
           if (order.paymentInfo?.method) {
             const m = order.paymentInfo.method.toLowerCase();
             const details = order.paymentInfo.methodDetails || {};
@@ -470,8 +584,18 @@ export default function Orders() {
 
                   <div className="ord-actions">
                     <button className="ord-action-btn ord-action-btn--ghost" onClick={() => navigate("/shop")}>Continue Shopping</button>
-                    {status === "Delivered" && <button className="ord-action-btn ord-action-btn--primary">Rate and Review</button>}
-                    {status !== "Cancelled" && status !== "Refund Tracking" && status !== "Delivered" && (
+                    {status === "Delivered" && (
+                      <div className="flex gap-2">
+                        <button className="ord-action-btn ord-action-btn--primary flex-1" onClick={(e) => { 
+                          e.stopPropagation(); 
+                          const pid = order.items && order.items[0] ? (order.items[0].product?._id || order.items[0].product) : null;
+                          if (pid) navigate(`/product/${pid}`); 
+                          else navigate("/shop");
+                        }}>Replace Item</button>
+                        <button className="ord-action-btn ord-action-btn--ghost flex-1" onClick={(e) => { e.stopPropagation(); setReplaceTarget(order); }}>Return Item</button>
+                      </div>
+                    )}
+                    {status !== "Cancelled" && status !== "Refund Tracking" && status !== "Delivered" && !status.includes("Replacement") && (
                       <button className="ord-action-btn ord-action-btn--danger" onClick={(e) => { e.stopPropagation(); setCancelTarget(order); }}>Cancel Order</button>
                     )}
                   </div>
