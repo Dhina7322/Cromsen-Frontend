@@ -31,6 +31,16 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [newOrderId, setNewOrderId] = useState('');
+  const [exchangeContext, setExchangeContext] = useState(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('exchangeContext');
+      if (stored) {
+        setExchangeContext(JSON.parse(stored));
+      }
+    } catch(e) {}
+  }, []);
 
   // Address Management State
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -181,8 +191,41 @@ const Checkout = () => {
     setLoading(true);
 
     try {
-      if (!cartTotal || cartTotal <= 0) {
+      if (!cartTotal || cartTotal < 0) {
         return alert("Your cart is empty or has invalid totals.");
+      }
+
+      const exchangeDiscount = exchangeContext ? (Number(exchangeContext.oldTotal) || 0) : 0;
+      const finalPayable = Math.max(0, Number(cartTotal) - exchangeDiscount);
+
+      // Direct mock verification if exchange covers the full cost
+      if (finalPayable <= 0 && exchangeContext) {
+        const mockVerifyRes = await axios.post('/api/payment/verify-payment', {
+          razorpay_order_id: "order_exchange_" + Date.now(),
+          razorpay_payment_id: "pay_exchange_" + Date.now(),
+          razorpay_signature: "mock_signature",
+          orderDetails: {
+            user: userEmail || shippingData.email,
+            items: cartItems.map(item => ({
+              product: item._id,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              image: item.image || item.images?.[0] || ''
+            })),
+            totalAmount: finalPayable,
+            shippingAddress: { ...shippingData }
+          }
+        });
+
+        if (mockVerifyRes.status === 200) {
+          await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: "Replacement Completed" });
+          localStorage.removeItem('exchangeContext');
+          setOrderComplete(true);
+          setNewOrderId(mockVerifyRes.data.orderId);
+          clearCart();
+          return;
+        }
       }
 
       const resRzp = await loadRazorpay();
@@ -197,7 +240,7 @@ const Checkout = () => {
 
       // 1. Create order on server
       const { data: order } = await axios.post('/api/payment/create-order', {
-        amount: cartTotal,
+        amount: finalPayable,
         receipt: `receipt_${Date.now()}`,
         orderDetails: {
           user: userEmail || shippingData.email,
@@ -240,6 +283,10 @@ const Checkout = () => {
         });
 
         if (mockVerifyRes.status === 200) {
+          if (exchangeContext) {
+            await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: "Replacement Completed" });
+            localStorage.removeItem('exchangeContext');
+          }
           setOrderComplete(true);
           setNewOrderId(mockVerifyRes.data.orderId);
           clearCart();
@@ -276,6 +323,10 @@ const Checkout = () => {
             });
 
             if (verifyRes.data.message === 'Payment verified successfully') {
+              if (exchangeContext) {
+                 await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: "Replacement Completed" });
+                 localStorage.removeItem('exchangeContext');
+              }
               setOrderComplete(true);
               setNewOrderId(verifyRes.data.orderId);
               clearCart();
@@ -465,9 +516,15 @@ const Checkout = () => {
                   <span>Shipping</span>
                   <span className="text-green-600 font-bold uppercase tracking-widest text-[10px]">Free</span>
                 </div>
+                {exchangeContext && (
+                  <div className="flex justify-between text-gray-500 bg-blue-50/50 p-2 rounded -mx-2">
+                    <span className="text-blue-700">Exchange Credit <br/><span className="text-[10px] text-blue-500 uppercase">Order #{exchangeContext.oldOrderId.slice(-8)}</span></span>
+                    <span className="font-bold text-blue-700">-₹{(Number(exchangeContext.oldTotal) || 0).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="pt-6 border-t border-gray-100 flex justify-between items-center mt-6">
                   <span className="text-xl font-serif text-primary font-bold">Total Payable</span>
-                  <span className="text-2xl font-bold text-action tracking-tight">₹{(Number(cartTotal) || 0).toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-action tracking-tight">₹{Math.max(0, (Number(cartTotal) || 0) - (exchangeContext ? (Number(exchangeContext.oldTotal) || 0) : 0)).toFixed(2)}</span>
                 </div>
               </div>
 

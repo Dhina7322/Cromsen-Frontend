@@ -38,6 +38,11 @@ function App() {
   const handleRoleSelect = (role) => {
     localStorage.setItem('userRole', role);
     setUserRole(role);
+    if (role === 'admin') {
+      window.location.href = '/admin/login';
+    } else {
+      window.location.href = '/login';
+    }
   };
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import "./orders.css";
 const API = ""; // uses Vite proxy → /api → localhost:5001
 
 const STATUS_STEPS = [
-  { label: "Order Placed",     key: "placedAt",         offset: 0 },
+  { label: "Order Placed",     key: "createdAt",        offset: 0 },
   { label: "Processing",       key: "processingAt",     offset: 1 },
   { label: "Shipped",          key: "shippedAt",        offset: 2 },
   { label: "Out for Delivery", key: "outForDeliveryAt", offset: 4 },
@@ -22,25 +22,25 @@ const REFUND_STEPS = [
   { label: "Cancelled",        key: "cancelledAt",       offset: 0 },
   { label: "Refund Initiated", key: "refundInitiatedAt", offset: 0 },
   { label: "Refund Processed", key: "refundProcessedAt", offset: 3 },
-  { label: "Refund Delivered", key: "refundDeliveredAt", offset: 5 },
+  { label: "Refund Completed", key: "refundCompletedAt", offset: 5 },
 ];
 
 const REFUND_IDX = {
   "Refund Tracking": 1,
   "Refund Processed": 2,
-  "Refund Delivered": 3,
+  "Refund Completed": 3,
 };
 
 const REPLACE_STEPS = [
   { label: "Replacement Requested", key: "replacementRequestedAt", offset: 0 },
   { label: "Replacement Processed", key: "replacementProcessedAt", offset: 2 },
-  { label: "Replacement Delivered", key: "replacementDeliveredAt", offset: 5 },
+  { label: "Replacement Completed", key: "replacementCompletedAt", offset: 5 },
 ];
 
 const REPLACE_IDX = {
   "Replacement Requested": 0,
   "Replacement Processed": 1,
-  "Replacement Delivered": 2,
+  "Replacement Completed": 2,
 };
 
 const STATUS_COLORS = {
@@ -52,10 +52,10 @@ const STATUS_COLORS = {
   Cancelled:         { color: "#f87171", bg: "rgba(248,113,113,0.15)" },
   "Refund Tracking": { color: "#ef4444", bg: "rgba(239,68,68,0.15)"  },
   "Refund Processed":{ color: "#eab308", bg: "rgba(234,179,8,0.15)"   },
-  "Refund Delivered":{ color: "#22c55e", bg: "rgba(34,197,94,0.15)"   },
+  "Refund Completed":{ color: "#22c55e", bg: "rgba(34,197,94,0.15)"   },
   "Replacement Requested": { color: "#8b5cf6", bg: "rgba(139,92,246,0.15)" },
   "Replacement Processed": { color: "#6366f1", bg: "rgba(99,102,241,0.15)" },
-  "Replacement Delivered": { color: "#22c55e", bg: "rgba(34,197,94,0.15)" },
+  "Replacement Completed": { color: "#22c55e", bg: "rgba(34,197,94,0.15)" },
   Abandoned:         { color: "#6b7280", bg: "rgba(107,114,128,0.15)" },
 };
 
@@ -259,22 +259,49 @@ function TrackingBar({ order }) {
   const stepsToUse = isReplace ? REPLACE_STEPS : (isRefund ? REFUND_STEPS : STATUS_STEPS);
 
   const getStepDate = (step, i) => {
-    const actualDate = order[step.key];
-    if (actualDate) return { date: actualDate, isEstimate: false };
-    
+    // For steps we've reached or passed, use actual date if available
+    if (i <= currentIdx && order[step.key]) {
+      return { date: order[step.key], isEstimate: false };
+    }
+
+    // For steps we've reached but no actual date stored, use a sensible fallback
+    if (i <= currentIdx) {
+      // Find the nearest previous actual date and add the difference in offsets
+      for (let j = i - 1; j >= 0; j--) {
+        if (order[stepsToUse[j].key]) {
+          const diffDays = step.offset - stepsToUse[j].offset;
+          return { date: addDays(order[stepsToUse[j].key], Math.max(diffDays, 0)), isEstimate: false };
+        }
+      }
+      return { date: addDays(order.createdAt || new Date(), step.offset), isEstimate: false };
+    }
+
+    // For future (not reached) steps, compute forward estimates
     if (isReplace) {
       const baseDate = order.replacementRequestedAt || order.deliveredAt || order.createdAt || new Date();
-      return { date: addDays(baseDate, step.offset), isEstimate: i > currentIdx };
+      return { date: addDays(baseDate, step.offset), isEstimate: true };
     }
-
     if (isRefund) {
       const baseDate = order.cancelledAt || order.createdAt || new Date();
-      return { date: addDays(baseDate, step.offset), isEstimate: i > currentIdx };
+      return { date: addDays(baseDate, step.offset), isEstimate: true };
     }
 
-    if (step.key === "deliveredAt" && order.expectedDelivery) return { date: order.expectedDelivery, isEstimate: i > currentIdx };
-    if (step.key === "outForDeliveryAt" && order.expectedDelivery) return { date: addDays(order.expectedDelivery, -1), isEstimate: i > currentIdx };
-    return { date: addDays(order.createdAt || new Date(), step.offset), isEstimate: true };
+    // For normal order future steps: find the last known actual date and estimate forward
+    let lastKnownDate = order.createdAt || new Date();
+    let lastKnownOffset = 0;
+    for (let j = i - 1; j >= 0; j--) {
+      if (order[stepsToUse[j].key]) {
+        lastKnownDate = order[stepsToUse[j].key];
+        lastKnownOffset = stepsToUse[j].offset;
+        break;
+      }
+    }
+    // Use expectedDelivery for delivery-related steps if set
+    if (step.key === "deliveredAt" && order.expectedDelivery) return { date: order.expectedDelivery, isEstimate: true };
+    if (step.key === "outForDeliveryAt" && order.expectedDelivery) return { date: addDays(order.expectedDelivery, -1), isEstimate: true };
+    
+    const daysDiff = step.offset - lastKnownOffset;
+    return { date: addDays(lastKnownDate, Math.max(daysDiff, 1)), isEstimate: true };
   };
 
   return (
@@ -588,9 +615,8 @@ export default function Orders() {
                       <div className="flex gap-2">
                         <button className="ord-action-btn ord-action-btn--primary flex-1" onClick={(e) => { 
                           e.stopPropagation(); 
-                          const pid = order.items && order.items[0] ? (order.items[0].product?._id || order.items[0].product) : null;
-                          if (pid) navigate(`/product/${pid}`); 
-                          else navigate("/shop");
+                          localStorage.setItem('exchangeContext', JSON.stringify({ oldOrderId: order._id, oldTotal: order.totalAmount }));
+                          navigate("/shop");
                         }}>Replace Item</button>
                         <button className="ord-action-btn ord-action-btn--ghost flex-1" onClick={(e) => { e.stopPropagation(); setReplaceTarget(order); }}>Return Item</button>
                       </div>
