@@ -25,7 +25,7 @@ const AdminLayout = ({ children }) => {
       {/* Sidebar */}
       <aside className="w-64 bg-primary text-white flex flex-col shadow-xl z-20">
         <div className="p-6 flex flex-col items-center gap-2 border-b border-white/10">
-          <img src={Logo} alt="Cromsen Admin" className="h-8 w-auto object-contain brightness-0 invert" />
+          <img src={Logo} alt="Cromsen Admin" className="h-8 w-auto object-contain invert" />
           <span className="text-[9px] font-sans font-bold text-gray-400 uppercase tracking-widest leading-none">Admin</span>
         </div>
         

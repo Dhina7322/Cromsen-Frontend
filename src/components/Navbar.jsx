@@ -108,7 +108,7 @@ const Navbar = () => {
           
           {/* Left: Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <img src={Logo} alt="Cromsen Importers" className="h-8 lg:h-10 w-auto object-contain brightness-0 invert" />
+            <img src={Logo} alt="Cromsen Importers" className="h-8 lg:h-10 w-auto object-contain invert" />
           </Link>
 
           {/* Center: Navigation Menu */}
