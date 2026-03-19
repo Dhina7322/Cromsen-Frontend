@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { getProducts, getCategories } from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
+import Logo from '../assets/cromsen.png';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -107,7 +108,7 @@ const Navbar = () => {
           
           {/* Left: Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <img src="../../assets/logo.png" alt="Cromsen Importers" className="h-8 lg:h-10 w-auto object-contain brightness-0 invert" />
+            <img src={Logo} alt="Cromsen Importers" className="h-8 lg:h-10 w-auto object-contain brightness-0 invert" />
           </Link>
 
           {/* Center: Navigation Menu */}

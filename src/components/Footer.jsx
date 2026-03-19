@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
+import Logo from '../assets/cromsen.png';
 
 const Footer = () => {
   return (
@@ -44,7 +45,7 @@ const Footer = () => {
               </div>
 
               <div className="flex flex-col items-center shrink-0">
-                 <img src="/logo.png" alt="Cromsen Importers" className="h-12 w-auto object-contain" />
+                 <img src={Logo} alt="Cromsen Importers" className="h-12 w-auto object-contain" />
               </div>
 
               <div className="flex flex-col items-center md:items-end text-center md:text-right">

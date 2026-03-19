@@ -204,8 +204,10 @@ export default function OrdersTab() {
             </thead>
             <tbody className="divide-y divide-gray-100">
             {filteredOrders.map(o => {
-              const isStruck = o.status === "Cancelled" || o.status.includes("Refund") || o.status === "Abandoned";
-              const tdStyle = isStruck ? { textDecoration: 'line-through', color: '#ef4444', opacity: 0.8 } : {};
+              const isStruck = o.status === "Cancelled" || o.status === "Replacement Completed";
+              const isLinked = o.replacementFor || o.replacementOrderId;
+              const tdStyle = isStruck ? { opacity: 0.6, textDecoration: 'line-through' } : {};
+              const rowBg = isLinked ? (o.replacementFor ? 'rgba(124, 58, 237, 0.05)' : 'rgba(37, 99, 235, 0.05)') : '';
               
               const getAvailableStatuses = (status) => {
                 if (status === "Abandoned") return ["Abandoned"];
@@ -217,7 +219,7 @@ export default function OrdersTab() {
               const availableOptions = getAvailableStatuses(o.status);
 
               return (
-              <tr key={o._id} className="hover:bg-gray-50/50 transition-colors">
+              <tr key={o._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors" style={{ backgroundColor: rowBg }}>
                 <td className="py-4 px-6 whitespace-nowrap" style={tdStyle}><span className="font-semibold text-gray-900 border border-gray-200 bg-gray-50 px-2 py-1 rounded text-xs uppercase tracking-wider">#{o._id.slice(-8)}</span></td>
                 <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500 font-medium" style={tdStyle}>{new Date(o.createdAt).toLocaleDateString()}</td>
                 <td className="py-4 px-6 whitespace-nowrap" style={{...tdStyle}}>
@@ -227,9 +229,21 @@ export default function OrdersTab() {
                 <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-600 font-medium" style={{...tdStyle}}><span className="bg-gray-100 px-2 py-1 rounded-md">{o.items?.length || 0} Products</span></td>
                 <td className="py-4 px-6 whitespace-nowrap font-bold text-gray-900" style={{...tdStyle}}>₹{Number(o.totalAmount || 0).toLocaleString()}</td>
                 <td className="py-4 px-6 whitespace-nowrap" style={{...tdStyle}}>
-                  <span className={`status-tag s-${o.status?.toLowerCase().replace(' ', '-')}`} style={isStruck ? { textDecoration: 'none' } : {}}>
-                    <i></i> {o.status}
-                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span className={`status-tag s-${o.status?.toLowerCase().replace(' ', '-')}`} style={isStruck ? { textDecoration: 'none' } : {}}>
+                      <i></i> {o.status}
+                    </span>
+                    {o.replacementFor && (
+                      <span className="text-[10px] text-purple-600 font-bold flex items-center gap-1">
+                        <ArrowLeft size={10} /> Replacement for #{o.replacementFor.slice(-8).toUpperCase()}
+                      </span>
+                    )}
+                    {o.replacementOrderId && (
+                      <span className="text-[10px] text-blue-600 font-bold flex items-center gap-1">
+                        <ChevronRight size={10} /> Replaced by #{o.replacementOrderId.slice(-8).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-6 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -312,6 +326,40 @@ export default function OrdersTab() {
                   <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
                   <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
                   <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
+
+                  {(selectedOrder.replacementFor || selectedOrder.replacementOrderId) && (
+                    <div style={{ marginTop: '24px', background: '#f5f3ff', border: '1px solid #ddd6fe', padding: '12px', borderRadius: '8px' }}>
+                      <div className="om-section-title" style={{ color: '#7c3aed', marginBottom: '8px' }}>Order Linkage</div>
+                      {selectedOrder.replacementFor && (
+                        <div className="flex justify-between items-center text-[13px] mb-2">
+                          <span className="text-gray-500">Replacement for</span>
+                          <button 
+                            onClick={() => {
+                              setSearchTerm(selectedOrder.replacementFor);
+                              setSelectedOrder(null);
+                            }}
+                            className="text-purple-600 font-bold hover:underline"
+                          >
+                            #{selectedOrder.replacementFor.slice(-8).toUpperCase()}
+                          </button>
+                        </div>
+                      )}
+                      {selectedOrder.replacementOrderId && (
+                        <div className="flex justify-between items-center text-[13px]">
+                          <span className="text-gray-500">Replaced by</span>
+                          <button 
+                            onClick={() => {
+                              setSearchTerm(selectedOrder.replacementOrderId);
+                              setSelectedOrder(null);
+                            }}
+                            className="text-blue-600 font-bold hover:underline"
+                          >
+                            #{selectedOrder.replacementOrderId.slice(-8).toUpperCase()}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {selectedOrder.cancelReason && (
                     <div style={{ marginTop: '24px', background: '#fef2f2', border: '1px solid #fee2e2', padding: '12px', borderRadius: '8px' }}>
