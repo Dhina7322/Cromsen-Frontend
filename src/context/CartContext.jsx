@@ -1,13 +1,25 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
+// Helper to get the per-user cart key
+const getCartKey = () => {
+  try {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null') || JSON.parse(localStorage.getItem('user') || 'null');
+    const email = userInfo?.email || 'guest';
+    return `cart_${email}`;
+  } catch {
+    return 'cart_guest';
+  }
+};
+
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     try {
-      const savedCart = localStorage.getItem('cart');
+      const key = getCartKey();
+      const savedCart = localStorage.getItem(key);
       const parsed = savedCart ? JSON.parse(savedCart) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
@@ -15,8 +27,26 @@ export const CartProvider = ({ children }) => {
     }
   });
 
+  // Re-load cart when login/logout changes the user
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
+    const handleStorageChange = () => {
+      const key = getCartKey();
+      try {
+        const savedCart = localStorage.getItem(key);
+        const parsed = savedCart ? JSON.parse(savedCart) : [];
+        setCartItems(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        setCartItems([]);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    const key = getCartKey();
+    localStorage.setItem(key, JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (product, quantity = 1) => {
@@ -42,13 +72,29 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+    const key = getCartKey();
+    localStorage.removeItem(key);
+  }, []);
+
+  // Re-sync cart when user changes (login/logout)
+  const syncCartForUser = useCallback(() => {
+    const key = getCartKey();
+    try {
+      const savedCart = localStorage.getItem(key);
+      const parsed = savedCart ? JSON.parse(savedCart) : [];
+      setCartItems(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setCartItems([]);
+    }
+  }, []);
 
   const cartTotal = cartItems.reduce((total, item) => total + (Number(item.price) || 0) * item.quantity, 0);
   const cartCount = cartItems.reduce((count, item) => count + Number(item.quantity), 0);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount, syncCartForUser }}>
       {children}
     </CartContext.Provider>
   );

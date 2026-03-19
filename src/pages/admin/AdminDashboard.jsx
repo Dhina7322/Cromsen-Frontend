@@ -54,7 +54,6 @@ export default function AdminDashboard() {
       navigate("/admin/login");
       return;
     }
-    // The user state is now a local constant, so no setUser here.
     
     // Initial fetch to get baseline count and other stats
     fetchOrderCount();
@@ -63,6 +62,14 @@ export default function AdminDashboard() {
     const interval = setInterval(fetchOrderCount, 15000);
     return () => clearInterval(interval);
   }, [navigate]);
+
+  // Mark inquiries as "seen" when the user opens the Inquiries tab
+  useEffect(() => {
+    if (location.pathname === "/admin/inquiries") {
+      localStorage.setItem("lastSeenInquiries", new Date().toISOString());
+      setInquiriesCount(0);
+    }
+  }, [location.pathname]);
 
   const fetchOrderCount = async () => {
     try {
@@ -76,11 +83,21 @@ export default function AdminDashboard() {
         setPendingOrdersCount(pendingRes.data.orders?.length || pendingRes.data.length || 0);
       } catch (e) {}
 
-      // Fetch active inquiries for badge
+      // Fetch active inquiries for badge — only count NEW ones since last viewed
       try {
         const inqRes = await axios.get(`${API}/inquiries`);
         const inqList = inqRes.data.inquiries || inqRes.data || [];
-        setInquiriesCount(inqList.length);
+        const lastSeen = localStorage.getItem("lastSeenInquiries");
+        if (lastSeen && location.pathname !== "/admin/inquiries") {
+          const lastSeenDate = new Date(lastSeen);
+          const newInquiries = inqList.filter(inq => new Date(inq.createdAt) > lastSeenDate);
+          setInquiriesCount(newInquiries.length);
+        } else if (location.pathname === "/admin/inquiries") {
+          setInquiriesCount(0);
+        } else {
+          // First time ever — no lastSeen stored, show all as new
+          setInquiriesCount(inqList.length);
+        }
       } catch (e) {}
 
       if (lastOrderCount !== null && currentCount > lastOrderCount) {

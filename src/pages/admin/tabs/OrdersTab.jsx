@@ -9,6 +9,7 @@ import {
   Clock,
   ChevronRight,
   MoreVertical,
+  ChevronDown,
   X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,7 +36,7 @@ export default function OrdersTab() {
   const [statusFilter, setStatusFilter] = useState(initialStatus);
 
   const mainStatuses = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
-  const subStatuses = ["Refund Tracking", "Refund Processed", "Refund Delivered", "Replacement Requested", "Replacement Processed", "Replacement Delivered"];
+  const subStatuses = ["Refund Tracking", "Refund Processed", "Refund Completed", "Replacement Requested", "Replacement Processed", "Replacement Completed"];
 
   useEffect(() => {
     const s = searchParams.get("status");
@@ -101,7 +102,14 @@ export default function OrdersTab() {
   };
 
   const filteredOrders = orders.filter(o => {
-    const matchesSearch = o._id.includes(searchTerm) || (o.user?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase().trim();
+    const matchesSearch = !term || 
+      o._id.toLowerCase().includes(term) || 
+      (o.user?.name || "").toLowerCase().includes(term) ||
+      (o.guestEmail || "").toLowerCase().includes(term) ||
+      (o.user?.email || "").toLowerCase().includes(term) ||
+      (o.shippingAddress?.phone || "").includes(term) ||
+      (o.shippingAddress?.name || "").toLowerCase().includes(term);
     const matchesStatus = statusFilter === "All" ? o.status !== "Abandoned" : o.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -167,82 +175,86 @@ export default function OrdersTab() {
         </>
       )}
 
-      <div className="toolbar">
-        <div className="toolbar-left">
-          <div className="searchbox">
-            <Search size={16} />
-            <input
-              type="text"
-              placeholder="Search by Order ID or Customer..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div className="flex items-center gap-4 mb-6 mt-6">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Search by Order ID or Customer..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-action/20 focus:border-action transition-all shadow-sm placeholder:text-gray-400"
+          />
         </div>
       </div>
 
-      <div className="tbl-wrap">
-        <table className="tbl">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+                <th className="py-4 px-6 whitespace-nowrap">Order ID</th>
+                <th className="py-4 px-6 whitespace-nowrap">Date</th>
+                <th className="py-4 px-6 whitespace-nowrap">Customer</th>
+                <th className="py-4 px-6 whitespace-nowrap">Items</th>
+                <th className="py-4 px-6 whitespace-nowrap">Total</th>
+                <th className="py-4 px-6 whitespace-nowrap">Status</th>
+                <th className="py-4 px-6 whitespace-nowrap text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
             {filteredOrders.map(o => {
               const isStruck = o.status === "Cancelled" || o.status.includes("Refund") || o.status === "Abandoned";
               const tdStyle = isStruck ? { textDecoration: 'line-through', color: '#ef4444', opacity: 0.8 } : {};
               
               const getAvailableStatuses = (status) => {
                 if (status === "Abandoned") return ["Abandoned"];
-                if (status?.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
-                if (status?.includes("Replacement")) return ["Replacement Requested", "Replacement Processed", "Replacement Delivered"];
+                if (status?.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Completed"];
+                if (status?.includes("Replacement")) return ["Replacement Requested", "Replacement Processed", "Replacement Completed"];
                 return ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
               };
               
               const availableOptions = getAvailableStatuses(o.status);
 
               return (
-              <tr key={o._id}>
-                <td style={tdStyle}><span className="order-id">#{o._id.slice(-8)}</span></td>
-                <td className="date-cell" style={tdStyle}>{new Date(o.createdAt).toLocaleDateString()}</td>
-                <td style={tdStyle}>
-                  <div className="cust-name" style={isStruck ? { color: '#ef4444'} : {}}>{o.user?.name || o.guestEmail || "Guest"}</div>
-                  <div className="cust-phone" style={isStruck ? { color: '#ef4444'} : {}}>{o.shippingAddress?.phone}</div>
+              <tr key={o._id} className="hover:bg-gray-50/50 transition-colors">
+                <td className="py-4 px-6 whitespace-nowrap" style={tdStyle}><span className="font-semibold text-gray-900 border border-gray-200 bg-gray-50 px-2 py-1 rounded text-xs uppercase tracking-wider">#{o._id.slice(-8)}</span></td>
+                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500 font-medium" style={tdStyle}>{new Date(o.createdAt).toLocaleDateString()}</td>
+                <td className="py-4 px-6 whitespace-nowrap" style={{...tdStyle}}>
+                  <div className="font-bold text-gray-900" style={isStruck ? { color: '#ef4444'} : {}}>{o.user?.name || o.guestEmail || "Guest"}</div>
+                  <div className="text-xs text-gray-500 mt-0.5" style={isStruck ? { color: '#ef4444'} : {}}>{o.shippingAddress?.phone}</div>
                 </td>
-                <td style={tdStyle}>{o.items?.length || 0} Products</td>
-                <td className="amt" style={tdStyle}>₹{o.totalAmount}</td>
-                <td style={tdStyle}>
+                <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-600 font-medium" style={{...tdStyle}}><span className="bg-gray-100 px-2 py-1 rounded-md">{o.items?.length || 0} Products</span></td>
+                <td className="py-4 px-6 whitespace-nowrap font-bold text-gray-900" style={{...tdStyle}}>₹{Number(o.totalAmount || 0).toLocaleString()}</td>
+                <td className="py-4 px-6 whitespace-nowrap" style={{...tdStyle}}>
                   <span className={`status-tag s-${o.status?.toLowerCase().replace(' ', '-')}`} style={isStruck ? { textDecoration: 'none' } : {}}>
                     <i></i> {o.status}
                   </span>
                 </td>
-                <td style={{ textAlign: 'right' }}>
-                  <div className="row-acts">
-                    <button className="icon-btn" onClick={() => setSelectedOrder(o)} title="View Details"><Eye size={14} /></button>
-                    <button className="icon-btn" onClick={() => { setSelectedOrder(o); setTimeout(() => window.print(), 300); }} title="Print Invoice">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                <td className="py-4 px-6 whitespace-nowrap text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button className="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setSelectedOrder(o)} title="View Details"><Eye size={16} /></button>
+                    <button className="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors" onClick={() => { setSelectedOrder(o); setTimeout(() => window.print(), 300); }} title="Print Invoice">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                     </button>
-                    <select
-                      className="inline-select"
-                      value={o.status}
-                      onChange={(e) => updateOrderStatus(o._id, e.target.value)}
-                    >
-                      {availableOptions.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <div className="relative flex items-center">
+                      <select
+                        className="appearance-none bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700 h-9 pl-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-action/50 cursor-pointer text-left"
+                        value={o.status}
+                        onChange={(e) => updateOrderStatus(o._id, e.target.value)}
+                      >
+                        {availableOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <ChevronDown className="absolute right-2.5 text-gray-400 pointer-events-none" size={14} />
+                    </div>
                   </div>
                 </td>
               </tr>
             )})}
-            {filteredOrders.length === 0 && <tr><td colSpan="7" className="empty-row">No orders found matching criteria</td></tr>}
+            {filteredOrders.length === 0 && <tr><td colSpan="7" className="py-12 text-center text-gray-400 text-sm">No orders found matching criteria</td></tr>}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Order Detail Modal */}
@@ -326,8 +338,8 @@ export default function OrdersTab() {
                       {(() => {
                         const getAvailableStatuses = (status) => {
                           if (status === "Abandoned") return ["Abandoned"];
-                          if (status?.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Delivered"];
-                          if (status?.includes("Replacement")) return ["Replacement Requested", "Replacement Processed", "Replacement Delivered"];
+                          if (status?.includes("Refund")) return ["Refund Tracking", "Refund Processed", "Refund Completed"];
+                          if (status?.includes("Replacement")) return ["Replacement Requested", "Replacement Processed", "Replacement Completed"];
                           return ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
                         };
                         return getAvailableStatuses(selectedOrder.status);
