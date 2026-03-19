@@ -84,6 +84,13 @@ const ProductCard = ({ product }) => {
             {product.name}
           </h3>
         </Link>
+        {(product.variantName || product.type) && (
+          <div className="flex justify-center gap-2 mb-1 text-[10px] text-gray-500 uppercase tracking-widest font-semibold truncate">
+            {product.variantName && <span>{product.variantName}</span>}
+            {product.variantName && product.type && <span>|</span>}
+            {product.type && <span>{product.type}</span>}
+          </div>
+        )}
         <div className="flex flex-col items-center w-full pb-3">
           <p className="text-action font-bold text-sm tracking-tight">
             ₹{(!isNaN(displayedPrice) && displayedPrice > 0) ? displayedPrice.toFixed(2) : '0.00'}

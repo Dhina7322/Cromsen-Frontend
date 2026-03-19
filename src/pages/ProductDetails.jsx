@@ -11,6 +11,7 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -45,7 +46,8 @@ const ProductDetails = () => {
   const originalPrice = Number(product.retailPrice || 0);
 
   // Get the main product image URL
-  const mainImageUrl = getImageUrl(product.image || product.images?.[0]);
+  const allImages = [product.image, ...(product.images || [])].filter(Boolean);
+  const mainImageUrl = selectedImage || getImageUrl(product.image || product.images?.[0]);
 
   return (
     <div className="pt-32 pb-20">
@@ -81,9 +83,9 @@ const ProductDetails = () => {
               )}
             </motion.div>
             <div className="grid grid-cols-4 gap-4">
-              {(product.images || []).map((img, idx) => (
-                <div key={idx} className="bg-white border border-transparent hover:border-primary cursor-pointer transition-all">
-                  <img src={img} alt={product.name} className="w-full h-24 object-cover" />
+              {allImages.map((img, idx) => (
+                <div key={idx} className={`bg-white border hover:border-primary cursor-pointer transition-all ${selectedImage === getImageUrl(img) ? 'border-primary' : 'border-transparent'}`} onClick={() => setSelectedImage(getImageUrl(img))}>
+                  <img src={getImageUrl(img)} alt={product.name} className="w-full h-24 object-cover" />
                 </div>
               ))}
             </div>
@@ -94,7 +96,14 @@ const ProductDetails = () => {
             <span className="text-accent uppercase tracking-[0.2em] text-xs font-semibold mb-4">
               {product.category?.name || product.category}
             </span>
-            <h1 className="text-4xl md:text-5xl font-serif mb-6 leading-tight font-bold">{product.name}</h1>
+            <h1 className="text-4xl md:text-5xl font-serif mb-2 leading-tight font-bold">{product.name}</h1>
+            
+            {(product.variantName || product.type) && (
+              <div className="flex flex-wrap gap-4 mb-4 text-xs text-gray-500 uppercase tracking-widest font-semibold">
+                {product.variantName && <span>Variant: {product.variantName}</span>}
+                {product.type && <span>Type: {product.type}</span>}
+              </div>
+            )}
             
             <div className="flex flex-col mb-8">
               <p className="text-3xl font-serif text-action font-bold">₹{(!isNaN(displayedPrice) && displayedPrice > 0) ? displayedPrice.toFixed(2) : '0.00'}</p>

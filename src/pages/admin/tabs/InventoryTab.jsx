@@ -356,10 +356,13 @@ export default function InventoryTab() {
 
   const [formData, setFormData] = useState({
     name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
-    category: "", stock: "", isActive: true, featured: false
+    category: "", stock: "", isActive: true, featured: false,
+    variantName: "", type: ""
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [imagesFiles, setImagesFiles] = useState([]);
+  const [imagesPreviews, setImagesPreviews] = useState([]);
 
   useEffect(() => {
     fetchProducts();
@@ -400,24 +403,39 @@ export default function InventoryTab() {
         wholesalePrice: product.wholesalePrice,
         category: product.category?._id || product.category,
         stock: product.stock, isActive: product.isActive ?? true,
-        featured: product.featured || false
+        featured: product.featured || false,
+        variantName: product.variantName || "",
+        type: product.type || ""
       });
       setImagePreview(product.image ? getImageUrl(product.image) : "");
+      setImagesPreviews(product.images ? product.images.map(img => getImageUrl(img)) : []);
     } else {
       setEditingProduct(null);
       setFormData({
         name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
-        category: "", stock: "", isActive: true, featured: false
+        category: "", stock: "", isActive: true, featured: false,
+        variantName: "", type: ""
       });
       setImagePreview("");
+      setImagesPreviews([]);
     }
     setImageFile(null);
+    setImagesFiles([]);
     setIsModalOpen(true);
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) { setImageFile(file); setImagePreview(URL.createObjectURL(file)); }
+  };
+
+  const handleMultipleImagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length) {
+      setImagesFiles(files);
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setImagesPreviews(newPreviews);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -430,6 +448,9 @@ export default function InventoryTab() {
       }
     });
     if (imageFile) data.append("image", imageFile);
+    if (imagesFiles.length) {
+      imagesFiles.forEach(file => data.append("images", file));
+    }
     const uploadHeaders = { headers: { 'x-user-role': 'admin' } };
     try {
       if (editingProduct) {
@@ -579,6 +600,19 @@ export default function InventoryTab() {
                     </div>
                   </div>
 
+                  <div className="form-r2">
+                    <div className="fg">
+                      <label>Variant Name</label>
+                      <input type="text" value={formData.variantName}
+                        onChange={(e) => setFormData({ ...formData, variantName: e.target.value })} />
+                    </div>
+                    <div className="fg">
+                      <label>Type</label>
+                      <input type="text" value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })} />
+                    </div>
+                  </div>
+
                   <div className="fg">
                     <label>Description</label>
                     <textarea required rows="3" value={formData.description}
@@ -621,7 +655,7 @@ export default function InventoryTab() {
                   </div>
 
                   <div className="fg">
-                    <label>Product Image</label>
+                    <label>Primary Image</label>
                     <div className="upload-wrap">
                       <label className="upload-box">
                         <input type="file" className="hidden-input" onChange={handleImageChange} />
@@ -637,6 +671,35 @@ export default function InventoryTab() {
                           <X size={10} />
                         </button>
                       )}
+                    </div>
+                  </div>
+
+                  <div className="fg">
+                    <label>Additional Photos</label>
+                    <div className="upload-wrap" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <label className="upload-box" style={{ width: '80px', height: '80px', flexShrink: 0 }}>
+                        <input type="file" multiple className="hidden-input" onChange={handleMultipleImagesChange} />
+                        <ImageIcon size={20} />
+                        <span style={{ fontSize: '10px' }}>Upload</span>
+                      </label>
+                      {imagesPreviews.map((src, i) => (
+                        <div key={i} style={{ position: 'relative', width: '80px', height: '80px', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+                          <img src={src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Preview ${i}`} />
+                          <button type="button" 
+                            style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer' }}
+                            onClick={() => {
+                              const newPreviews = [...imagesPreviews];
+                              newPreviews.splice(i, 1);
+                              setImagesPreviews(newPreviews);
+                              
+                              const newFiles = [...imagesFiles];
+                              newFiles.splice(i, 1);
+                              setImagesFiles(newFiles);
+                            }}>
+                            <X size={10} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
