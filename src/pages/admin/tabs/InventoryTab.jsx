@@ -678,15 +678,16 @@ export default function InventoryTab() {
                   <div className="form-r3">
                     <div className="fg sm:col-span-2">
                       <label>Categories (Select one or more)</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
                         {categories.map(cat => (
                           <label 
                             key={cat._id} 
-                            className="flex items-center gap-2.5 p-2 bg-white border border-gray-100 rounded-lg cursor-pointer hover:border-blue-200 hover:bg-blue-50/10 transition-all select-none group"
+                            className="flex items-center justify-between p-1.5 bg-white border border-gray-100 rounded-md cursor-pointer hover:border-blue-200 hover:bg-blue-50/10 transition-all select-none group"
                           >
+                            <span className="text-[10px] font-bold text-gray-700 group-hover:text-blue-600 transition-colors uppercase tracking-tight truncate pr-2">{cat.name}</span>
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer"
+                              className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer flex-shrink-0"
                               checked={Array.isArray(formData.category) ? formData.category.includes(cat._id) : formData.category === cat._id}
                               onChange={(e) => {
                                 const currentCats = Array.isArray(formData.category) ? formData.category : (formData.category ? [formData.category] : []);
@@ -697,7 +698,6 @@ export default function InventoryTab() {
                                 }
                               }}
                             />
-                            <span className="text-[11px] font-bold text-gray-700 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{cat.name}</span>
                           </label>
                         ))}
                       </div>

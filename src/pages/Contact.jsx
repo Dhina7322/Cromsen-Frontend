@@ -160,6 +160,8 @@ const Contact = () => {
                           required
                           type="email" 
                           name="email"
+                          pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                          title="Please enter a valid email address"
                           value={formData.email}
                           onChange={handleInputChange}
                           className="w-full bg-white border border-gray-100 px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors" 

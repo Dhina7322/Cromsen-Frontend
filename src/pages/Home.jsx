@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import HeroSection from '../components/Hero';
 import CategoryShowcase from '../components/CategoryShowcase';
 import FeaturedProducts from '../components/FeaturedProducts';
@@ -8,6 +9,20 @@ import Contact from './Contact'; // We will include a portion of Contact on the 
 import { MapPin, AtSign, Phone } from 'lucide-react';
 
 const Home = () => {
+  const [subscribeEmail, setSubscribeEmail] = useState('');
+  const [subscribeStatus, setSubscribeStatus] = useState({ type: '', message: '' });
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(subscribeEmail)) {
+      setSubscribeStatus({ type: 'error', message: 'Please enter a valid email address.' });
+      return;
+    }
+    setSubscribeStatus({ type: 'success', message: 'Thank you for subscribing!' });
+    setSubscribeEmail('');
+  };
+
   return (
     <div className="overflow-x-hidden">
       <HeroSection />
@@ -25,13 +40,22 @@ const Home = () => {
             Receive special offers & updates via email. You will receive an email shortly to confirm your subscription.
           </p>
           
-          <form className="flex w-full max-w-md mx-auto mb-16">
-            <input 
-              type="email" 
-              placeholder="Your email" 
-              className="bg-transparent border-b border-white px-4 py-3 text-sm flex-grow focus:outline-none focus:border-action transition-colors text-white text-center"
-            />
-            <button className="bg-action text-white px-6 py-3 text-sm font-sans uppercase tracking-[0.2em] font-bold shadow-md hover:bg-white hover:text-primary transition-colors">Join</button>
+          <form className="flex flex-col w-full max-w-md mx-auto mb-16" onSubmit={handleSubscribe}>
+            <div className="flex w-full mb-2">
+              <input 
+                type="email" 
+                placeholder="Your email" 
+                value={subscribeEmail}
+                onChange={(e) => setSubscribeEmail(e.target.value)}
+                className="bg-transparent border-b border-white px-4 py-3 text-sm flex-grow focus:outline-none focus:border-action transition-colors text-white text-center"
+              />
+              <button type="submit" className="bg-action text-white px-6 py-3 text-sm font-sans uppercase tracking-[0.2em] font-bold shadow-md hover:bg-white hover:text-primary transition-colors">Join</button>
+            </div>
+            {subscribeStatus.message && (
+              <p className={`text-xs font-bold uppercase tracking-widest mt-2 ${subscribeStatus.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
+                {subscribeStatus.message}
+              </p>
+            )}
           </form>
 
           <div className="flex justify-center space-x-4">

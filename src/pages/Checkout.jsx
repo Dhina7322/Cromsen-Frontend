@@ -195,6 +195,19 @@ const Checkout = () => {
     if (e) e.preventDefault();
     setLoading(true);
 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10,15}$/;
+
+    if (!emailRegex.test(shippingData.email)) {
+      setLoading(false);
+      return alert("Please enter a valid email address.");
+    }
+
+    if (shippingData.phone && !phoneRegex.test(shippingData.phone)) {
+      setLoading(false);
+      return alert("Phone number must be 10-15 digits only.");
+    }
+
     try {
       if (!cartTotal || cartTotal < 0) {
         return alert("Your cart is empty or has invalid totals.");

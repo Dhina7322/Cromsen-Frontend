@@ -12,6 +12,19 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10,15}$/;
+
+    if (!emailRegex.test(email) && !phoneRegex.test(email)) {
+      return setFeedback({ 
+        show: true, 
+        type: 'error', 
+        message: 'Please enter a valid email address or 10-15 digit phone number.' 
+      });
+    }
+
     setLoading(true);
     try {
       const requiredRole = localStorage.getItem('userRole'); // 'customer' or 'dealer'
@@ -41,6 +54,8 @@ const Login = () => {
             <input 
               type="text" 
               required
+              pattern="(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$)|(^[0-9]{10,15}$)"
+              title="Please enter a valid email address or a 10-15 digit phone number"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"

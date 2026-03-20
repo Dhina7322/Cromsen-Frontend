@@ -131,7 +131,7 @@ export default function Profile() {
     if (formData.phone && !phoneRegex.test(formData.phone)) {
       return setFeedback({ show: true, type: 'error', message: 'Phone number must be 10-15 digits.' });
     }
-    if (user?.role === 'dealer' && formData.gstNumber && !gstRegex.test(formData.gstNumber)) {
+    if (formData.gstNumber && !gstRegex.test(formData.gstNumber)) {
         return setFeedback({ show: true, type: 'error', message: 'Please enter a valid 15-character GST number (e.g., 22AAAAA0000A1Z5).' });
     }
 
@@ -217,7 +217,7 @@ export default function Profile() {
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">Email</label>
-              <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-50 focus:bg-white outline-none transition-all text-sm font-semibold" required />
+              <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-50 focus:bg-white outline-none transition-all text-sm font-semibold" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address" />
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">Phone</label>
