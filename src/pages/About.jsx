@@ -8,7 +8,7 @@ const About = () => {
       <section className="bg-primary/5 py-32 text-center">
         <div className="container mx-auto max-w-[1200px] px-5">
           <span className="text-primary uppercase tracking-[0.3em] text-xs font-semibold mb-4 block">Elegance in Every Thread</span>
-          <h1 className="text-5xl md:text-7xl font-serif leading-tight">Our Story</h1>
+          <h1 className="text-5xl md:text-7xl font-serif leading-tight">Our Stories</h1>
         </div>
       </section>
 
