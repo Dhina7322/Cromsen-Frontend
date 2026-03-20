@@ -743,7 +743,12 @@ export default function InventoryTab() {
                                   newItems = combos.map(combo => {
                                     const comboKey = combo.join(' / ');
                                     const existing = (formData.variantItems || []).find(vi => vi.combination === comboKey);
-                                    return existing || { combination: comboKey, price: formData.retailPrice || 0, stock: 0 };
+                                    return existing || { 
+                                      combination: comboKey, 
+                                      retailPrice: formData.retailPrice || 0, 
+                                      wholesalePrice: formData.wholesalePrice || 0, 
+                                      stock: 0 
+                                    };
                                   });
                                 }
                                 setFormData({ ...formData, variants: newVariants, variantItems: newItems });
@@ -769,7 +774,12 @@ export default function InventoryTab() {
                                 newItems = combos.map(combo => {
                                   const comboKey = combo.join(' / ');
                                   const existing = (formData.variantItems || []).find(vi => vi.combination === comboKey);
-                                  return existing || { combination: comboKey, price: formData.retailPrice || 0, stock: 0 };
+                                  return existing || { 
+                                    combination: comboKey, 
+                                    retailPrice: formData.retailPrice || 0, 
+                                    wholesalePrice: formData.wholesalePrice || 0, 
+                                    stock: 0 
+                                  };
                                 });
                               }
                               setFormData({ ...formData, variants: newVariants, variantItems: newItems });
@@ -786,9 +796,10 @@ export default function InventoryTab() {
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                           <thead>
                             <tr style={{ background: '#fafafa', borderBottom: '1px solid var(--border)' }}>
-                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '40%' }}>Variant</th>
-                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '30%' }}>Price (₹)</th>
-                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '30%' }}>Available</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '30%' }}>Variant</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold' }}>Retail (₹)</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold' }}>Wholesale (₹)</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '20%' }}>Stock</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -798,10 +809,10 @@ export default function InventoryTab() {
                                 <td style={{ padding: '8px 12px' }}>
                                   <input 
                                     type="number" 
-                                    value={item.price} 
+                                    value={item.retailPrice || item.price || ''} 
                                     onChange={(e) => {
                                       const newItems = [...formData.variantItems];
-                                      newItems[iIdx].price = Number(e.target.value);
+                                      newItems[iIdx].retailPrice = e.target.value === '' ? '' : Number(e.target.value);
                                       setFormData({ ...formData, variantItems: newItems });
                                     }}
                                     style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}
@@ -810,10 +821,23 @@ export default function InventoryTab() {
                                 <td style={{ padding: '8px 12px' }}>
                                   <input 
                                     type="number" 
-                                    value={item.stock} 
+                                    placeholder="Wholesale"
+                                    value={item.wholesalePrice ?? ''} 
                                     onChange={(e) => {
                                       const newItems = [...formData.variantItems];
-                                      newItems[iIdx].stock = Number(e.target.value);
+                                      newItems[iIdx].wholesalePrice = e.target.value === '' ? '' : Number(e.target.value);
+                                      setFormData({ ...formData, variantItems: newItems });
+                                    }}
+                                    style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}
+                                  />
+                                </td>
+                                <td style={{ padding: '8px 12px' }}>
+                                  <input 
+                                    type="number" 
+                                    value={item.stock ?? ''} 
+                                    onChange={(e) => {
+                                      const newItems = [...formData.variantItems];
+                                      newItems[iIdx].stock = e.target.value === '' ? '' : Number(e.target.value);
                                       setFormData({ ...formData, variantItems: newItems });
                                     }}
                                     style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}
