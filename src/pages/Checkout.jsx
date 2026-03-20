@@ -34,13 +34,17 @@ const Checkout = () => {
   const [exchangeContext, setExchangeContext] = useState(null);
 
   useEffect(() => {
+    if (!userInfo) {
+      navigate('/login');
+    }
+    
     try {
       const stored = localStorage.getItem('exchangeContext');
       if (stored) {
         setExchangeContext(JSON.parse(stored));
       }
     } catch(e) {}
-  }, []);
+  }, [userInfo, navigate]);
 
   // Address Management State
   const [savedAddresses, setSavedAddresses] = useState([]);
