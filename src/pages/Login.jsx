@@ -37,14 +37,14 @@ const Login = () => {
         <h2 className="text-3xl font-brand font-bold text-center mb-8 uppercase tracking-widest text-primary">Login</h2>
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Email</label>
+            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Email or Phone Number</label>
             <input 
-              type="email" 
+              type="text" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
-              placeholder="Enter your email"
+              placeholder="Enter your email or phone"
             />
           </div>
           <div>

@@ -8,6 +8,7 @@ const Contact = () => {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     message: ''
   });
   const [loading, setLoading] = useState(false);
@@ -15,17 +16,36 @@ const Contact = () => {
   const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+    if (name === 'phone') {
+      value = value.replace(/\D/g, '').slice(0, 15);
+    }
+    if (name === 'email') {
+      value = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10,15}$/;
+
+    if (!emailRegex.test(formData.email)) {
+      return setError('Please enter a valid email address.');
+    }
+    if (!phoneRegex.test(formData.phone)) {
+      return setError('Phone number must be 10-15 digits.');
+    }
+
     setLoading(true);
     setError('');
     try {
       await axios.post('/api/inquiries', formData);
       setSubmitted(true);
-      setFormData({ firstName: '', lastName: '', email: '', message: '' });
+      setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
     } catch (err) {
       setError('Failed to send message. Please try again later.');
     } finally {
@@ -142,6 +162,18 @@ const Contact = () => {
                           name="email"
                           value={formData.email}
                           onChange={handleInputChange}
+                          className="w-full bg-white border border-gray-100 px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors" 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500">Phone Number</label>
+                        <input 
+                          required
+                          type="tel" 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="Your 10-digit number"
                           className="w-full bg-white border border-gray-100 px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors" 
                         />
                       </div>

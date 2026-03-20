@@ -678,12 +678,15 @@ export default function InventoryTab() {
                   <div className="form-r3">
                     <div className="fg sm:col-span-2">
                       <label>Categories (Select one or more)</label>
-                      <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 max-h-48 overflow-y-auto no-scrollbar">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
                         {categories.map(cat => (
-                          <label key={cat._id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-gray-200">
+                          <label 
+                            key={cat._id} 
+                            className="flex items-center gap-2.5 p-2 bg-white border border-gray-100 rounded-lg cursor-pointer hover:border-blue-200 hover:bg-blue-50/10 transition-all select-none group"
+                          >
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded accent-action"
+                              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer"
                               checked={Array.isArray(formData.category) ? formData.category.includes(cat._id) : formData.category === cat._id}
                               onChange={(e) => {
                                 const currentCats = Array.isArray(formData.category) ? formData.category : (formData.category ? [formData.category] : []);
@@ -694,7 +697,7 @@ export default function InventoryTab() {
                                 }
                               }}
                             />
-                            <span className="text-xs font-bold text-gray-700">{cat.name}</span>
+                            <span className="text-[11px] font-bold text-gray-700 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{cat.name}</span>
                           </label>
                         ))}
                       </div>

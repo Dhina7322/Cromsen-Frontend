@@ -11,11 +11,19 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phone: ''
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+    if (name === 'phone') {
+      value = value.replace(/\D/g, '').slice(0, 15);
+    }
+    if (name === 'email') {
+      value = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleRegister = async (e) => {
@@ -23,6 +31,17 @@ const Register = () => {
     if(formData.password !== formData.confirmPassword) {
       setFeedback({ show: true, type: 'error', message: "Passwords don't match!" });
       return;
+    }
+
+    // Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10,15}$/;
+
+    if (!emailRegex.test(formData.email)) {
+      return setFeedback({ show: true, type: 'error', message: 'Please enter a valid email address.' });
+    }
+    if (!phoneRegex.test(formData.phone)) {
+      return setFeedback({ show: true, type: 'error', message: 'Phone number must be 10-15 digits only.' });
     }
     
     setLoading(true);
@@ -32,6 +51,7 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        phone: formData.phone,
         role
       });
       localStorage.setItem('userInfo', JSON.stringify(data));
@@ -76,6 +96,18 @@ const Register = () => {
               onChange={handleChange}
               className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
               placeholder="Enter your email"
+            />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Phone Number</label>
+            <input 
+              type="tel" 
+              name="phone"
+              required
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
+              placeholder="10-15 digits only"
             />
           </div>
           <div>

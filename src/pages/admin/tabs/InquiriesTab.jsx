@@ -7,7 +7,8 @@ import {
   User,
   MessageSquare,
   X,
-  Calendar
+  Calendar,
+  Phone
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -41,7 +42,7 @@ export default function InquiriesTab() {
   };
 
   const filteredInquiries = inquiries.filter(inq => {
-    const searchStr = `${inq.firstName} ${inq.lastName} ${inq.email} ${inq.message}`.toLowerCase();
+    const searchStr = `${inq.firstName} ${inq.lastName} ${inq.email} ${inq.phone || ''} ${inq.message}`.toLowerCase();
     return searchStr.includes(searchTerm.toLowerCase());
   });
 
@@ -73,6 +74,7 @@ export default function InquiriesTab() {
               <th>Date</th>
               <th>Customer</th>
               <th>Email</th>
+              <th>Phone</th>
               <th>Message Preview</th>
               <th style={{ textAlign: 'right' }}>Actions</th>
             </tr>
@@ -87,6 +89,7 @@ export default function InquiriesTab() {
                   <div className="cust-name">{inq.firstName} {inq.lastName}</div>
                 </td>
                 <td><div className="text-gray-500 text-sm">{inq.email}</div></td>
+                <td><div className="text-gray-500 text-sm font-semibold">{inq.phone || 'N/A'}</div></td>
                 <td>
                   <div className="text-gray-400 text-sm truncate max-w-[300px]">
                     {inq.message}
@@ -127,7 +130,8 @@ export default function InquiriesTab() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-primary">{selectedInquiry.firstName} {selectedInquiry.lastName}</h3>
-                    <p className="text-sm text-gray-500 flex items-center gap-2"><Mail size={14}/> {selectedInquiry.email}</p>
+                    <p className="text-sm text-gray-500 flex items-center gap-2 mb-1"><Mail size={14}/> {selectedInquiry.email}</p>
+                    <p className="text-sm text-gray-700 flex items-center gap-2 font-semibold"><Phone size={14}/> {selectedInquiry.phone || 'N/A'}</p>
                   </div>
                   <div className="ml-auto text-right">
                     <p className="text-xs text-gray-400 uppercase tracking-widest flex items-center justify-end gap-2">
