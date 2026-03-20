@@ -18,6 +18,7 @@ const Shop = () => {
   const [productsPerRow, setProductsPerRow] = useState(3);
   const [productsPerPage, setProductsPerPage] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('newest');
 
   const activeCategory = searchParams.get('category') || 'All';
   const searchQuery = searchParams.get('search') || '';
@@ -33,7 +34,8 @@ const Shop = () => {
           ...(activeCategory !== 'All' && { category: activeCategory }),
           ...(searchQuery && { search: searchQuery }),
           page: currentPage,
-          limit: productsPerPage
+          limit: productsPerPage,
+          sort: sortBy
         });
 
         // Backend now returns { products, total, page, pages }
@@ -47,7 +49,7 @@ const Shop = () => {
       }
     };
     fetchData();
-  }, [activeCategory, searchQuery, currentPage, productsPerPage]);
+  }, [activeCategory, searchQuery, currentPage, productsPerPage, sortBy]);
 
   const generateSlug = (name) => {
     if (name === 'All') return 'All';
