@@ -8,7 +8,14 @@ import {
   Mail, 
   Phone,
   UserCheck,
-  UserX
+  UserX,
+  Calendar,
+  User as UserIcon,
+  MapPin,
+  FileText,
+  Eye,
+  X,
+  Building
 } from "lucide-react";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
@@ -21,6 +28,8 @@ export default function UsersTab() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -62,6 +71,11 @@ export default function UsersTab() {
     }
   };
 
+  const openUserDetail = (user) => {
+    setSelectedUser(user);
+    setShowModal(true);
+  };
+
   return (
     <div className="section-gap">
       <div className="toolbar">
@@ -99,7 +113,11 @@ export default function UsersTab() {
               <tr key={u._id}>
                 <td>
                   <div className="cust-cell">
-                    <div className="sb-avatar">{u.name ? u.name[0] : 'U'}</div>
+                    {u.avatar ? (
+                      <img src={u.avatar} className="sb-avatar object-cover" alt="" />
+                    ) : (
+                      <div className="sb-avatar">{u.name ? u.name[0] : 'U'}</div>
+                    )}
                     <div style={{ marginLeft: '10px' }}>
                       <div className="cust-name">{u.name || 'Anonymous User'}</div>
                       <div className={`cust-role role-${u.role || 'customer'}`} style={{ fontSize: '10px', marginTop: '4px' }}>
@@ -122,6 +140,7 @@ export default function UsersTab() {
                 </td>
                 <td style={{ textAlign: 'right' }}>
                    <div className="row-acts">
+                     <button className="icon-btn text-blue-600" onClick={() => openUserDetail(u)} title="View Detail"><Eye size={14}/></button>
                      <button className={`icon-btn ${u.isBlocked ? 'text-green-600' : 'text-orange-600'}`} onClick={() => toggleUserStatus(u)} title={u.isBlocked ? "Unblock" : "Block"}>
                        {u.isBlocked ? <UserCheck size={14}/> : <UserX size={14}/>}
                      </button>
@@ -134,6 +153,103 @@ export default function UsersTab() {
           </tbody>
         </table>
       </div>
+
+      {showModal && selectedUser && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100">
+            <div className="p-6 border-b border-gray-50 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800">Customer Details</h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-1.5 rounded-lg"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="flex items-center gap-4">
+                {selectedUser.avatar ? (
+                  <img src={selectedUser.avatar} className="w-14 h-14 rounded-xl object-cover ring-2 ring-gray-50 shadow-sm" alt="" />
+                ) : (
+                  <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold border border-blue-100">
+                    {selectedUser.name?.[0]}
+                  </div>
+                )}
+                <div>
+                  <h4 className="text-base font-bold text-gray-800 leading-tight">{selectedUser.name}</h4>
+                  <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mt-0.5">{selectedUser.role} Account</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3">
+                  <div className="bg-white p-1.5 rounded-lg text-gray-400 shadow-sm"><Mail size={14} /></div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Email Address</p>
+                    <p className="text-[11px] font-semibold text-gray-700 truncate">{selectedUser.email}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3">
+                  <div className="bg-white p-1.5 rounded-lg text-gray-400 shadow-sm"><Phone size={14} /></div>
+                  <div className="flex-1">
+                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Phone Number</p>
+                    <p className="text-[11px] font-semibold text-gray-700">{selectedUser.phone || "Not provided"}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3">
+                  <div className="bg-white p-1.5 rounded-lg text-gray-400 shadow-sm"><Building size={14} /></div>
+                  <div className="flex-1">
+                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Company</p>
+                    <p className="text-[11px] font-semibold text-gray-700 truncate">{selectedUser.company || "Not provided"}</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3">
+                  <div className="bg-white p-1.5 rounded-lg text-gray-400 shadow-sm"><Calendar size={14} /></div>
+                  <div className="flex-1">
+                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Joined</p>
+                    <p className="text-[11px] font-semibold text-gray-700">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+
+                {selectedUser.role === 'dealer' && (
+                  <>
+                    <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3 md:col-span-2">
+                      <div className="bg-white p-1.5 rounded-lg text-gray-400 shadow-sm"><MapPin size={14} /></div>
+                      <div className="flex-1">
+                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Company Address</p>
+                        <p className="text-[11px] font-semibold text-gray-700">{selectedUser.companyAddress || "Not provided"}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3">
+                      <div className="bg-white p-1.5 rounded-lg text-gray-400 shadow-sm"><FileText size={14} /></div>
+                      <div className="flex-1">
+                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">GST Number</p>
+                        <p className="text-[11px] font-semibold text-gray-700">{selectedUser.gstNumber || "Not provided"}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 flex justify-end">
+              <button 
+                onClick={() => setShowModal(false)}
+                className="px-6 py-2 bg-white text-gray-600 font-bold rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 text-sm shadow-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+

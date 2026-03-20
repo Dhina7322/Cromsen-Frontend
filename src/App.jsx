@@ -13,8 +13,9 @@ import Cart from './pages/Cart';
 import Services from './pages/Services';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
-
+import Profile from './pages/Profile';
 import { useLocation } from 'react-router-dom';
+
 
 // Simplified Admin Imports
 import AdminLogin from './pages/admin/AdminLogin';
@@ -72,8 +73,10 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-orders" element={<Orders />} />
+          <Route path="/profile" element={<Profile />} />
           
           {/* Admin Routes Consolidated */}
+
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />}>
              <Route index element={<DashboardOverviewWrapper />} />

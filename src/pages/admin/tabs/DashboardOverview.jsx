@@ -1,15 +1,17 @@
-import React from "react";
-import { Package, ShoppingCart, Users, Layers } from "lucide-react";
+import { Package, ShoppingCart, Users, Layers, IndianRupee, TrendingUp, RotateCcw } from "lucide-react";
 
 export default function DashboardOverview({ stats }) {
   return (
     <div className="admin-body-container">
       <div className="kpi-grid">
-        <KPI label="Total Products" value={stats.products} icon={<Package />} color="#f47121" />
-        <KPI label="In Categories" value={stats.categories} icon={<Layers />} color="#3b82f6" />
-        <KPI label="Active Orders" value={stats.orders} icon={<ShoppingCart />} color="#10b981" />
+        <KPI label="Total Revenue" value={`₹${stats.totalRevenue || 0}`} icon={<IndianRupee />} color="#10b981" />
+        <KPI label="Total Profit" value={`₹${stats.totalProfit?.toFixed(0) || 0}`} icon={<TrendingUp />} color="#3b82f6" />
+        <KPI label="Refund Amount" value={`₹${stats.totalRefunds || 0}`} icon={<RotateCcw />} color="#ef4444" />
+        <KPI label="Active Orders" value={stats.orders} icon={<ShoppingCart />} color="#f47121" />
         <KPI label="Registered Users" value={stats.users} icon={<Users />} color="#8b5cf6" />
+        <KPI label="Total Products" value={stats.products} icon={<Package />} color="#6366f1" />
       </div>
+
 
       <div className="dash-grid-2">
         <div className="dash-card">

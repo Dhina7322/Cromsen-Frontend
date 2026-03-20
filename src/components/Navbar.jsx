@@ -318,11 +318,18 @@ const Navbar = () => {
                       <div className="absolute top-full right-0 pt-2 w-40 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all translate-y-2 group-hover:translate-y-0">
                         <div className="bg-primary border border-white/10 rounded-lg shadow-xl py-2">
                           <Link
+                            to="/profile"
+                            className="w-full block text-left px-4 py-2 text-[10px] text-gray-300 hover:text-white hover:bg-white/5"
+                          >
+                            My Profile
+                          </Link>
+                          <Link
                             to="/my-orders"
                             className="w-full block text-left px-4 py-2 text-[10px] text-gray-300 hover:text-white hover:bg-white/5"
                           >
                             My Orders
                           </Link>
+
                           <button 
                             onClick={() => {
                               localStorage.removeItem('userInfo');
@@ -569,9 +576,13 @@ const Navbar = () => {
                           {JSON.parse(localStorage.getItem('userInfo')).name}
                         </span>
                       </div>
+                      <Link to="/profile" onClick={() => setIsOpen(false)} className="text-left text-sm uppercase tracking-widest font-medium text-gray-300 hover:text-white">
+                        My Profile
+                      </Link>
                       <Link to="/my-orders" onClick={() => setIsOpen(false)} className="text-left text-sm uppercase tracking-widest font-medium text-gray-300 hover:text-white">
                         My Orders
                       </Link>
+
                       <button 
                         onClick={() => {
                           localStorage.removeItem('userInfo');
