@@ -209,7 +209,7 @@ export default function AdminDashboard() {
               </motion.div>
             )}
           </AnimatePresence>
-          <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="enquires" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
+          <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Enquiries" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
           <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
         </nav>
         {user.role === "main" && (
