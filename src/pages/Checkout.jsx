@@ -35,13 +35,17 @@ const Checkout = () => {
   const [exchangeContext, setExchangeContext] = useState(null);
 
   useEffect(() => {
+    if (!userInfo) {
+      navigate('/login');
+    }
+    
     try {
       const stored = localStorage.getItem('exchangeContext');
       if (stored) {
         setExchangeContext(JSON.parse(stored));
       }
     } catch(e) {}
-  }, []);
+  }, [userInfo, navigate]);
 
   // Address Management State
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -247,6 +251,7 @@ const Checkout = () => {
         receipt: `receipt_${Date.now()}`,
         orderDetails: {
           user: userEmail || shippingData.email,
+          replacementFor: exchangeContext?.oldOrderId || null,
           items: cartItems.map(it => ({
             product: it._id,
             name: it.name,
@@ -299,7 +304,10 @@ const Checkout = () => {
 
             if (verifyRes.data.message === 'Payment verified successfully') {
               if (exchangeContext) {
-                 await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: "Replacement Completed" });
+                 await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { 
+                   status: "Replacement Completed",
+                   replacementOrderId: verifyRes.data.orderId 
+                 });
                  localStorage.removeItem('exchangeContext');
               }
               setFinalAmount(finalPayable);

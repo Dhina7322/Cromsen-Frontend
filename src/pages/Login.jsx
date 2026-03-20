@@ -12,7 +12,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post('/api/users/login', { email, password });
+      const requiredRole = localStorage.getItem('userRole'); // 'customer' or 'dealer'
+      const { data } = await axios.post('/api/users/login', { email, password, requiredRole });
       localStorage.setItem('userInfo', JSON.stringify(data));
       localStorage.setItem('userRole', data.role);
       navigate('/');

@@ -1,10 +1,24 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { Minus, Plus, Trash2, ArrowRight, ImageIcon } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, ImageIcon, LogIn, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getImageUrl } from '../utils/imageUtils';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
+  const navigate = useNavigate();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  const handleCheckoutClick = (e) => {
+    e.preventDefault();
+    const userInfo = localStorage.getItem('userInfo');
+    if (!userInfo) {
+      setShowLoginPrompt(true);
+    } else {
+      navigate('/checkout');
+    }
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -146,12 +160,12 @@ const Cart = () => {
                 </div>
               </div>
 
-              <Link 
-                to="/checkout"
+              <button 
+                onClick={handleCheckoutClick}
                 className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-action transition-all shadow-md flex items-center justify-center gap-2 mb-4 group"
               >
                 Checkout Now <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </button>
               
               <p className="text-center text-[10px] text-gray-400 uppercase tracking-widest">
                 Taxes and discounts applied at checkout
@@ -160,6 +174,58 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      {/* Login Prompt Modal */}
+      <AnimatePresence>
+        {showLoginPrompt && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLoginPrompt(false)}
+              className="absolute inset-0 bg-primary/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl relative z-10 text-center border border-gray-100"
+            >
+              <button 
+                onClick={() => setShowLoginPrompt(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-primary transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="w-20 h-20 bg-action/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <LogIn size={32} className="text-action" />
+              </div>
+
+              <h3 className="text-2xl font-serif text-primary mb-4 font-bold">Login Required</h3>
+              <p className="text-gray-500 mb-8 leading-relaxed font-sans">
+                Please sign in to your account to place an order and enjoy a seamless checkout experience.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-action transition-all shadow-md"
+                >
+                  Login Now
+                </button>
+                <button 
+                  onClick={() => navigate('/register')}
+                  className="w-full bg-white text-primary border border-gray-200 py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-all font-sans"
+                >
+                  Create Account
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
