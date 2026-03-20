@@ -905,10 +905,23 @@ export default function InventoryTab() {
                                 <td style={{ padding: '8px 12px' }}>
                                   <input 
                                     type="number" 
-                                    value={item.stock} 
+                                    placeholder="Wholesale"
+                                    value={item.wholesalePrice ?? ''} 
                                     onChange={(e) => {
                                       const newItems = [...formData.variantItems];
-                                      newItems[iIdx].stock = Number(e.target.value);
+                                      newItems[iIdx].wholesalePrice = e.target.value === '' ? '' : Number(e.target.value);
+                                      setFormData({ ...formData, variantItems: newItems });
+                                    }}
+                                    style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}
+                                  />
+                                </td>
+                                <td style={{ padding: '8px 12px' }}>
+                                  <input 
+                                    type="number" 
+                                    value={item.stock ?? ''} 
+                                    onChange={(e) => {
+                                      const newItems = [...formData.variantItems];
+                                      newItems[iIdx].stock = e.target.value === '' ? '' : Number(e.target.value);
                                       setFormData({ ...formData, variantItems: newItems });
                                     }}
                                     style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}

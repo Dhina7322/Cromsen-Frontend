@@ -18,6 +18,7 @@ const Shop = () => {
   const [productsPerRow, setProductsPerRow] = useState(3);
   const [productsPerPage, setProductsPerPage] = useState(12);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('newest');
 
   const activeCategory = searchParams.get('category') || 'All';
   const searchQuery = searchParams.get('search') || '';
@@ -33,7 +34,8 @@ const Shop = () => {
           ...(activeCategory !== 'All' && { category: activeCategory }),
           ...(searchQuery && { search: searchQuery }),
           page: currentPage,
-          limit: productsPerPage
+          limit: productsPerPage,
+          sort: sortBy
         });
 
         // Backend now returns { products, total, page, pages }
@@ -47,7 +49,7 @@ const Shop = () => {
       }
     };
     fetchData();
-  }, [activeCategory, searchQuery, currentPage, productsPerPage]);
+  }, [activeCategory, searchQuery, currentPage, productsPerPage, sortBy]);
 
   const generateSlug = (name) => {
     if (name === 'All') return 'All';
@@ -176,11 +178,18 @@ const Shop = () => {
               <div>
                 <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold mb-6 border-b border-gray-200 pb-4 text-primary">Sort By</h3>
                 <div className="relative">
-                  <select className="w-full appearance-none bg-white border border-gray-200 rounded px-3 py-3 text-sm focus:outline-none focus:border-action text-gray-600 font-sans shadow-sm cursor-pointer">
-                    <option>Featured</option>
-                    <option>Newest</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
+                  <select 
+                    className="w-full appearance-none bg-white border border-gray-200 rounded px-3 py-3 text-sm focus:outline-none focus:border-action text-gray-600 font-sans shadow-sm cursor-pointer"
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="featured">Featured</option>
+                    <option value="newest">Newest</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
                   </select>
                   <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
