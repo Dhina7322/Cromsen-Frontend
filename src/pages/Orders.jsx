@@ -572,6 +572,11 @@ export default function Orders() {
                             </div>
                             <div className="ord-item-info">
                               <div className="ord-item-name">{item.name || "Product"}</div>
+                              {item.variant && (
+                                <div className="ord-item-variant" style={{ fontSize: 11, fontWeight: 700, color: "var(--action)", textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 2 }}>
+                                  Variant: {item.variant}
+                                </div>
+                              )}
                               <div className="ord-item-sub"><span>Qty: {qty}</span><span>.</span><span>Rs.{Number(item.price || 0).toLocaleString()} each</span></div>
                             </div>
                             <div className="ord-item-price">Rs.{(qty * Number(item.price || 0)).toLocaleString()}</div>

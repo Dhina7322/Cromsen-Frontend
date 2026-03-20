@@ -357,7 +357,7 @@ export default function InventoryTab() {
   const [formData, setFormData] = useState({
     name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
     category: "", stock: "", isActive: true, featured: false,
-    variantName: "", type: ""
+    variants: [], variantItems: []
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -404,8 +404,8 @@ export default function InventoryTab() {
         category: product.category?._id || product.category,
         stock: product.stock, isActive: product.isActive ?? true,
         featured: product.featured || false,
-        variantName: product.variantName || "",
-        type: product.type || ""
+        variants: product.variants || [],
+        variantItems: product.variantItems || []
       });
       setImagePreview(product.image ? getImageUrl(product.image) : "");
       setImagesPreviews(product.images ? product.images.map(img => getImageUrl(img)) : []);
@@ -414,7 +414,7 @@ export default function InventoryTab() {
       setFormData({
         name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
         category: "", stock: "", isActive: true, featured: false,
-        variantName: "", type: ""
+        variants: [], variantItems: []
       });
       setImagePreview("");
       setImagesPreviews([]);
@@ -443,7 +443,9 @@ export default function InventoryTab() {
     setLoading(true);
     const data = new FormData();
     Object.keys(formData).forEach(key => {
-      if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) {
+      if (key === 'variants' || key === 'variantItems') {
+        data.append(key, JSON.stringify(formData[key]));
+      } else if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) {
         data.append(key, formData[key]);
       }
     });
@@ -600,18 +602,7 @@ export default function InventoryTab() {
                     </div>
                   </div>
 
-                  <div className="form-r2">
-                    <div className="fg">
-                      <label>Variant Name</label>
-                      <input type="text" value={formData.variantName}
-                        onChange={(e) => setFormData({ ...formData, variantName: e.target.value })} />
-                    </div>
-                    <div className="fg">
-                      <label>Type</label>
-                      <input type="text" value={formData.type}
-                        onChange={(e) => setFormData({ ...formData, type: e.target.value })} />
-                    </div>
-                  </div>
+
 
                   <div className="fg">
                     <label>Description</label>
@@ -701,6 +692,139 @@ export default function InventoryTab() {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Advanced Variants Section */}
+                  <div className="fg" style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', background: 'var(--card2)', marginTop: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <label style={{ margin: 0, fontSize: '15px', fontWeight: 'bold' }}>Variants</label>
+                      <button type="button" 
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'white', border: '1px solid var(--border)', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                        onClick={() => {
+                          const newVariants = [...(formData.variants || []), { name: '', options: [] }];
+                          setFormData({ ...formData, variants: newVariants });
+                        }}>
+                        <Plus size={14} /> Add option
+                      </button>
+                    </div>
+
+                    {(formData.variants || []).map((variant, vIdx) => (
+                      <div key={vIdx} style={{ background: 'white', padding: '12px', borderRadius: '6px', border: '1px solid var(--border)', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                          <div style={{ flex: 1 }}>
+                            <label style={{ fontSize: '12px', marginBottom: '4px' }}>Option name</label>
+                            <input 
+                              type="text" 
+                              placeholder="e.g. Size or Color"
+                              value={variant.name} 
+                              onChange={(e) => {
+                                const newVariants = [...formData.variants];
+                                newVariants[vIdx].name = e.target.value;
+                                setFormData({ ...formData, variants: newVariants });
+                              }} 
+                              style={{ width: '100%', padding: '6px 10px', border: '1px solid var(--border)', borderRadius: '4px' }}
+                            />
+                          </div>
+                          <div style={{ flex: 2 }}>
+                            <label style={{ fontSize: '12px', marginBottom: '4px' }}>Option values (comma separated)</label>
+                            <input 
+                              type="text" 
+                              placeholder="e.g. S, M, L"
+                              value={(variant.options || []).join(', ')} 
+                              onBlur={(e) => {
+                                const vals = e.target.value.split(',').map(v => v.trim()).filter(Boolean);
+                                const newVariants = [...formData.variants];
+                                newVariants[vIdx].options = vals;
+                                
+                                // Regenerate combinations
+                                let newItems = [];
+                                if (newVariants.length > 0 && newVariants.every(v => v.options.length > 0)) {
+                                  const combos = newVariants.reduce((a, b) => a.flatMap(x => b.options.map(y => [...x, y])), [[]]);
+                                  newItems = combos.map(combo => {
+                                    const comboKey = combo.join(' / ');
+                                    const existing = (formData.variantItems || []).find(vi => vi.combination === comboKey);
+                                    return existing || { combination: comboKey, price: formData.retailPrice || 0, stock: 0 };
+                                  });
+                                }
+                                setFormData({ ...formData, variants: newVariants, variantItems: newItems });
+                              }}
+                              onChange={(e) => {
+                                // Allow typing
+                                const newVariants = [...formData.variants];
+                                newVariants[vIdx].options = e.target.value.split(','); // temporary string state technically, but this allows typing naturally
+                                setFormData({ ...formData, variants: newVariants });
+                              }}
+                              style={{ width: '100%', padding: '6px 10px', border: '1px solid var(--border)', borderRadius: '4px' }}
+                            />
+                          </div>
+                          <button type="button" 
+                            style={{ marginTop: '22px', background: 'transparent', border: 'none', color: '#ff4d4f', cursor: 'pointer' }}
+                            onClick={() => {
+                              const newVariants = [...formData.variants];
+                              newVariants.splice(vIdx, 1);
+                              
+                              let newItems = [];
+                              if (newVariants.length > 0 && newVariants.every(v => v.options.length > 0)) {
+                                const combos = newVariants.reduce((a, b) => a.flatMap(x => b.options.map(y => [...x, y])), [[]]);
+                                newItems = combos.map(combo => {
+                                  const comboKey = combo.join(' / ');
+                                  const existing = (formData.variantItems || []).find(vi => vi.combination === comboKey);
+                                  return existing || { combination: comboKey, price: formData.retailPrice || 0, stock: 0 };
+                                });
+                              }
+                              setFormData({ ...formData, variants: newVariants, variantItems: newItems });
+                            }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Variant Combinations Table */}
+                    {formData.variantItems && formData.variantItems.length > 0 && (
+                      <div style={{ marginTop: '20px', background: 'white', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                          <thead>
+                            <tr style={{ background: '#fafafa', borderBottom: '1px solid var(--border)' }}>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '40%' }}>Variant</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '30%' }}>Price (₹)</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '30%' }}>Available</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {formData.variantItems.map((item, iIdx) => (
+                              <tr key={iIdx} style={{ borderBottom: '1px solid var(--border)' }}>
+                                <td style={{ padding: '8px 12px', fontWeight: '500' }}>{item.combination}</td>
+                                <td style={{ padding: '8px 12px' }}>
+                                  <input 
+                                    type="number" 
+                                    value={item.price} 
+                                    onChange={(e) => {
+                                      const newItems = [...formData.variantItems];
+                                      newItems[iIdx].price = Number(e.target.value);
+                                      setFormData({ ...formData, variantItems: newItems });
+                                    }}
+                                    style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}
+                                  />
+                                </td>
+                                <td style={{ padding: '8px 12px' }}>
+                                  <input 
+                                    type="number" 
+                                    value={item.stock} 
+                                    onChange={(e) => {
+                                      const newItems = [...formData.variantItems];
+                                      newItems[iIdx].stock = Number(e.target.value);
+                                      setFormData({ ...formData, variantItems: newItems });
+                                    }}
+                                    style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}
+                                  />
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', gap: '20px' }}>
