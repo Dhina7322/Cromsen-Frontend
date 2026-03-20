@@ -14,7 +14,7 @@ const RoleSelector = ({ onSelect }) => {
           <div className="w-20 h-20 rounded-full bg-action/20 flex items-center justify-center mb-8 border border-action/30 group-hover:scale-110 transition-transform">
              <div className="w-10 h-10 rounded-full bg-action" />
           </div>
-          <h2 className="text-3xl font-serif text-white mb-4">Retail Customer</h2>
+          <h2 className="text-3xl font-serif text-white mb-4">Retailer</h2>
           <p className="text-gray-400 font-light leading-relaxed">
             I am shopping for my personal home or office. Show me standard luxury pricing.
           </p>

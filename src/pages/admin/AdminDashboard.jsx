@@ -190,7 +190,6 @@ export default function AdminDashboard() {
 
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <img src={Logo} alt="Cromsen Logo" className="brand-logo-img" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
           <div>
             <div className="brand-name">Cromsen</div>
             <div className="brand-sub">Admin Control</div>

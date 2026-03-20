@@ -25,10 +25,12 @@ const Register = () => {
     
     setLoading(true);
     try {
+      const role = localStorage.getItem('userRole') || 'customer';
       const { data } = await axios.post('/api/users/register', {
         name: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        role
       });
       localStorage.setItem('userInfo', JSON.stringify(data));
       localStorage.setItem('userRole', data.role);

@@ -76,7 +76,7 @@ export default function UsersTab() {
             />
           </div>
         </div>
-        <div className="p-role p-role--sub">{totalUsers} Total Customers</div>
+        <div className="p-role p-role--sub">{totalUsers} Total Users</div>
       </div>
 
       <div className="tbl-wrap">
@@ -102,7 +102,9 @@ export default function UsersTab() {
                     <div className="sb-avatar">{u.name ? u.name[0] : 'U'}</div>
                     <div style={{ marginLeft: '10px' }}>
                       <div className="cust-name">{u.name || 'Anonymous User'}</div>
-                      <div className="cust-role" style={{ fontSize: '11px', color: 'var(--text3)' }}>{u.role || 'customer'}</div>
+                      <div className={`cust-role role-${u.role || 'customer'}`} style={{ fontSize: '10px', marginTop: '4px' }}>
+                        {u.role === 'dealer' ? 'Dealer' : 'Retailer'}
+                      </div>
                     </div>
                   </div>
                 </td>
