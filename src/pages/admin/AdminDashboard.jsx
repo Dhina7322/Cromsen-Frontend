@@ -21,6 +21,8 @@ import { useNavigate, Outlet, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../../styles/admin.css";
 
+import Logo from "../../assets/cromsen.png";
+
 const API = "/api";
 
 export default function AdminDashboard() {
@@ -188,7 +190,6 @@ export default function AdminDashboard() {
 
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <div className="brand-logo">C</div>
           <div>
             <div className="brand-name">Cromsen</div>
             <div className="brand-sub">Admin Control</div>
@@ -207,7 +208,7 @@ export default function AdminDashboard() {
               </motion.div>
             )}
           </AnimatePresence>
-          <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Inquiries" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
+          <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Enquiries" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
           <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
         </nav>
         {user.role === "main" && (
