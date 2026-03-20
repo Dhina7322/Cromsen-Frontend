@@ -5,7 +5,7 @@ import { useOutletContext } from "react-router-dom";
 
 export default function DashboardOverviewWrapper() {
   const { showToast } = useOutletContext();
-  const [stats, setStats] = useState({ products: 0, categories: 0, orders: 0, users: 0, recentOrders: [], lowStock: [] });
+  const [stats, setStats] = useState({ products: 0, categories: 0, orders: 0, users: 0, totalRevenue: 0, totalProfit: 0, totalRefunds: 0, recentOrders: [], lowStock: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,9 +17,13 @@ export default function DashboardOverviewWrapper() {
           categories: res.data.totalCategories,
           orders: res.data.totalOrders,
           users: res.data.totalUsers,
+          totalRevenue: res.data.totalRevenue,
+          totalProfit: res.data.totalProfit,
+          totalRefunds: res.data.totalRefunds,
           recentOrders: res.data.recentOrders || [],
           lowStock: res.data.lowStock || []
         });
+
       } catch (err) {
         showToast("error", "Failed to load dashboard statistics");
       } finally {

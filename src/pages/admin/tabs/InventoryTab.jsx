@@ -353,6 +353,9 @@ export default function InventoryTab() {
   const [loading, setLoading] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
@@ -389,10 +392,17 @@ export default function InventoryTab() {
     }
   };
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    if (selectedCategories.length === 0) return matchesSearch;
+    
+    const pCats = Array.isArray(p.category) ? p.category.map(c => c._id || c) : [p.category?._id || p.category];
+    const matchesCategory = selectedCategories.some(catId => pCats.includes(catId));
+    
+    return matchesSearch && matchesCategory;
+  });
 
   const handleOpenModal = (product = null) => {
     if (product) {
@@ -401,7 +411,7 @@ export default function InventoryTab() {
         name: product.name, sku: product.sku || "",
         description: product.description, retailPrice: product.retailPrice,
         wholesalePrice: product.wholesalePrice,
-        category: product.category?._id || product.category,
+        category: Array.isArray(product.category) ? product.category.map(c => c._id || c) : (product.category?._id || product.category || []),
         stock: product.stock, isActive: product.isActive ?? true,
         featured: product.featured || false,
         variants: product.variants || [],
@@ -413,7 +423,7 @@ export default function InventoryTab() {
       setEditingProduct(null);
       setFormData({
         name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
-        category: "", stock: "", isActive: true, featured: false,
+        category: [], stock: "", isActive: true, featured: false,
         variants: [], variantItems: []
       });
       setImagePreview("");
@@ -443,7 +453,7 @@ export default function InventoryTab() {
     setLoading(true);
     const data = new FormData();
     Object.keys(formData).forEach(key => {
-      if (key === 'variants' || key === 'variantItems') {
+      if (key === 'variants' || key === 'variantItems' || key === 'category') {
         data.append(key, JSON.stringify(formData[key]));
       } else if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) {
         data.append(key, formData[key]);
@@ -496,10 +506,45 @@ export default function InventoryTab() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <select className="filter-select">
-            <option value="">All Categories</option>
-            {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-          </select>
+          <div className="relative" ref={filterRef}>
+            <button 
+              className={`topbar-btn ${selectedCategories.length > 0 ? 'border-action text-action bg-action/5' : ''}`}
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+            >
+              <Plus size={14} className={isFilterOpen ? 'rotate-45 transition-transform' : 'transition-transform'} />
+              {selectedCategories.length > 0 ? `${selectedCategories.length} Categories` : 'All Categories'}
+            </button>
+            
+            {isFilterOpen && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 z-[200] p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-50">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Filter Categories</span>
+                  {selectedCategories.length > 0 && (
+                    <button onClick={() => setSelectedCategories([])} className="text-[10px] font-bold text-action hover:underline uppercase">Clear</button>
+                  )}
+                </div>
+                <div className="max-h-60 overflow-y-auto pr-1 custom-scrollbar space-y-1">
+                  {categories.map(cat => (
+                    <label key={cat._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors group">
+                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${selectedCategories.includes(cat._id) ? 'bg-action border-action' : 'border-gray-200 group-hover:border-action/50'}`}>
+                        {selectedCategories.includes(cat._id) && <Check size={10} color="white" strokeWidth={4} />}
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        className="hidden" 
+                        checked={selectedCategories.includes(cat._id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedCategories([...selectedCategories, cat._id]);
+                          else setSelectedCategories(selectedCategories.filter(id => id !== cat._id));
+                        }}
+                      />
+                      <span className={`text-xs font-bold ${selectedCategories.includes(cat._id) ? 'text-primary' : 'text-gray-500'}`}>{cat.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <button className="topbar-btn" onClick={() => setShowImport(true)} title="Bulk Import CSV">
@@ -523,35 +568,53 @@ export default function InventoryTab() {
             <tr>
               <th>Product</th>
               <th>SKU</th>
-              <th>Category</th>
-              <th>Retail Price</th>
-              <th>Wholesale</th>
-              <th>Stock</th>
+              <th>Categories</th>
+              <th>Variants</th>
               <th>Status</th>
               <th style={{ textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.map(p => (
-              <tr key={p._id}>
+              <tr 
+                key={p._id} 
+                onClick={() => handleOpenModal(p)}
+                className="cursor-pointer hover:bg-gray-50/80 transition-all group"
+              >
                 <td>
                   <div className="prod-cell">
                     {p.image ? (
-                      <img src={getImageUrl(p.image)} alt="" className="prod-thumb" />
+                      <img src={getImageUrl(p.image)} alt="" className="prod-thumb shadow-sm group-hover:scale-110 transition-transform duration-300" />
                     ) : (
                       <div className="prod-thumb-ph">{p.name[0]}</div>
                     )}
-                    <span className="prod-name">{p.name}</span>
+                    <span className="prod-name group-hover:text-action transition-colors">{p.name}</span>
                   </div>
                 </td>
-                <td><span className="sku-tag">{p.sku || 'N/A'}</span></td>
-                <td><span className="cat-tag">{p.category?.name || 'Uncategorized'}</span></td>
-                <td className="price-user">₹{p.retailPrice}</td>
-                <td className="price-dealer">₹{p.wholesalePrice ?? '—'}</td>
+                <td><span className="sku-tag font-mono text-[10px]">{p.sku || 'N/A'}</span></td>
                 <td>
-                  <span className={`stock-badge ${p.stock === 0 ? 'stock-oos' : p.stock < 10 ? 'stock-low' : 'stock-ok'}`}>
-                    {p.stock}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {Array.isArray(p.category) ? (
+                      p.category.map(cat => (
+                        <span key={cat._id} className="cat-tag bg-blue-50 text-blue-600 border-blue-100 text-[9px] py-1">
+                          {cat.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="cat-tag">{p.category?.name || 'Uncategorized'}</span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="flex flex-col gap-1">
+                    {(p.variants || []).map((v, idx) => (
+                      <div key={idx} className="text-[10px] whitespace-nowrap">
+                        <span className="font-bold text-gray-400 uppercase mr-1">{v.name}:</span>
+                        <span className="text-gray-600">{(v.options || []).join(', ')}</span>
+                      </div>
+                    ))}
+                    {(!p.variants || p.variants.length === 0) && <span className="text-gray-300 text-[10px italic]">No variants</span>}
+                  </div>
                 </td>
                 <td>
                   <span className={`status-tag ${p.isActive ? 's-delivered' : 's-cancelled'}`}>
@@ -559,9 +622,10 @@ export default function InventoryTab() {
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <div className="row-acts">
-                    <button className="icon-btn" onClick={() => handleOpenModal(p)}><Edit2 size={14} /></button>
-                    <button className="icon-btn danger" onClick={() => handleDelete(p._id)}><Trash2 size={14} /></button>
+                  <div className="row-acts" onClick={e => e.stopPropagation()}>
+                    <button className="icon-btn danger hover:bg-red-50" onClick={() => handleDelete(p._id)} title="Delete Product">
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -610,33 +674,30 @@ export default function InventoryTab() {
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
                   </div>
 
-                  <div className="form-r2">
-                    <div className="price-field-group">
-                      <label className="price-field-label--user">Retail Price</label>
-                      <div className="price-input-wrap">
-                        <span className="price-currency">₹</span>
-                        <input required type="number" value={formData.retailPrice}
-                          onChange={(e) => setFormData({ ...formData, retailPrice: e.target.value })} />
-                      </div>
-                    </div>
-                    <div className="price-field-group price-field-group--dealer">
-                      <label className="price-field-label--dealer">Wholesale Price</label>
-                      <div className="price-input-wrap">
-                        <span className="price-currency">₹</span>
-                        <input required type="number" value={formData.wholesalePrice}
-                          onChange={(e) => setFormData({ ...formData, wholesalePrice: e.target.value })} />
-                      </div>
-                    </div>
-                  </div>
 
                   <div className="form-r3">
-                    <div className="fg">
-                      <label>Category</label>
-                      <select required value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
-                        <option value="">Select Category</option>
-                        {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-                      </select>
+                    <div className="fg sm:col-span-2">
+                      <label>Categories (Select one or more)</label>
+                      <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 max-h-48 overflow-y-auto no-scrollbar">
+                        {categories.map(cat => (
+                          <label key={cat._id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-gray-200">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 rounded accent-action"
+                              checked={Array.isArray(formData.category) ? formData.category.includes(cat._id) : formData.category === cat._id}
+                              onChange={(e) => {
+                                const currentCats = Array.isArray(formData.category) ? formData.category : (formData.category ? [formData.category] : []);
+                                if (e.target.checked) {
+                                  setFormData({ ...formData, category: [...currentCats, cat._id] });
+                                } else {
+                                  setFormData({ ...formData, category: currentCats.filter(id => id !== cat._id) });
+                                }
+                              }}
+                            />
+                            <span className="text-xs font-bold text-gray-700">{cat.name}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
                     <div className="fg">
                       <label>Stock Count</label>
@@ -743,7 +804,13 @@ export default function InventoryTab() {
                                   newItems = combos.map(combo => {
                                     const comboKey = combo.join(' / ');
                                     const existing = (formData.variantItems || []).find(vi => vi.combination === comboKey);
-                                    return existing || { combination: comboKey, price: formData.retailPrice || 0, stock: 0 };
+                                    return existing || { 
+                                      combination: comboKey, 
+                                      retailPrice: formData.retailPrice || 0, 
+                                      wholesalePrice: formData.wholesalePrice || 0, 
+                                      stock: 0 
+                                    };
+
                                   });
                                 }
                                 setFormData({ ...formData, variants: newVariants, variantItems: newItems });
@@ -769,7 +836,13 @@ export default function InventoryTab() {
                                 newItems = combos.map(combo => {
                                   const comboKey = combo.join(' / ');
                                   const existing = (formData.variantItems || []).find(vi => vi.combination === comboKey);
-                                  return existing || { combination: comboKey, price: formData.retailPrice || 0, stock: 0 };
+                                  return existing || { 
+                                    combination: comboKey, 
+                                    retailPrice: formData.retailPrice || 0, 
+                                    wholesalePrice: formData.wholesalePrice || 0, 
+                                    stock: 0 
+                                  };
+
                                 });
                               }
                               setFormData({ ...formData, variants: newVariants, variantItems: newItems });
@@ -786,8 +859,9 @@ export default function InventoryTab() {
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                           <thead>
                             <tr style={{ background: '#fafafa', borderBottom: '1px solid var(--border)' }}>
-                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '40%' }}>Variant</th>
-                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '30%' }}>Price (₹)</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '35%' }}>Variant</th>
+                              <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '40%' }}>Price (Retail/Wholesale)</th>
+
                               <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 'bold', width: '30%' }}>Available</th>
                             </tr>
                           </thead>
@@ -796,17 +870,38 @@ export default function InventoryTab() {
                               <tr key={iIdx} style={{ borderBottom: '1px solid var(--border)' }}>
                                 <td style={{ padding: '8px 12px', fontWeight: '500' }}>{item.combination}</td>
                                 <td style={{ padding: '8px 12px' }}>
-                                  <input 
-                                    type="number" 
-                                    value={item.price} 
-                                    onChange={(e) => {
-                                      const newItems = [...formData.variantItems];
-                                      newItems[iIdx].price = Number(e.target.value);
-                                      setFormData({ ...formData, variantItems: newItems });
-                                    }}
-                                    style={{ width: '100%', padding: '6px', border: '1px solid var(--border)', borderRadius: '4px' }}
-                                  />
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text3)', minWidth: '45px' }}>RETAIL</span>
+                                      <input 
+                                        type="number" 
+                                        placeholder="Retail"
+                                        value={item.retailPrice} 
+                                        onChange={(e) => {
+                                          const newItems = [...formData.variantItems];
+                                          newItems[iIdx].retailPrice = Number(e.target.value);
+                                          setFormData({ ...formData, variantItems: newItems });
+                                        }}
+                                        style={{ flex: 1, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '12px' }}
+                                      />
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span style={{ fontSize: '10px', fontWeight: '800', color: '#059669', minWidth: '45px' }}>DEALER</span>
+                                      <input 
+                                        type="number" 
+                                        placeholder="Wholesale"
+                                        value={item.wholesalePrice} 
+                                        onChange={(e) => {
+                                          const newItems = [...formData.variantItems];
+                                          newItems[iIdx].wholesalePrice = Number(e.target.value);
+                                          setFormData({ ...formData, variantItems: newItems });
+                                        }}
+                                        style={{ flex: 1, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '12px', background: '#ecfdf5' }}
+                                      />
+                                    </div>
+                                  </div>
                                 </td>
+
                                 <td style={{ padding: '8px 12px' }}>
                                   <input 
                                     type="number" 

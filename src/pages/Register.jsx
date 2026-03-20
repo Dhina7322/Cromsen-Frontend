@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import FeedbackModal from '../components/FeedbackModal';
 
 const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState({ show: false, type: 'success', message: '' });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,7 +21,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     if(formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      setFeedback({ show: true, type: 'error', message: "Passwords don't match!" });
       return;
     }
     
@@ -37,7 +39,11 @@ const Register = () => {
       navigate('/');
       window.location.reload(); // Refresh to update navbar
     } catch (err) {
-      alert(err.response?.data?.message || 'Registration failed');
+      setFeedback({ 
+        show: true, 
+        type: 'error', 
+        message: err.response?.data?.message || 'Registration failed. Please try again later.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -45,73 +51,81 @@ const Register = () => {
 
   return (
     <div className="min-h-screen pt-32 pb-20 flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white p-8 md:p-12 shadow-xl w-full max-w-md border border-gray-100">
+      <div className="bg-white p-8 md:p-12 shadow-xl w-full max-w-md border border-gray-100 rounded-3xl">
         <h2 className="text-3xl font-brand font-bold text-center mb-8 uppercase tracking-widest text-primary">Register</h2>
         <form onSubmit={handleRegister} className="space-y-6">
           <div>
-            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold">Full Name</label>
+            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Full Name</label>
             <input 
               type="text" 
               name="name"
               required
               value={formData.name}
               onChange={handleChange}
-              className="w-full border-b border-gray-300 py-3 focus:outline-none focus:border-action transition-colors text-sm"
+              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
               placeholder="Enter your full name"
             />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold">Email</label>
+            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Email</label>
             <input 
               type="email" 
               name="email"
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full border-b border-gray-300 py-3 focus:outline-none focus:border-action transition-colors text-sm"
+              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
               placeholder="Enter your email"
             />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold">Password</label>
+            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Password</label>
             <input 
               type="password" 
               name="password"
               required
               value={formData.password}
               onChange={handleChange}
-              className="w-full border-b border-gray-300 py-3 focus:outline-none focus:border-action transition-colors text-sm"
+              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
               placeholder="Create a password"
             />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold">Confirm Password</label>
+            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Confirm Password</label>
             <input 
               type="password" 
               name="confirmPassword"
               required
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full border-b border-gray-300 py-3 focus:outline-none focus:border-action transition-colors text-sm"
+              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
               placeholder="Confirm your password"
             />
           </div>
           <button 
             type="submit"
-            className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-action transition-all shadow-md mt-4"
+            disabled={loading}
+            className="w-full bg-primary text-white py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 mt-4"
           >
-            Create Account
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500 font-sans">
+        <div className="mt-8 text-center text-xs">
+          <p className="text-gray-500 font-bold uppercase tracking-widest">
             Already have an account?{' '}
-            <Link to="/login" className="text-action hover:text-primary transition-colors font-bold underline underline-offset-4">
+            <Link to="/login" className="text-action hover:text-black transition-colors font-bold underline underline-offset-8">
               Login here
             </Link>
           </p>
         </div>
       </div>
+
+      <FeedbackModal 
+        show={feedback.show}
+        type={feedback.type}
+        message={feedback.message}
+        onClose={() => setFeedback({ ...feedback, show: false })}
+      />
     </div>
   );
 };
