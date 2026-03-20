@@ -14,6 +14,12 @@ const ProductCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     
+    const hasVariants = product.variants && product.variants.length > 0;
+    if (hasVariants) {
+      navigate(`/product/${product._id}`);
+      return;
+    }
+    
     // Use price provided by backend (which is role-aware) or fallback
     const rawPrice = product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice);
     const priceToUse = Number(rawPrice) || 0;
@@ -25,6 +31,12 @@ const ProductCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     
+    const hasVariants = product.variants && product.variants.length > 0;
+    if (hasVariants) {
+      navigate(`/product/${product._id}`);
+      return;
+    }
+
     const rawPrice = product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice);
     const priceToUse = Number(rawPrice) || 0;
     addToCart({ ...product, price: priceToUse });
@@ -84,13 +96,7 @@ const ProductCard = ({ product }) => {
             {product.name}
           </h3>
         </Link>
-        {(product.variantName || product.type) && (
-          <div className="flex justify-center gap-2 mb-1 text-[10px] text-gray-500 uppercase tracking-widest font-semibold truncate">
-            {product.variantName && <span>{product.variantName}</span>}
-            {product.variantName && product.type && <span>|</span>}
-            {product.type && <span>{product.type}</span>}
-          </div>
-        )}
+
         <div className="flex flex-col items-center w-full pb-3">
           <p className="text-action font-bold text-sm tracking-tight">
             ₹{(!isNaN(displayedPrice) && displayedPrice > 0) ? displayedPrice.toFixed(2) : '0.00'}
