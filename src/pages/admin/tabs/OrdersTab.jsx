@@ -289,6 +289,9 @@ export default function OrdersTab() {
                         </div>
                         <div className="om-item-info">
                           <div className="om-item-name">{item.name}</div>
+                          {item.variant && (
+                            <div className="text-[10px] uppercase font-bold text-action tracking-wider mb-0.5">Variant: {item.variant}</div>
+                          )}
                           <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
                         </div>
                         <div className="om-item-total">₹{item.quantity * item.price}</div>

@@ -10,7 +10,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState(0);
+  const [selectedOptions, setSelectedOptions] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
   const { addToCart } = useCart();
 
@@ -19,6 +19,15 @@ const ProductDetails = () => {
       try {
         const data = await getProductById(id);
         setProduct(data);
+        if (data && data.variants && data.variants.length > 0) {
+          const initialOptions = {};
+          data.variants.forEach(v => {
+            if (v.options && v.options.length > 0) {
+              initialOptions[v.name] = v.options[0];
+            }
+          });
+          setSelectedOptions(initialOptions);
+        }
       } catch (err) {
         console.error('Error fetching product:', err);
       } finally {
@@ -42,8 +51,14 @@ const ProductDetails = () => {
   );
 
   const role = localStorage.getItem('userRole');
-  const displayedPrice = Number(product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice) || 0);
-  const originalPrice = Number(product.retailPrice || 0);
+  
+  // Find current combination
+  const currentCombinationKey = product ? Object.values(selectedOptions).join(' / ') : '';
+  const currentVariantItem = product?.variantItems?.find(vi => vi.combination === currentCombinationKey);
+
+  const displayedPrice = currentVariantItem ? currentVariantItem.price : Number(product?.price || (role === 'dealer' ? product?.wholesalePrice : product?.retailPrice) || 0);
+  const originalPrice = Number(product?.retailPrice || 0);
+  const stockAvailable = currentVariantItem ? currentVariantItem.stock : (product?.stock || 0);
 
   // Get the main product image URL
   const allImages = [product.image, ...(product.images || [])].filter(Boolean);
@@ -98,15 +113,11 @@ const ProductDetails = () => {
             </span>
             <h1 className="text-4xl md:text-5xl font-serif mb-2 leading-tight font-bold">{product.name}</h1>
             
-            {(product.variantName || product.type) && (
-              <div className="flex flex-wrap gap-4 mb-4 text-xs text-gray-500 uppercase tracking-widest font-semibold">
-                {product.variantName && <span>Variant: {product.variantName}</span>}
-                {product.type && <span>Type: {product.type}</span>}
-              </div>
-            )}
-            
-            <div className="flex flex-col mb-8">
+            <div className="flex flex-col mb-4">
               <p className="text-3xl font-serif text-action font-bold">₹{(!isNaN(displayedPrice) && displayedPrice > 0) ? displayedPrice.toFixed(2) : '0.00'}</p>
+              <p className={`text-xs mt-1 font-bold ${stockAvailable > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {stockAvailable > 0 ? `${stockAvailable} in stock` : 'Out of stock'}
+              </p>
               {role === 'dealer' && originalPrice && originalPrice > displayedPrice && (
                 <p className="text-sm text-gray-400 line-through">MRP: ₹{originalPrice.toFixed(2)}</p>
               )}
@@ -118,14 +129,14 @@ const ProductDetails = () => {
 
             {/* Variants */}
             {product.variants && product.variants.length > 0 && product.variants.map((variant, vIdx) => (
-              <div key={vIdx} className="mb-8">
-                <h3 className="text-xs uppercase tracking-widest font-bold mb-4">{variant.name}</h3>
+              <div key={vIdx} className="mb-6">
+                <h3 className="text-xs uppercase tracking-widest font-bold mb-3">{variant.name}</h3>
                 <div className="flex flex-wrap gap-3">
                   {variant.options.map((opt, oIdx) => (
                     <button 
                       key={oIdx}
-                      className={`px-4 py-2 text-xs uppercase tracking-widest border transition-all ${selectedVariant === oIdx ? 'border-action bg-action text-white' : 'border-gray-200 hover:border-action'}`}
-                      onClick={() => setSelectedVariant(oIdx)}
+                      className={`px-4 py-2 text-xs uppercase tracking-widest border transition-all ${selectedOptions[variant.name] === opt ? 'border-action bg-action text-white' : 'border-gray-200 hover:border-action'}`}
+                      onClick={() => setSelectedOptions({ ...selectedOptions, [variant.name]: opt })}
                     >
                       {opt}
                     </button>
@@ -137,11 +148,12 @@ const ProductDetails = () => {
             {/* Actions */}
             <div className="flex space-x-4 mb-12">
               <button 
-                onClick={() => addToCart({ ...product, price: Number(displayedPrice) || 0 })}
-                className="flex-grow bg-action hover:bg-primary text-white font-bold py-4 text-xs uppercase tracking-widest transition-colors flex items-center justify-center space-x-3 shadow-md"
+                onClick={() => addToCart({ ...product, price: Number(displayedPrice) || 0, selectedVariant: currentCombinationKey })}
+                className="flex-grow bg-action hover:bg-primary text-white font-bold py-4 text-xs uppercase tracking-widest transition-colors flex items-center justify-center space-x-3 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={stockAvailable <= 0}
               >
                 <ShoppingCart size={18} />
-                <span>Add to Cart</span>
+                <span>{stockAvailable > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
               </button>
             </div>
 

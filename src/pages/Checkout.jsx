@@ -31,6 +31,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [newOrderId, setNewOrderId] = useState('');
+  const [finalAmount, setFinalAmount] = useState(0);
   const [exchangeContext, setExchangeContext] = useState(null);
 
   useEffect(() => {
@@ -210,8 +211,9 @@ const Checkout = () => {
               product: item._id,
               name: item.name,
               quantity: item.quantity,
-              price: item.price,
-              image: item.image || item.images?.[0] || ''
+              price: Number(item.price) || 0,
+              image: item.image || item.images?.[0] || '',
+              variant: item.selectedVariant
             })),
             totalAmount: finalPayable,
             shippingAddress: { ...shippingData }
@@ -221,6 +223,7 @@ const Checkout = () => {
         if (mockVerifyRes.status === 200) {
           await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: "Replacement Completed" });
           localStorage.removeItem('exchangeContext');
+          setFinalAmount(finalPayable);
           setOrderComplete(true);
           setNewOrderId(mockVerifyRes.data.orderId);
           clearCart();
@@ -247,11 +250,12 @@ const Checkout = () => {
           items: cartItems.map(it => ({
             product: it._id,
             name: it.name,
-            price: it.dealerPrice || it.price,
+            price: Number(it.price) || 0,
             quantity: it.quantity,
-            image: it.image
+            image: it.image,
+            variant: it.selectedVariant
           })),
-          totalAmount: cartTotal,
+          totalAmount: finalPayable,
           shippingAddress: {
             name: `${shippingData.firstName} ${shippingData.lastName}`,
             address: shippingData.address,
@@ -284,10 +288,11 @@ const Checkout = () => {
                   product: item._id,
                   name: item.name,
                   quantity: item.quantity,
-                  price: item.price,
-                  image: item.image || item.images?.[0] || ''
+                  price: Number(item.price) || 0,
+                  image: item.image || item.images?.[0] || '',
+                  variant: item.selectedVariant
                 })),
-                totalAmount: cartTotal,
+                totalAmount: finalPayable,
                 shippingAddress: { ...shippingData }
               }
             });
@@ -297,6 +302,7 @@ const Checkout = () => {
                  await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: "Replacement Completed" });
                  localStorage.removeItem('exchangeContext');
               }
+              setFinalAmount(finalPayable);
               setOrderComplete(true);
               setNewOrderId(verifyRes.data.orderId);
               clearCart();
@@ -332,6 +338,7 @@ const Checkout = () => {
         </motion.div>
         <h2 className="text-4xl font-serif text-primary mb-4 font-bold">Order Confirmed!</h2>
         <p className="text-gray-500 mb-2 max-w-sm font-sans">Thank you for your purchase. Your order has been received.</p>
+        <p className="text-2xl font-serif text-primary font-bold mb-2">Amount Paid: ₹{(Number(finalAmount) || 0).toFixed(2)}</p>
         <p className="text-action font-bold mb-8">Order ID: #{newOrderId.slice(-8).toUpperCase()}</p>
         <Link to="/shop" className="bg-primary text-white px-10 py-4 text-xs font-bold uppercase tracking-widest hover:bg-action transition-all shadow-xl">
           Continue Shopping
@@ -470,6 +477,9 @@ const Checkout = () => {
                     </div>
                     <div className="flex-grow">
                       <p className="text-sm font-serif text-primary font-bold line-clamp-1">{item.name}</p>
+                      {item.selectedVariant && (
+                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Variant: {item.selectedVariant}</p>
+                      )}
                       <p className="text-[10px] text-gray-400 uppercase tracking-widest">Qty: {item.quantity}</p>
                     </div>
                     <p className="text-sm font-bold text-primary">₹{(Number(item.price || 0) * item.quantity).toFixed(2)}</p>

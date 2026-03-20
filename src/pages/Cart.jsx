@@ -42,7 +42,7 @@ const Cart = () => {
             </div>
 
             {cartItems.map((item) => (
-              <div key={item._id} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-6 border-b border-gray-100 bg-white p-4 md:p-0 md:bg-transparent shadow-sm md:shadow-none rounded-lg md:rounded-none">
+              <div key={`${item._id}-${item.selectedVariant}`} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-6 border-b border-gray-100 bg-white p-4 md:p-0 md:bg-transparent shadow-sm md:shadow-none rounded-lg md:rounded-none">
                 <div className="col-span-1 md:col-span-6 flex items-center space-x-6">
                   <Link to={`/product/${item._id}`} className="shrink-0 w-24 h-24 overflow-hidden rounded bg-gray-100 block border border-gray-200 relative">
                     {getImageUrl(item.image || item.images?.[0]) ? (
@@ -72,11 +72,16 @@ const Cart = () => {
                     <span className="text-[10px] text-accent uppercase tracking-widest font-bold mb-1">
                       {item.category?.name || item.category || 'Product'}
                     </span>
-                    <Link to={`/product/${item._id}`} className="text-lg font-serif text-primary hover:text-action transition-colors mb-2">
+                    <Link to={`/product/${item._id}`} className="text-lg font-serif text-primary hover:text-action transition-colors mb-1">
                       {item.name || 'Untitled Product'}
                     </Link>
+                    {item.selectedVariant && (
+                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 bg-gray-50 self-start px-2 py-1 border border-gray-100 rounded-sm">
+                        Variant: {item.selectedVariant}
+                      </span>
+                    )}
                     <button 
-                      onClick={() => removeFromCart(item._id)}
+                      onClick={() => removeFromCart(item._id, item.selectedVariant)}
                       className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors self-start underline underline-offset-4"
                     >
                       <Trash2 size={12} /> Remove
@@ -94,7 +99,7 @@ const Cart = () => {
                   <div className="md:hidden text-xs font-bold uppercase text-gray-500">Quantity</div>
                   <div className="flex items-center border border-gray-200 bg-white">
                     <button 
-                      onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.quantity - 1)}
                       className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                       disabled={item.quantity <= 1}
                     >
@@ -102,7 +107,7 @@ const Cart = () => {
                     </button>
                     <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
                     <button 
-                      onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.quantity + 1)}
                       className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                     >
                       <Plus size={14} />
