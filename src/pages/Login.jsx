@@ -12,6 +12,19 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^[0-9]{10,15}$/;
+
+    if (!emailRegex.test(email) && !phoneRegex.test(email)) {
+      return setFeedback({ 
+        show: true, 
+        type: 'error', 
+        message: 'Please enter a valid email address or 10-15 digit phone number.' 
+      });
+    }
+
     setLoading(true);
     try {
       const requiredRole = localStorage.getItem('userRole'); // 'customer' or 'dealer'
@@ -37,14 +50,16 @@ const Login = () => {
         <h2 className="text-3xl font-brand font-bold text-center mb-8 uppercase tracking-widest text-primary">Login</h2>
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Email</label>
+            <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Email or Phone Number</label>
             <input 
-              type="email" 
+              type="text" 
               required
+              pattern="(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$)|(^[0-9]{10,15}$)"
+              title="Please enter a valid email address or a 10-15 digit phone number"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
-              placeholder="Enter your email"
+              placeholder="Enter your email or phone"
             />
           </div>
           <div>

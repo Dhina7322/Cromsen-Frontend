@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 // import { SpeedInsights } from '@vercel/speed-insights/react'; // Removed to fix resolve error outdoors
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -14,7 +14,6 @@ import Services from './pages/Services';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
-import { useLocation } from 'react-router-dom';
 
 
 // Simplified Admin Imports
@@ -35,21 +34,25 @@ import RoleSelector from './components/RoleSelector';
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole'));
   const location = useLocation();
+  const navigate = useNavigate();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   const handleRoleSelect = (role) => {
     localStorage.setItem('userRole', role);
     setUserRole(role);
     if (role === 'admin') {
-      window.location.href = '/admin/login';
+      navigate('/admin/login');
     } else {
-      window.location.href = '/login';
+      navigate('/login');
     }
   };
 
   useEffect(() => {
     // Check if role is set, if not we show selector
-  }, []);
+    if (!userRole && !isAdminRoute && location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+  }, [userRole, isAdminRoute, location.pathname, navigate]);
 
   if (!userRole && !isAdminRoute) {
     return <RoleSelector onSelect={handleRoleSelect} />;

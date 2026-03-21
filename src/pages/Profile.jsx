@@ -4,6 +4,10 @@ import { User, Phone, Building, Mail, Lock, Camera, Save, ArrowLeft, Check, X, A
 import { Link, useNavigate } from "react-router-dom";
 import FeedbackModal from "../components/FeedbackModal";
 
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const phoneRegex = /^[0-9]{10,15}$/;
+const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
 export default function Profile() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -57,7 +61,24 @@ export default function Profile() {
   }, [navigate]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+    
+    // Strict numeric-only for phone
+    if (name === 'phone') {
+      value = value.replace(/\D/g, '').slice(0, 15);
+    }
+
+    // Real-time email character filtering
+    if (name === 'email') {
+      value = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+    }
+    
+    // Auto-uppercase for GST
+    if (name === 'gstNumber') {
+      value = value.toUpperCase().slice(0, 15);
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const getPasswordStrength = (pwd) => {
@@ -102,6 +123,18 @@ export default function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!emailRegex.test(formData.email)) {
+      return setFeedback({ show: true, type: 'error', message: 'Please enter a valid email address.' });
+    }
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      return setFeedback({ show: true, type: 'error', message: 'Phone number must be 10-15 digits.' });
+    }
+    if (formData.gstNumber && !gstRegex.test(formData.gstNumber)) {
+        return setFeedback({ show: true, type: 'error', message: 'Please enter a valid 15-character GST number (e.g., 22AAAAA0000A1Z5).' });
+    }
+
     if (!formData.currentPassword) {
       return setFeedback({ show: true, type: 'error', message: 'Current password is required to save changes.' });
     }
@@ -184,11 +217,33 @@ export default function Profile() {
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">Email</label>
-              <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-50 focus:bg-white outline-none transition-all text-sm font-semibold" required />
+              <div className="relative">
+                <input 
+                  type="email" 
+                  name="email" 
+                  value={formData.email} 
+                  onChange={handleChange} 
+                  className={`w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 outline-none transition-all text-sm font-semibold pr-10 ${
+                    formData.email ? (emailRegex.test(formData.email) ? 'focus:ring-green-500/20 ring-1 ring-green-500/20' : 'focus:ring-red-500/20 ring-1 ring-red-500/20') : 'focus:ring-blue-50'
+                  }`} 
+                  required 
+                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" 
+                  title="Please enter a valid email address" 
+                />
+                {formData.email && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {emailRegex.test(formData.email) ? (
+                      <Check size={14} className="text-green-500" />
+                    ) : (
+                      <AlertCircle size={14} className="text-red-500" />
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">Phone</label>
-              <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-50 focus:bg-white outline-none transition-all text-sm font-semibold" />
+              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-50 focus:bg-white outline-none transition-all text-sm font-semibold" placeholder="10-15 digits only" />
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">{user?.role === 'dealer' ? 'Company Name' : 'Company'}</label>

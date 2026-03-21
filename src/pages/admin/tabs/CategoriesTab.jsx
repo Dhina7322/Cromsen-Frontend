@@ -84,7 +84,10 @@ export default function CategoriesTab() {
     setAssigningCat(cat);
     // Find products already in this category
     const existingIds = products
-      .filter(p => (p.category?._id || p.category) === cat._id)
+      .filter(p => {
+        const catArr = Array.isArray(p.category) ? p.category : (p.category ? [p.category] : []);
+        return catArr.some(c => (c._id || c) === cat._id);
+      })
       .map(p => p._id);
     setSelectedProductIds(existingIds);
     setIsAssignModalOpen(true);
@@ -148,7 +151,8 @@ export default function CategoriesTab() {
       setIsAssignModalOpen(false);
       fetchData();
     } catch (err) {
-      showToast("error", "Failed to assign products");
+      console.error("Assignment error:", err);
+      showToast("error", err.response?.data?.message || "Failed to assign products");
     } finally {
       setLoading(false);
     }
@@ -204,7 +208,10 @@ export default function CategoriesTab() {
                 <div style={{ marginLeft: '8px' }}>
                   <div className="cust-name">{cat.name}</div>
                   <div className="cust-phone">
-                    {products.filter(p => (p.category?._id || p.category) === cat._id).length} Products Assigned
+                    {products.filter(p => {
+                      const catArr = Array.isArray(p.category) ? p.category : (p.category ? [p.category] : []);
+                      return catArr.some(c => (c._id || c) === cat._id);
+                    }).length} Products Assigned
                   </div>
                 </div>
                 <div style={{ marginLeft: '12px', color: 'var(--text3)' }}>
@@ -232,7 +239,10 @@ export default function CategoriesTab() {
                     <table className="tbl">
                       <tbody style={{ background: '#fcfcfc' }}>
                         {products
-                          .filter(p => (p.category?._id || p.category) === cat._id)
+                          .filter(p => {
+                            const catArr = Array.isArray(p.category) ? p.category : (p.category ? [p.category] : []);
+                            return catArr.some(c => (c._id || c) === cat._id);
+                          })
                           .map(prod => (
                             <tr key={prod._id}>
                               <td style={{ paddingLeft: '60px' }}>
@@ -252,7 +262,10 @@ export default function CategoriesTab() {
                               </td>
                             </tr>
                           ))}
-                        {products.filter(p => (p.category?._id || p.category) === cat._id).length === 0 && (
+                        {products.filter(p => {
+                          const catArr = Array.isArray(p.category) ? p.category : (p.category ? [p.category] : []);
+                          return catArr.some(c => (c._id || c) === cat._id);
+                        }).length === 0 && (
                           <tr>
                             <td colSpan="2" className="empty-row" style={{ fontSize: '12px', padding: '20px' }}>
                               No products assigned yet

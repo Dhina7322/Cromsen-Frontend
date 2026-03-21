@@ -25,10 +25,12 @@ export default function AdminLogin() {
       });
       
       const admin = res.data;
-      sessionStorage.setItem("cromsen_auth", "true");
-      sessionStorage.setItem("cromsen_user", admin.username);
-      sessionStorage.setItem("cromsen_role", admin.role || "sub");
-      sessionStorage.setItem("cromsen_uid", admin._id);
+      const expire = new Date().getTime() + 30 * 60 * 1000;
+      localStorage.setItem("cromsen_auth", "true");
+      localStorage.setItem("cromsen_user", admin.username);
+      localStorage.setItem("cromsen_role", admin.role || "sub");
+      localStorage.setItem("cromsen_uid", admin._id);
+      localStorage.setItem("cromsen_auth_expire", expire.toString());
       
       navigate("/admin");
     } catch (err) {

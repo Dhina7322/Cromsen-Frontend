@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import HeroSection from '../components/Hero';
 import CategoryShowcase from '../components/CategoryShowcase';
 import FeaturedProducts from '../components/FeaturedProducts';
@@ -9,6 +11,36 @@ import Contact from './Contact'; // We will include a portion of Contact on the 
 import { MapPin, AtSign, Phone } from 'lucide-react';
 
 const Home = () => {
+  const testimonials = [
+    {
+      id: 1,
+      name: 'Joseph',
+      quote: "The made-to-measure curtains are beautifully crafted and fit perfectly in our home. Excellent quality and professional service from start to finish.",
+      image: 'https://randomuser.me/api/portraits/men/32.jpg'
+    },
+    {
+      id: 2,
+      name: 'Sarah Chen',
+      quote: "I am extremely impressed with the quality of the mosquito nets. They are practically invisible and work perfectly. Highly recommend Cromsen for their professional installation.",
+      image: 'https://randomuser.me/api/portraits/women/44.jpg'
+    },
+    {
+      id: 3,
+      name: 'Michael Rodriguez',
+      quote: "The team was very helpful in choosing the right blinds for my office. The installation was quick and clean. The dynamic design added a premium feel to my workspace.",
+      image: 'https://randomuser.me/api/portraits/men/46.jpg'
+    }
+  ];
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [testimonials.length]);
+
   return (
     <div className="overflow-x-hidden">
       <HeroSection />
@@ -18,8 +50,36 @@ const Home = () => {
       <KeyFactors />
       <FeaturedProducts />
       
-      {/* Testimonials Section */}
-      <Testimonials />
+      {/* Subscribe Section */}
+      <section className="py-24 bg-primary text-white text-center flex flex-col items-center">
+        <div className="container mx-auto px-5 max-w-[1200px]">
+          <div className="text-white text-xs tracking-[0.2em] font-sans uppercase mb-6 font-bold">Subscribe</div>
+          <p className="text-xl md:text-2xl font-serif leading-relaxed mb-10 w-2/3 mx-auto text-gray-300">
+            Receive special offers & updates via email. You will receive an email shortly to confirm your subscription.
+          </p>
+          
+          <form className="flex w-full max-w-md mx-auto mb-16">
+            <input 
+              type="email" 
+              placeholder="Your email" 
+              className="bg-transparent border-b border-white px-4 py-3 text-sm flex-grow focus:outline-none focus:border-action transition-colors text-white text-center"
+            />
+            <button className="bg-action text-white px-6 py-3 text-sm font-sans uppercase tracking-[0.2em] font-bold shadow-md hover:bg-white hover:text-primary transition-colors">Join</button>
+          </form>
+
+          <div className="flex justify-center space-x-4">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
+            </div>
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent relative -top-2 scale-110 z-10">
+              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Team" className="w-full h-full object-cover grayscale" />
+            </div>
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
+              <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Head Office Map Section (Simplified from reference layout) */}
       <section className="py-20 bg-white border-t border-gray-100">

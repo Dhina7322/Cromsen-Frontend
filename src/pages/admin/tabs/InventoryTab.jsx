@@ -675,34 +675,37 @@ export default function InventoryTab() {
                   </div>
 
 
-                  <div className="form-r3">
-                    <div className="fg sm:col-span-2">
-                      <label>Categories (Select one or more)</label>
-                      <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 max-h-48 overflow-y-auto no-scrollbar">
-                        {categories.map(cat => (
-                          <label key={cat._id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-gray-200">
-                            <input 
-                              type="checkbox" 
-                              className="w-4 h-4 rounded accent-action"
-                              checked={Array.isArray(formData.category) ? formData.category.includes(cat._id) : formData.category === cat._id}
-                              onChange={(e) => {
-                                const currentCats = Array.isArray(formData.category) ? formData.category : (formData.category ? [formData.category] : []);
-                                if (e.target.checked) {
-                                  setFormData({ ...formData, category: [...currentCats, cat._id] });
-                                } else {
-                                  setFormData({ ...formData, category: currentCats.filter(id => id !== cat._id) });
-                                }
-                              }}
-                            />
-                            <span className="text-xs font-bold text-gray-700">{cat.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="fg">
-                      <label>Stock Count</label>
-                      <input required type="number" value={formData.stock}
-                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+                  <div style={{ width: '100%', marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Categories (Select one or more)</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {categories.map(cat => (
+                        <label 
+                          key={cat._id} 
+                          className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all select-none group shadow-sm"
+                          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', margin: 0 }}
+                        >
+                          <span 
+                            className="text-[11px] sm:text-xs font-bold text-gray-700 group-hover:text-blue-700 transition-colors uppercase tracking-tight text-left flex-1" 
+                            style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: '10px' }}
+                          >
+                            {cat.name}
+                          </span>
+                          <input 
+                            type="checkbox" 
+                            className="text-blue-600 focus:ring-blue-500 transition-all cursor-pointer flex-shrink-0"
+                            style={{ width: '16px', height: '16px', margin: 0, padding: 0, display: 'block' }}
+                            checked={Array.isArray(formData.category) ? formData.category.includes(cat._id) : formData.category === cat._id}
+                            onChange={(e) => {
+                              const currentCats = Array.isArray(formData.category) ? formData.category : (formData.category ? [formData.category] : []);
+                              if (e.target.checked) {
+                                setFormData({ ...formData, category: [...currentCats, cat._id] });
+                              } else {
+                                setFormData({ ...formData, category: currentCats.filter(id => id !== cat._id) });
+                              }
+                            }}
+                          />
+                        </label>
+                      ))}
                     </div>
                   </div>
 

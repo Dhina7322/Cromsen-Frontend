@@ -41,8 +41,8 @@ export default function AdminDashboard() {
 
   let user = { name: "Admin", role: "main" };
   try {
-    const sessionUser = sessionStorage.getItem("cromsen_user");
-    const sessionRole = sessionStorage.getItem("cromsen_role");
+    const sessionUser = localStorage.getItem("cromsen_user");
+    const sessionRole = localStorage.getItem("cromsen_role");
     if (sessionUser) {
       user = { name: sessionUser, role: sessionRole || "sub" };
     }
@@ -51,8 +51,13 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    const isAuth = sessionStorage.getItem("cromsen_auth");
-    if (!isAuth) {
+    const isAuth = localStorage.getItem("cromsen_auth");
+    const expireTime = localStorage.getItem("cromsen_auth_expire");
+    const now = new Date().getTime();
+
+    if (!isAuth || !expireTime || now > parseInt(expireTime)) {
+      ['cromsen_auth', 'cromsen_user', 'cromsen_role', 'cromsen_uid', 'cromsen_auth_expire']
+        .forEach(k => localStorage.removeItem(k));
       navigate("/admin/login");
       return;
     }
@@ -122,7 +127,8 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    sessionStorage.clear();
+    ['cromsen_auth', 'cromsen_user', 'cromsen_role', 'cromsen_uid', 'cromsen_auth_expire']
+      .forEach(k => localStorage.removeItem(k));
     navigate("/admin/login");
   };
 
