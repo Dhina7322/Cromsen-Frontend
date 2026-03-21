@@ -44,7 +44,6 @@ const Home = () => {
     <div className="overflow-x-hidden">
       <HeroSection />
       <CategoryShowcase />
-      <AboutSection />
       <ServiceFeatures />
       <KeyFactors />
       <FeaturedProducts />

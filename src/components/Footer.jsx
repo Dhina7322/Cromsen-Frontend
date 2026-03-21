@@ -56,16 +56,20 @@ const Footer = () => {
 
             <div className="w-full h-px bg-gray-100 mb-8" />
             
-            <div className="flex space-x-6 mb-4">
-              <a href="#" className="text-gray-400 hover:text-action transition-all">
-                <Facebook size={16} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-action transition-all">
-                <Instagram size={16} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-action transition-all">
-                <Twitter size={16} />
-              </a>
+            <div className="w-full flex flex-col items-start gap-6">
+              <div className="relative pb-2">
+                <h3 className="text-3xl font-medium text-[#0089d1] font-sans capitalize tracking-tight">Our Policy</h3>
+                <div className="absolute bottom-0 left-0 w-16 h-1 bg-[#e67e22]" />
+              </div>
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-[11px] uppercase tracking-[0.2em] font-bold text-gray-800">
+                <Link to="/privacy-policy" className="hover:text-action transition-colors">Privacy Policy</Link>
+                <div className="hidden md:block w-px h-3 bg-gray-300" />
+                <Link to="/terms-conditions" className="hover:text-action transition-colors">Terms & Conditions</Link>
+                <div className="hidden md:block w-px h-3 bg-gray-300" />
+                <Link to="/return-refund-policy" className="hover:text-action transition-colors">Return & Refund Policy</Link>
+                <div className="hidden md:block w-px h-3 bg-gray-300" />
+                <Link to="/shipping-policy" className="hover:text-action transition-colors">Shipping Policy</Link>
+              </div>
             </div>
           </footer>
         </div>

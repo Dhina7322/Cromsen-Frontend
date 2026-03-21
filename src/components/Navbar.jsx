@@ -91,7 +91,6 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/shop' },
     { name: 'Services', path: '/services' },
-    { name: 'About Us', path: '/about' },
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -310,7 +309,21 @@ const Navbar = () => {
                 return (
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2 group cursor-pointer relative">
-                      <User size={16} className="text-action" />
+                      {userObj.avatar ? (
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
+                          <img 
+                            src={getImageUrl(userObj.avatar)} 
+                            alt={firstName} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = '<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="text-action h-4 w-4 mx-auto mt-1" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <User size={16} className="text-action" />
+                      )}
                       <span className="text-white hover:text-action transition-colors capitalize">
                         {firstName}
                       </span>
@@ -571,7 +584,21 @@ const Navbar = () => {
                   {localStorage.getItem('userInfo') ? (
                     <>
                       <div className="flex items-center space-x-2 text-action px-1">
-                        <User size={16} />
+                        {JSON.parse(localStorage.getItem('userInfo')).avatar ? (
+                          <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 shrink-0">
+                            <img 
+                              src={getImageUrl(JSON.parse(localStorage.getItem('userInfo')).avatar)} 
+                              alt="Avatar" 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = '<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <User size={16} />
+                        )}
                         <span className="text-sm uppercase tracking-widest font-medium">
                           {JSON.parse(localStorage.getItem('userInfo')).name}
                         </span>

@@ -84,7 +84,9 @@ const Cart = () => {
                   </Link>
                   <div className="flex flex-col">
                     <span className="text-[10px] text-accent uppercase tracking-widest font-bold mb-1">
-                      {item.category?.name || item.category || 'Product'}
+                      {Array.isArray(item.category) 
+                        ? (item.category[0]?.name || item.category[0] || 'Product') 
+                        : (item.category?.name || item.category || 'Product')}
                     </span>
                     <Link to={`/product/${item._id}`} className="text-lg font-serif text-primary hover:text-action transition-colors mb-1">
                       {item.name || 'Untitled Product'}
