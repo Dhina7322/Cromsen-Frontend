@@ -4,6 +4,7 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import AboutSection from '../components/AboutSection';
 import ServiceFeatures from '../components/ServiceFeatures';
 import KeyFactors from '../components/KeyFactors';
+import Testimonials from '../components/Testimonials';
 import Contact from './Contact'; // We will include a portion of Contact on the home page
 import { MapPin, AtSign, Phone } from 'lucide-react';
 
@@ -17,36 +18,8 @@ const Home = () => {
       <KeyFactors />
       <FeaturedProducts />
       
-      {/* Subscribe Section */}
-      <section className="py-24 bg-primary text-white text-center flex flex-col items-center">
-        <div className="container mx-auto px-5 max-w-[1200px]">
-          <div className="text-white text-xs tracking-[0.2em] font-sans uppercase mb-6 font-bold">Subscribe</div>
-          <p className="text-xl md:text-2xl font-serif leading-relaxed mb-10 w-2/3 mx-auto text-gray-300">
-            Receive special offers & updates via email. You will receive an email shortly to confirm your subscription.
-          </p>
-          
-          <form className="flex w-full max-w-md mx-auto mb-16">
-            <input 
-              type="email" 
-              placeholder="Your email" 
-              className="bg-transparent border-b border-white px-4 py-3 text-sm flex-grow focus:outline-none focus:border-action transition-colors text-white text-center"
-            />
-            <button className="bg-action text-white px-6 py-3 text-sm font-sans uppercase tracking-[0.2em] font-bold shadow-md hover:bg-white hover:text-primary transition-colors">Join</button>
-          </form>
-
-          <div className="flex justify-center space-x-4">
-            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
-            </div>
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent relative -top-2 scale-110 z-10">
-              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Team" className="w-full h-full object-cover grayscale" />
-            </div>
-            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
-              <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Testimonials Section */}
+      <Testimonials />
 
       {/* Head Office Map Section (Simplified from reference layout) */}
       <section className="py-20 bg-white border-t border-gray-100">
