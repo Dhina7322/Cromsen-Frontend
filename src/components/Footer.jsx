@@ -57,9 +57,9 @@ const Footer = () => {
             <div className="w-full h-px bg-gray-100 mb-8" />
             
             <div className="w-full flex flex-col items-start gap-6">
-              <div className="relative pb-2">
-                <h3 className="text-3xl font-medium text-[#0089d1] font-sans capitalize tracking-tight">Our Policy</h3>
-                <div className="absolute bottom-0 left-0 w-16 h-1 bg-[#e67e22]" />
+              <div className="relative pb-2 flex flex-col items-start">
+                <h3 className="text-xl font-medium text-[#0089d1] font-sans capitalize tracking-tight">Policy</h3>
+                <div className="w-12 h-0.5 bg-[#e67e22] mt-1" />
               </div>
               <div className="flex flex-wrap items-center gap-x-8 gap-y-4 text-[11px] uppercase tracking-[0.2em] font-bold text-gray-800">
                 <Link to="/privacy-policy" className="hover:text-action transition-colors">Privacy Policy</Link>
