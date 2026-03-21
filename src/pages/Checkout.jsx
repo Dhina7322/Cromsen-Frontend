@@ -6,7 +6,7 @@ import {
   Truck, 
   CreditCard, 
   ArrowLeft, 
-  CheckCircle2, 
+  CheckCircle, 
   ImageIcon, 
   Plus, 
   Edit2, 
@@ -355,7 +355,7 @@ const Checkout = () => {
     return (
       <div className="min-h-screen pt-40 pb-20 flex flex-col items-center bg-white text-center px-4">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 size={48} />
+          <CheckCircle size={48} />
         </motion.div>
         <h2 className="text-4xl font-serif text-primary mb-4 font-bold">Order Confirmed!</h2>
         <p className="text-gray-500 mb-2 max-w-sm font-sans">Thank you for your purchase. Your order has been received.</p>

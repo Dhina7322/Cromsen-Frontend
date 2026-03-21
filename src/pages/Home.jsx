@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import HeroSection from '../components/Hero';
 import CategoryShowcase from '../components/CategoryShowcase';
 import FeaturedProducts from '../components/FeaturedProducts';
@@ -9,19 +10,35 @@ import Contact from './Contact'; // We will include a portion of Contact on the 
 import { MapPin, AtSign, Phone } from 'lucide-react';
 
 const Home = () => {
-  const [subscribeEmail, setSubscribeEmail] = useState('');
-  const [subscribeStatus, setSubscribeStatus] = useState({ type: '', message: '' });
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(subscribeEmail)) {
-      setSubscribeStatus({ type: 'error', message: 'Please enter a valid email address.' });
-      return;
+  const testimonials = [
+    {
+      id: 1,
+      name: 'Joseph',
+      quote: "The made-to-measure curtains are beautifully crafted and fit perfectly in our home. Excellent quality and professional service from start to finish.",
+      image: 'https://randomuser.me/api/portraits/men/32.jpg'
+    },
+    {
+      id: 2,
+      name: 'Sarah Chen',
+      quote: "I am extremely impressed with the quality of the mosquito nets. They are practically invisible and work perfectly. Highly recommend Cromsen for their professional installation.",
+      image: 'https://randomuser.me/api/portraits/women/44.jpg'
+    },
+    {
+      id: 3,
+      name: 'Michael Rodriguez',
+      quote: "The team was very helpful in choosing the right blinds for my office. The installation was quick and clean. The dynamic design added a premium feel to my workspace.",
+      image: 'https://randomuser.me/api/portraits/men/46.jpg'
     }
-    setSubscribeStatus({ type: 'success', message: 'Thank you for subscribing!' });
-    setSubscribeEmail('');
-  };
+  ];
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [testimonials.length]);
 
   return (
     <div className="overflow-x-hidden">
@@ -32,43 +49,55 @@ const Home = () => {
       <KeyFactors />
       <FeaturedProducts />
       
-      {/* Subscribe Section */}
-      <section className="py-24 bg-primary text-white text-center flex flex-col items-center">
-        <div className="container mx-auto px-5 max-w-[1200px]">
-          <div className="text-white text-xs tracking-[0.2em] font-sans uppercase mb-6 font-bold">Subscribe</div>
-          <p className="text-xl md:text-2xl font-serif leading-relaxed mb-10 w-2/3 mx-auto text-gray-300">
-            Receive special offers & updates via email. You will receive an email shortly to confirm your subscription.
-          </p>
-          
-          <form className="flex flex-col w-full max-w-md mx-auto mb-16" onSubmit={handleSubscribe}>
-            <div className="flex w-full mb-2">
-              <input 
-                type="email" 
-                placeholder="Your email" 
-                value={subscribeEmail}
-                onChange={(e) => setSubscribeEmail(e.target.value)}
-                className="bg-transparent border-b border-white px-4 py-3 text-sm flex-grow focus:outline-none focus:border-action transition-colors text-white text-center"
-              />
-              <button type="submit" className="bg-action text-white px-6 py-3 text-sm font-sans uppercase tracking-[0.2em] font-bold shadow-md hover:bg-white hover:text-primary transition-colors">Join</button>
-            </div>
-            {subscribeStatus.message && (
-              <p className={`text-xs font-bold uppercase tracking-widest mt-2 ${subscribeStatus.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
-                {subscribeStatus.message}
-              </p>
-            )}
-          </form>
-
-          <div className="flex justify-center space-x-4">
-            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
-            </div>
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent relative -top-2 scale-110 z-10">
-              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Team" className="w-full h-full object-cover grayscale" />
-            </div>
-            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
-              <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
-            </div>
+      {/* Testimonials Section */}
+      <section className="py-24 bg-primary text-white text-center flex flex-col items-center relative overflow-hidden">
+        <div className="container mx-auto px-5 max-w-[1200px] z-10">
+          <div className="flex flex-col items-center mb-12">
+            <h2 className="text-2xl font-sans font-medium mb-3 tracking-wide">Testimonials</h2>
+            <div className="w-10 h-1 border-t-2 border-action"></div>
           </div>
+
+          <div className="relative h-[250px] md:h-[200px] flex items-center justify-center mb-12">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="max-w-3xl"
+              >
+                <p className="text-xl md:text-2xl font-serif italic leading-relaxed text-gray-300 mb-8 px-4">
+                  “{testimonials[activeIndex].quote}”
+                </p>
+                <div className="text-lg font-sans text-gray-400 font-medium">
+                  {testimonials[activeIndex].name}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div className="flex justify-center items-center space-x-6">
+            {testimonials.map((t, idx) => (
+              <button
+                key={t.id}
+                onClick={() => setActiveIndex(idx)}
+                className={`transition-all duration-500 rounded-full overflow-hidden border-2 ${
+                  activeIndex === idx 
+                    ? 'w-20 h-20 border-action scale-110 z-20 shadow-xl' 
+                    : 'w-14 h-14 border-transparent grayscale opacity-50 scale-90 hover:opacity-80'
+                }`}
+              >
+                <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Subtle Decorative Elements */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-5">
+           <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-action rounded-full blur-[100px] -translate-y-1/2"></div>
+           <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-action rounded-full blur-[100px] -translate-y-1/2"></div>
         </div>
       </section>
 

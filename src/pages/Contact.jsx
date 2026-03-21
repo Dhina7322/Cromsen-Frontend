@@ -1,7 +1,10 @@
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle, Check, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import axios from 'axios';
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const phoneRegex = /^[0-9]{10,15}$/;
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -30,9 +33,6 @@ const Contact = () => {
     e.preventDefault();
     
     // Validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const phoneRegex = /^[0-9]{10,15}$/;
-
     if (!emailRegex.test(formData.email)) {
       return setError('Please enter a valid email address.');
     }
@@ -156,16 +156,29 @@ const Contact = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500">Email Address</label>
-                        <input 
-                          required
-                          type="email" 
-                          name="email"
-                          pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                          title="Please enter a valid email address"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="w-full bg-white border border-gray-100 px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors" 
-                        />
+                        <div className="relative">
+                          <input 
+                            required
+                            type="email" 
+                            name="email"
+                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                            title="Please enter a valid email address"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className={`w-full bg-white border px-4 py-3 text-sm focus:outline-none transition-all pr-10 ${
+                              formData.email ? (emailRegex.test(formData.email) ? 'border-green-500 focus:border-green-600' : 'border-red-500 focus:border-red-600') : 'border-gray-100 focus:border-primary'
+                            }`} 
+                          />
+                          {formData.email && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              {emailRegex.test(formData.email) ? (
+                                <Check size={14} className="text-green-500" />
+                              ) : (
+                                <AlertCircle size={14} className="text-red-500" />
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500">Phone Number</label>
@@ -211,7 +224,7 @@ const Contact = () => {
                     className="h-full flex flex-col items-center justify-center text-center py-12"
                   >
                     <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
-                      <CheckCircle2 size={40} />
+                      <CheckCircle size={40} />
                     </div>
                     <h2 className="text-3xl font-serif mb-4">Message Sent!</h2>
                     <p className="text-gray-600 mb-8 max-w-sm">

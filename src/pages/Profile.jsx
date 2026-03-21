@@ -4,6 +4,10 @@ import { User, Phone, Building, Mail, Lock, Camera, Save, ArrowLeft, Check, X, A
 import { Link, useNavigate } from "react-router-dom";
 import FeedbackModal from "../components/FeedbackModal";
 
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const phoneRegex = /^[0-9]{10,15}$/;
+const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
 export default function Profile() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -121,10 +125,6 @@ export default function Profile() {
     e.preventDefault();
     
     // Validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const phoneRegex = /^[0-9]{10,15}$/;
-    const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-
     if (!emailRegex.test(formData.email)) {
       return setFeedback({ show: true, type: 'error', message: 'Please enter a valid email address.' });
     }
@@ -217,7 +217,29 @@ export default function Profile() {
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">Email</label>
-              <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-50 focus:bg-white outline-none transition-all text-sm font-semibold" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address" />
+              <div className="relative">
+                <input 
+                  type="email" 
+                  name="email" 
+                  value={formData.email} 
+                  onChange={handleChange} 
+                  className={`w-full h-11 px-4 bg-gray-50 border-none rounded-xl focus:ring-2 outline-none transition-all text-sm font-semibold pr-10 ${
+                    formData.email ? (emailRegex.test(formData.email) ? 'focus:ring-green-500/20 ring-1 ring-green-500/20' : 'focus:ring-red-500/20 ring-1 ring-red-500/20') : 'focus:ring-blue-50'
+                  }`} 
+                  required 
+                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" 
+                  title="Please enter a valid email address" 
+                />
+                {formData.email && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {emailRegex.test(formData.email) ? (
+                      <Check size={14} className="text-green-500" />
+                    ) : (
+                      <AlertCircle size={14} className="text-red-500" />
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">Phone</label>
