@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProductById } from '../services/api';
-import { ShoppingCart, ChevronRight, Truck, ShieldCheck, RefreshCw, ImageIcon, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, ChevronRight, Truck, ShieldCheck, RefreshCw, ImageIcon, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../utils/imageUtils';
@@ -124,7 +124,7 @@ const ProductDetails = () => {
                 <div className="absolute top-6 left-6">
                     {stockAvailable > 0 ? (
                         <span className="bg-white/90 backdrop-blur-md text-[#10b981] px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-100 flex items-center gap-2 shadow-sm">
-                            <CheckCircle2 size={12} /> In Stock
+                            <CheckCircle size={12} /> In Stock
                         </span>
                     ) : (
                         <span className="bg-red-50/90 backdrop-blur-md text-red-500 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-100 shadow-sm">
@@ -161,7 +161,9 @@ const ProductDetails = () => {
             <div className="flex items-center gap-3 mb-6">
                 <span className="h-[2px] w-8 bg-action"></span>
                 <span className="text-action uppercase tracking-[0.3em] text-[10px] font-black">
-                    {product.category?.name || product.category || "General"}
+                    {Array.isArray(product.category) 
+                      ? (product.category[0]?.name || product.category[0] || "General") 
+                      : (product.category?.name || product.category || "General")}
                 </span>
             </div>
             

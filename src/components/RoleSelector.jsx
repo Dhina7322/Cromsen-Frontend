@@ -42,15 +42,6 @@ const RoleSelector = ({ onSelect }) => {
         </motion.div>
       </div>
       
-      <div className="absolute bottom-12 left-0 right-0 text-center flex flex-col items-center gap-4">
-         <img src={Logo} alt="Cromsen" className="h-6 w-auto object-contain opacity-50 invert" />
-         <button 
-           onClick={() => onSelect('admin')}
-           className="text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition-colors"
-         >
-           Access Admin Portal
-         </button>
-      </div>
     </div>
   );
 };
