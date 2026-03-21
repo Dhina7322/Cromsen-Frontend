@@ -5,7 +5,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductDetails from './pages/ProductDetails';
-import About from './pages/About';
+import PolicyPage from './pages/PolicyPage';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -69,7 +69,7 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/services" element={<Services />} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/:type" element={<PolicyPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

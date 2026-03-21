@@ -6,6 +6,7 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import AboutSection from '../components/AboutSection';
 import ServiceFeatures from '../components/ServiceFeatures';
 import KeyFactors from '../components/KeyFactors';
+import Testimonials from '../components/Testimonials';
 import Contact from './Contact'; // We will include a portion of Contact on the home page
 import { MapPin, AtSign, Phone } from 'lucide-react';
 
@@ -44,60 +45,38 @@ const Home = () => {
     <div className="overflow-x-hidden">
       <HeroSection />
       <CategoryShowcase />
-      <AboutSection />
       <ServiceFeatures />
       <KeyFactors />
       <FeaturedProducts />
       
-      {/* Testimonials Section */}
-      <section className="py-24 bg-primary text-white text-center flex flex-col items-center relative overflow-hidden">
-        <div className="container mx-auto px-5 max-w-[1200px] z-10">
-          <div className="flex flex-col items-center mb-12">
-            <h2 className="text-2xl font-sans font-medium mb-3 tracking-wide">Testimonials</h2>
-            <div className="w-10 h-1 border-t-2 border-action"></div>
-          </div>
+      {/* Subscribe Section */}
+      <section className="py-24 bg-primary text-white text-center flex flex-col items-center">
+        <div className="container mx-auto px-5 max-w-[1200px]">
+          <div className="text-white text-xs tracking-[0.2em] font-sans uppercase mb-6 font-bold">Subscribe</div>
+          <p className="text-xl md:text-2xl font-serif leading-relaxed mb-10 w-2/3 mx-auto text-gray-300">
+            Receive special offers & updates via email. You will receive an email shortly to confirm your subscription.
+          </p>
+          
+          <form className="flex w-full max-w-md mx-auto mb-16">
+            <input 
+              type="email" 
+              placeholder="Your email" 
+              className="bg-transparent border-b border-white px-4 py-3 text-sm flex-grow focus:outline-none focus:border-action transition-colors text-white text-center"
+            />
+            <button className="bg-action text-white px-6 py-3 text-sm font-sans uppercase tracking-[0.2em] font-bold shadow-md hover:bg-white hover:text-primary transition-colors">Join</button>
+          </form>
 
-          <div className="relative h-[250px] md:h-[200px] flex items-center justify-center mb-12">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIndex}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="max-w-3xl"
-              >
-                <p className="text-xl md:text-2xl font-serif italic leading-relaxed text-gray-300 mb-8 px-4">
-                  “{testimonials[activeIndex].quote}”
-                </p>
-                <div className="text-lg font-sans text-gray-400 font-medium">
-                  {testimonials[activeIndex].name}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+          <div className="flex justify-center space-x-4">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
+            </div>
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent relative -top-2 scale-110 z-10">
+              <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Team" className="w-full h-full object-cover grayscale" />
+            </div>
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-transparent">
+              <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Team" className="w-full h-full object-cover grayscale opacity-80" />
+            </div>
           </div>
-
-          <div className="flex justify-center items-center space-x-6">
-            {testimonials.map((t, idx) => (
-              <button
-                key={t.id}
-                onClick={() => setActiveIndex(idx)}
-                className={`transition-all duration-500 rounded-full overflow-hidden border-2 ${
-                  activeIndex === idx 
-                    ? 'w-20 h-20 border-action scale-110 z-20 shadow-xl' 
-                    : 'w-14 h-14 border-transparent grayscale opacity-50 scale-90 hover:opacity-80'
-                }`}
-              >
-                <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Subtle Decorative Elements */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-5">
-           <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-action rounded-full blur-[100px] -translate-y-1/2"></div>
-           <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-action rounded-full blur-[100px] -translate-y-1/2"></div>
         </div>
       </section>
 
