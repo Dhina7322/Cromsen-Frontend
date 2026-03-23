@@ -62,6 +62,7 @@ function App() {
               <Route index element={<DashboardOverviewWrapper />} />
               <Route path="inventory" element={<InventoryTab />} />
               <Route path="categories" element={<CategoriesTab />} />
+              <Route path="homepage" element={<HomepageTab />} />
               <Route path="orders" element={<OrdersTab />} />
               <Route path="inquiries" element={<InquiriesTab />} />
               <Route path="customers" element={<UsersTab />} />

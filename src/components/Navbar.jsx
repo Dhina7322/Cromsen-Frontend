@@ -232,7 +232,6 @@ const Navbar = () => {
                           {filteredSuggestions.products.map((p) => {
                             const oos = p.stock <= 0;
                             return (
-                              <div key={p._id} onClick={() => { navigate(`/product/${p._id}`); setSearchQuery(""); setShowSuggestions(false); }}
                               <div 
                                 key={p.slug || p._id}
                                 onClick={() => { navigate(`/product/${p.slug || p._id}`); setSearchQuery(""); setShowSuggestions(false); }}

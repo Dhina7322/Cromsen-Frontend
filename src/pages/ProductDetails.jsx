@@ -22,7 +22,7 @@ const ProductDetails = () => {
         const data = await getProductById(id);
         
         // Redirection logic: if accessed by ID but slug exists, redirect to slug
-        if (data && data.slug && id === data._id) {
+        if (data && data.slug && String(id) === String(data._id)) {
           navigate(`/product/${data.slug}`, { replace: true });
           return;
         }
