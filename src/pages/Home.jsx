@@ -81,6 +81,7 @@ const Home = () => {
         />
       )}
       
+      <Testimonials />
       {/* Subscribe Section */}
       <section className="py-24 bg-primary text-white text-center flex flex-col items-center">
         <div className="container mx-auto px-5 max-w-[1200px]">

@@ -10,6 +10,40 @@ import { getImageUrl } from "../../../utils/imageUtils";
 import Invoice from "../../../components/admin/Invoice";
 
 const API = "/api";
+const adminHeaders = { headers: { 'x-user-role': 'admin' } };
+
+const PAYMENT_LABELS = {
+  cod: "Cash on Delivery",
+  card: "Credit / Debit Card",
+  upi: "UPI / GPay / PhonePe",
+  netbanking: "Net Banking",
+  wallet: "Mobile Wallet",
+  razorpay: "Online Payment",
+};
+
+const getPaymentLabel = (order) => {
+  const rawMethod = order.paymentMethod || "";
+  let methodLabel = PAYMENT_LABELS[rawMethod.toLowerCase()] || rawMethod || "Cash on Delivery";
+  if (order.paymentInfo?.method) {
+    const m = order.paymentInfo.method.toLowerCase();
+    const details = order.paymentInfo.methodDetails || {};
+    if (m === 'card' && details.card?.network) methodLabel = `${details.card.network} Card (**** ${details.card.last4})`;
+    else if (m === 'upi' && details.vpa) methodLabel = `UPI (GPay/PhonePe: ${details.vpa})`;
+    else methodLabel = PAYMENT_LABELS[m] || order.paymentInfo.method;
+  }
+  return methodLabel;
+};
+
+const getPaymentType = (order) => {
+  const method = (order.paymentInfo?.method || order.paymentMethod || "COD").toLowerCase();
+  if (method === 'card') return "CARD";
+  if (method === 'upi') return "UPI";
+  if (method === 'razorpay') return "ONLINE";
+  if (method === 'cod') return "COD";
+  if (method === 'netbanking') return "NET BANKING";
+  if (method === 'wallet') return "WALLET";
+  return method.toUpperCase();
+};
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KPI({ label, value, icon, color }) {
@@ -55,7 +89,7 @@ function DropdownPill({ label, options, statusFilter, counts, onSelect }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
-            className="absolute left-0 top-full mt-1 z-50 bg-white border border-gray-100 rounded-xl shadow-xl py-1 min-w-[210px] overflow-hidden"
+            className="absolute left-0 top-full mt-1 z-50 bg-white border border-gray-100 py-1 min-w-[210px] overflow-hidden"
           >
             {options.map(s => (
               <li
@@ -298,7 +332,7 @@ export default function OrdersTab() {
               placeholder="Search order ID or customer..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-action/20 focus:border-action transition-all shadow-sm placeholder:text-gray-400"
+              className="w-full bg-white border border-gray-200 pl-9 pr-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-action/20 focus:border-action transition-all placeholder:text-gray-400"
             />
             {searchTerm && (
               <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
@@ -310,7 +344,7 @@ export default function OrdersTab() {
       )}
 
       {/* ── Orders Table ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -319,6 +353,7 @@ export default function OrdersTab() {
                 <th className="py-4 px-6 whitespace-nowrap">Date</th>
                 <th className="py-4 px-6 whitespace-nowrap">Customer</th>
                 <th className="py-4 px-6 whitespace-nowrap">Items</th>
+                <th className="py-4 px-6 whitespace-nowrap">Payment</th>
                 <th className="py-4 px-6 whitespace-nowrap">Total</th>
                 <th className="py-4 px-6 whitespace-nowrap">Status</th>
                 <th className="py-4 px-6 whitespace-nowrap text-right">Actions</th>
@@ -352,6 +387,9 @@ export default function OrdersTab() {
                     </td>
                     <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-600 font-medium" style={tdStyle}>
                       <span className="bg-gray-100 px-2 py-1 rounded-md">{o.items?.length || 0} Products</span>
+                    </td>
+                    <td className="py-4 px-6 whitespace-nowrap text-xs font-bold text-gray-500 uppercase tracking-tight" style={tdStyle}>
+                      {getPaymentType(o)}
                     </td>
                     <td className="py-4 px-6 whitespace-nowrap font-bold text-gray-900" style={tdStyle}>
                       ₹{Number(o.totalAmount || 0).toLocaleString()}
@@ -466,6 +504,7 @@ export default function OrdersTab() {
                   <div className="om-section-title">Order Summary</div>
                   <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
                   <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
+                  <div className="om-summary-row"><span>Payment Method</span><span className="font-bold text-action text-[11px] uppercase">{getPaymentLabel(selectedOrder)}</span></div>
                   <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
 
                   {(selectedOrder.replacementFor || selectedOrder.replacementOrderId) && (

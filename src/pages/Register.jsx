@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import FeedbackModal from '../components/FeedbackModal';
+import { Check, AlertCircle } from 'lucide-react';
+
+const isValidEmail = (v) => {
+  if (!v) return false;
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,6}$/.test(v);
+};
+
+const phoneRegex = /^[0-9]{10,15}$/;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -21,7 +29,7 @@ const Register = () => {
       value = value.replace(/\D/g, '').slice(0, 15);
     }
     if (name === 'email') {
-      value = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+      value = value.trim().replace(/[^a-zA-Z0-9@._-]/g, '');
     }
     setFormData({ ...formData, [name]: value });
   };
@@ -33,11 +41,7 @@ const Register = () => {
       return;
     }
 
-    // Validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const phoneRegex = /^[0-9]{10,15}$/;
-
-    if (!emailRegex.test(formData.email)) {
+    if (!isValidEmail(formData.email)) {
       return setFeedback({ show: true, type: 'error', message: 'Please enter a valid email address.' });
     }
     if (!phoneRegex.test(formData.phone)) {
@@ -47,17 +51,23 @@ const Register = () => {
     setLoading(true);
     try {
       const role = localStorage.getItem('userRole') || 'customer';
-      const { data } = await axios.post('/api/users/register', {
+      await axios.post('/api/users/register', {
         name: formData.name,
         email: formData.email,
         password: formData.password,
         phone: formData.phone,
         role
       });
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      localStorage.setItem('userRole', data.role);
-      navigate('/');
-      window.location.reload(); // Refresh to update navbar
+      
+      setFeedback({ 
+        show: true, 
+        type: 'success', 
+        message: 'Registration successful! Please login with your credentials.' 
+      });
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
       setFeedback({ 
         show: true, 
@@ -68,6 +78,9 @@ const Register = () => {
       setLoading(false);
     }
   };
+
+  const isEmailValid = isValidEmail(formData.email);
+  const isPhoneValid = phoneRegex.test(formData.phone);
 
   return (
     <div className="min-h-screen pt-32 pb-20 flex items-center justify-center bg-gray-50 px-4">
@@ -88,29 +101,51 @@ const Register = () => {
           </div>
           <div>
             <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Email</label>
-            <input 
-              type="email" 
-              name="email"
-              required
-              pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-              title="Please enter a valid email address"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
-              placeholder="Enter your email"
-            />
+            <div className="relative">
+              <input 
+                type="text" 
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 transition-all text-sm font-semibold outline-none ${
+                   formData.email ? (isEmailValid ? 'focus:ring-green-500' : 'focus:ring-red-400') : 'focus:ring-primary'
+                }`}
+                placeholder="Enter your email"
+              />
+              {formData.email && (
+                <span className="absolute right-5 top-1/2 -translate-y-1/2">
+                  {isEmailValid ? <Check size={18} className="text-green-500" /> : <AlertCircle size={18} className="text-red-400" />}
+                </span>
+              )}
+            </div>
+            {formData.email && !isEmailValid && (
+              <p className="text-[10px] text-red-400 mt-2 ml-1 font-bold uppercase tracking-wider">Invalid email format</p>
+            )}
           </div>
           <div>
             <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Phone Number</label>
-            <input 
-              type="tel" 
-              name="phone"
-              required
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
-              placeholder="10-15 digits only"
-            />
+            <div className="relative">
+              <input 
+                type="tel" 
+                name="phone"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                className={`w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 transition-all text-sm font-semibold outline-none ${
+                   formData.phone ? (isPhoneValid ? 'focus:ring-green-500' : 'focus:ring-red-400') : 'focus:ring-primary'
+                }`}
+                placeholder="10-15 digits only"
+              />
+              {formData.phone && (
+                <span className="absolute right-5 top-1/2 -translate-y-1/2">
+                  {isPhoneValid ? <Check size={18} className="text-green-500" /> : <AlertCircle size={18} className="text-red-400" />}
+                </span>
+              )}
+            </div>
+            {formData.phone && !isPhoneValid && (
+              <p className="text-[10px] text-red-400 mt-2 ml-1 font-bold uppercase tracking-wider">Must be 10-15 digits only</p>
+            )}
           </div>
           <div>
             <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Password</label>

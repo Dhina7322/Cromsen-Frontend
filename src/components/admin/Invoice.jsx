@@ -36,15 +36,20 @@ const Invoice = ({ order }) => {
     <div className="invoice-container bg-white p-8 max-w-[800px] mx-auto text-gray-800 font-sans shadow-lg print:shadow-none print:p-0 print:max-w-full print:mx-0">
       <style>{`
         @media print {
-          body * { visibility: hidden; }
-          .invoice-container, .invoice-container * { visibility: visible; }
+          @page { margin: 0; }
+          body { margin: 0; padding: 0; visibility: hidden; }
           .invoice-container {
+            visibility: visible;
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
-            padding: 20px !important;
+            padding: 50px !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            background: white;
           }
+          .invoice-container * { visibility: visible; }
           .no-print { display: none !important; }
         }
         .invoice-table th, .invoice-table td {
@@ -96,10 +101,6 @@ const Invoice = ({ order }) => {
             <div className="text-xs">
               <span className="text-gray-400 font-bold uppercase tracking-wider">Date:</span>
               <span className="ml-2 font-bold text-gray-900">{date}</span>
-            </div>
-            <div className="text-xs">
-              <span className="text-gray-400 font-bold uppercase tracking-wider">Status:</span>
-              <span className="ml-2 font-bold text-green-600 uppercase">{order.status || 'PAID'}</span>
             </div>
           </div>
         </div>
@@ -219,10 +220,7 @@ const Invoice = ({ order }) => {
         </div>
       </div>
       
-      {/* Footer Branding */}
-      <div className="mt-16 pt-6 border-t border-gray-100 text-center">
-        <div className="text-xs font-serif text-gray-400 tracking-[0.3em] uppercase">Sustainable • Luxury • Bespoke</div>
-      </div>
+      {/* Footer Branding Removed */}
     </div>
   );
 };

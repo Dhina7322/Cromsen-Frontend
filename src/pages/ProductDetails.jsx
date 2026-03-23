@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getProductById } from '../services/api';
-import { ShoppingCart, ChevronRight, Truck, ShieldCheck, RefreshCw, ImageIcon, CheckCircle } from 'lucide-react';
+import { ShoppingCart, ChevronRight, Truck, ShieldCheck, RefreshCw, ImageIcon, CheckCircle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../utils/imageUtils';
@@ -91,6 +91,11 @@ const ProductDetails = () => {
   const stockAvailable = currentVariantItem ? currentVariantItem.stock : (product?.stock || 0);
   const mainImageUrl = getImageUrl(allImages[selectedImageIndex]);
 
+  const handleBuyNow = () => {
+    addToCart({ ...product, price: Number(displayedPrice), selectedVariant: currentCombinationKey });
+    navigate('/checkout');
+  };
+
   return (
     <div className="pt-32 pb-20 bg-white">
       <div className="container mx-auto max-w-[1240px] px-6">
@@ -158,7 +163,6 @@ const ProductDetails = () => {
                 >
                   <img src={getImageUrl(img)} alt="" className="w-full h-full object-cover" />
                 </button>
-
               ))}
             </div>
 
@@ -215,21 +219,31 @@ const ProductDetails = () => {
             </div>
 
             {/* Cart Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className="flex flex-col gap-4 mb-12">
+              {/* Add to Cart */}
               <button 
                 onClick={() => addToCart({ ...product, price: Number(displayedPrice), selectedVariant: currentCombinationKey })}
                 disabled={stockAvailable <= 0}
-                className="flex-grow h-16 bg-[#1e293b] hover:bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-4 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed group"
+                className="w-full h-16 bg-[#1e293b] hover:bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-4 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed group"
               >
                 <ShoppingCart size={18} className="group-hover:translate-x-1 transition-transform" />
                 <span>{stockAvailable > 0 ? 'Add To Cart' : 'Currently Unavailable'}</span>
+              </button>
+
+              {/* Buy Now */}
+              <button
+                onClick={handleBuyNow}
+                disabled={stockAvailable <= 0}
+                className="w-full h-16 bg-action hover:brightness-110 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-action/20 active:scale-[0.98] flex items-center justify-center gap-4 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed group"
+              >
+                <Zap size={18} className="group-hover:scale-110 transition-transform" />
+                <span>{stockAvailable > 0 ? 'Buy Now' : 'Currently Unavailable'}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-
   );
 };
 
