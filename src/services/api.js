@@ -81,4 +81,15 @@
   export const adminLogin = (credentials) => api.post('/admin/login', credentials);
   export const getAdminStats = () => api.get('/admin/stats');
 
+  // Homepage Config API
+  export const getHomepageConfig = async () => {
+    const response = await api.get('/homepage');
+    return response.data;
+  };
+
+  export const updateHomepageConfig = async (config) => {
+    const response = await api.put('/homepage', config);
+    return response.data;
+  };
+
   export default api;

@@ -27,6 +27,7 @@ import UsersTab from './pages/admin/tabs/UsersTab';
 import AdminsTab from './pages/admin/tabs/AdminsTab';
 import SettingsTab from './pages/admin/tabs/SettingsTab';
 import InquiriesTab from './pages/admin/tabs/InquiriesTab';
+import HomepageTab from './pages/admin/tabs/HomepageTab';
 
 import { useState, useEffect } from 'react';
 import RoleSelector from './components/RoleSelector';
@@ -85,6 +86,7 @@ function App() {
              <Route index element={<DashboardOverviewWrapper />} />
              <Route path="inventory" element={<InventoryTab />} />
              <Route path="categories" element={<CategoriesTab />} />
+             <Route path="homepage" element={<HomepageTab />} />
              <Route path="orders" element={<OrdersTab />} />
              <Route path="inquiries" element={<InquiriesTab />} />
              <Route path="customers" element={<UsersTab />} />

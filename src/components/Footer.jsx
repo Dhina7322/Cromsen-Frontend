@@ -22,7 +22,7 @@ const Footer = () => {
               </div>
             </div>
             <div className="relative h-48 group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1616489953149-8ba5dc422934?q=80&w=600&auto=format&fit=crop" className="w-full h-full object-cover" alt="Drapery Hardware" />
+              <img src="https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=600&auto=format&fit=crop" className="w-full h-full object-cover" alt="Drapery Hardware" />
               <div className="absolute inset-x-0 bottom-4 text-center">
                 <span className="bg-white/90 text-neutral-dark text-xs uppercase tracking-widest px-4 py-2 font-bold shadow-sm group-hover:bg-action group-hover:text-white transition-colors">Drapery Hardware</span>
               </div>

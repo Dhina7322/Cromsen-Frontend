@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./orders.css";
 
@@ -363,7 +363,7 @@ export default function Orders() {
         try {
           const res = await axios.get(`/api/products/${pid}`);
           const p = res.data;
-          return { ...item, image: p.image || p.images?.[0] || "" };
+          return { ...item, image: p.image || p.images?.[0] || "", slug: p.slug || "" };
         } catch { return item; }
       }));
       return { ...order, items: enrichedItems };
@@ -564,14 +564,15 @@ export default function Orders() {
                     <div className="ord-items">
                       {products.map((item, idx) => {
                         const qty = item.qty || item.quantity || 1;
+                        const productLink = `/product/${item.slug || item.product?._id || item.product || item._id}`;
                         return (
                           <div key={idx} className="ord-item">
-                            <div className="ord-item-img">
+                            <Link to={productLink} className="ord-item-img">
                               {item.image ? <img src={imgUrl(item.image)} alt={item.name} onError={e => { e.target.style.display = "none"; }} />
                                           : <div className="ord-item-ph-lg">{(item.name || "P").charAt(0)}</div>}
-                            </div>
+                            </Link>
                             <div className="ord-item-info">
-                              <div className="ord-item-name">{item.name || "Product"}</div>
+                              <Link to={productLink} className="ord-item-name hover:text-action transition-colors">{item.name || "Product"}</Link>
                               {item.variant && (
                                 <div className="ord-item-variant" style={{ fontSize: 11, fontWeight: 700, color: "var(--action)", textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 2 }}>
                                   Variant: {item.variant}

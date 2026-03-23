@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getProductById } from '../services/api';
 import { ShoppingCart, ChevronRight, Truck, ShieldCheck, RefreshCw, ImageIcon, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import { getImageUrl } from '../utils/imageUtils';
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -19,6 +20,13 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         const data = await getProductById(id);
+        
+        // Redirection logic: if accessed by ID but slug exists, redirect to slug
+        if (data && data.slug && id === data._id) {
+          navigate(`/product/${data.slug}`, { replace: true });
+          return;
+        }
+
         setProduct(data);
         if (data && data.variants && data.variants.length > 0) {
           const initialOptions = {};
@@ -36,7 +44,7 @@ const ProductDetails = () => {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, navigate]);
 
   const allImages = product ? [product.image, ...(product.images || [])].filter(Boolean) : [];
 

@@ -249,8 +249,8 @@ const Navbar = () => {
                             const oos = p.stock <= 0;
                             return (
                               <div 
-                                key={p._id}
-                                onClick={() => { navigate(`/product/${p._id}`); setSearchQuery(""); setShowSuggestions(false); }}
+                                key={p.slug || p._id}
+                                onClick={() => { navigate(`/product/${p.slug || p._id}`); setSearchQuery(""); setShowSuggestions(false); }}
                                 className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                               >
                                 <div className="relative w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
@@ -525,8 +525,8 @@ const Navbar = () => {
                               const oos = p.stock <= 0;
                               return (
                                 <div 
-                                  key={p._id}
-                                  onClick={() => { navigate(`/product/${p._id}`); setSearchQuery(""); setShowSuggestions(false); setIsOpen(false); }}
+                                  key={p.slug || p._id}
+                                  onClick={() => { navigate(`/product/${p.slug || p._id}`); setSearchQuery(""); setShowSuggestions(false); setIsOpen(false); }}
                                   className="flex items-center gap-4 p-2 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
                                 >
                                   <div className="relative w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0 border border-gray-200">

@@ -207,7 +207,7 @@ const Shop = () => {
               <>
                 <div className={`grid gap-x-6 gap-y-10 ${gridClasses[productsPerRow]}`}>
                   {products.map((product) => (
-                    <ProductCard key={product._id} product={product} />
+                    <ProductCard key={product.slug || product._id} product={product} />
                   ))}
                 </div>
 

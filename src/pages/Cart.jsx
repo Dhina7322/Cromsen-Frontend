@@ -58,7 +58,7 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div key={`${item._id}-${item.selectedVariant}`} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-6 border-b border-gray-100 bg-white p-4 md:p-0 md:bg-transparent shadow-sm md:shadow-none rounded-lg md:rounded-none">
                 <div className="col-span-1 md:col-span-6 flex items-center space-x-6">
-                  <Link to={`/product/${item._id}`} className="shrink-0 w-24 h-24 overflow-hidden rounded bg-gray-100 block border border-gray-200 relative">
+                  <Link to={`/product/${item.slug || item._id}`} className="shrink-0 w-24 h-24 overflow-hidden rounded bg-gray-100 block border border-gray-200 relative">
                     {getImageUrl(item.image || item.images?.[0]) ? (
                       <>
                         <img 
@@ -88,7 +88,7 @@ const Cart = () => {
                         ? (item.category[0]?.name || item.category[0] || 'Product') 
                         : (item.category?.name || item.category || 'Product')}
                     </span>
-                    <Link to={`/product/${item._id}`} className="text-lg font-serif text-primary hover:text-action transition-colors mb-1">
+                    <Link to={`/product/${item.slug || item._id}`} className="text-lg font-serif text-primary hover:text-action transition-colors mb-1">
                       {item.name || 'Untitled Product'}
                     </Link>
                     {item.selectedVariant && (

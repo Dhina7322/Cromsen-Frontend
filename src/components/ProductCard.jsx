@@ -16,7 +16,7 @@ const ProductCard = ({ product }) => {
     
     const hasVariants = product.variants && product.variants.length > 0;
     if (hasVariants) {
-      navigate(`/product/${product._id}`);
+      navigate(`/product/${product.slug || product._id}`);
       return;
     }
     
@@ -33,7 +33,7 @@ const ProductCard = ({ product }) => {
     
     const hasVariants = product.variants && product.variants.length > 0;
     if (hasVariants) {
-      navigate(`/product/${product._id}`);
+      navigate(`/product/${product.slug || product._id}`);
       return;
     }
 
@@ -56,7 +56,7 @@ const ProductCard = ({ product }) => {
       className="group relative flex flex-col items-center text-center"
     >
       <div className="relative w-full aspect-[4/5] overflow-hidden bg-gray-50 mb-4 group cursor-pointer border border-gray-100">
-        <Link to={`/product/${product._id}`} className="w-full h-full bg-gray-50 flex items-center justify-center text-gray-400">
+        <Link to={`/product/${product.slug || product._id}`} className="w-full h-full bg-gray-50 flex items-center justify-center text-gray-400">
           {imageUrl ? (
             <img 
               src={imageUrl} 
@@ -82,7 +82,7 @@ const ProductCard = ({ product }) => {
             <span>Buy Now</span>
           </button>
           <Link 
-            to={`/product/${product._id}`} 
+            to={`/product/${product.slug || product._id}`} 
             className="bg-white text-primary p-3 hover:bg-action hover:text-white transition-colors flex items-center justify-center"
           >
             <Eye size={16} />
@@ -91,7 +91,7 @@ const ProductCard = ({ product }) => {
       </div>
       
       <div className="w-full px-2">
-        <Link to={`/product/${product._id}`} className="block">
+        <Link to={`/product/${product.slug || product._id}`} className="block">
           <h3 className="text-[13px] font-sans text-gray-800 mb-1 group-hover:text-action transition-colors truncate">
             {product.name}
           </h3>
