@@ -391,7 +391,7 @@ const Checkout = () => {
     try {
       const discount     = exchangeContext ? Number(exchangeContext.oldTotal) || 0 : 0;
       const finalPayable = Math.max(0, Number(cartTotal) - discount);
-      const buildItems   = (arr) => arr.map(i => ({ product: i._id, name: i.name, quantity: i.quantity, price: Number(i.price) || 0, image: i.image || i.images?.[0] || '', variant: i.selectedVariant }));
+      const buildItems   = (arr) => arr.map(i => ({ product: i._id, name: i.name, quantity: i.quantity, price: Number(i.price) || 0, image: i.image || i.images?.[0] || '', variant: i.selectedVariant, customColor: i.customColor, customDimensions: i.customDimensions }));
       const shippingAddr = { name: `${ship.firstName} ${ship.lastName}`, address: ship.address, city: ship.city, state: ship.state, zip: ship.zip, phone: `${getDialCode(ship.country)}${ship.phone}`, country: ship.country };
 
       if (finalPayable <= 0 && exchangeContext) {

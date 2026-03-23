@@ -347,7 +347,8 @@ export default function InventoryTab() {
   const [formData, setFormData] = useState({
     name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
     category: [], stock: "", isActive: true, featured: false,
-    slug: "", variants: [], variantItems: []
+    slug: "", variants: [], variantItems: [],
+    pricePerSqFtRetail: "", pricePerSqFtDealer: ""
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -398,13 +399,15 @@ export default function InventoryTab() {
         category: Array.isArray(product.category) ? product.category.map(c => c._id || c) : (product.category?._id || product.category || []),
         stock: product.stock, isActive: product.isActive ?? true,
         featured: product.featured || false, slug: product.slug || "",
-        variants: product.variants || [], variantItems: product.variantItems || []
+        variants: product.variants || [], variantItems: product.variantItems || [],
+        pricePerSqFtRetail: product.pricePerSqFtRetail || "",
+        pricePerSqFtDealer: product.pricePerSqFtDealer || ""
       });
       setImagePreview(product.image ? getImageUrl(product.image) : "");
       setImagesPreviews(product.images ? product.images.map(img => getImageUrl(img)) : []);
     } else {
       setEditingProduct(null);
-      setFormData({ name: "", sku: "", slug: "", description: "", retailPrice: "", wholesalePrice: "", category: [], stock: "", isActive: true, featured: false, variants: [], variantItems: [] });
+      setFormData({ name: "", sku: "", slug: "", description: "", retailPrice: "", wholesalePrice: "", category: [], stock: "", isActive: true, featured: false, variants: [], variantItems: [], pricePerSqFtRetail: "", pricePerSqFtDealer: "" });
       setImagePreview(""); setImagesPreviews([]);
     }
     setImageFile(null); setImagesFiles([]);
@@ -605,6 +608,17 @@ export default function InventoryTab() {
                     <div className="fg">
                       <label>SKU (Internal Code)</label>
                       <input type="text" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} />
+                    </div>
+                  </div>
+
+                  <div className="form-r2" style={{ marginTop: '16px' }}>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Retail)</label>
+                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
+                    </div>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Dealer)</label>
+                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
                     </div>
                   </div>
 

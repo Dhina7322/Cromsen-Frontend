@@ -14,6 +14,10 @@ const ProductDetails = () => {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
+  const [customWidth, setCustomWidth] = useState("");
+  const [customHeight, setCustomHeight] = useState("");
+  const [customColor, setCustomColor] = useState("");
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -74,25 +78,47 @@ const ProductDetails = () => {
 
   const role = localStorage.getItem('userRole');
   
-  // Find current combination
-  const currentCombinationKey = Object.values(selectedOptions).join(' / ');
+  // Find current combination by preserving the exact order of variants
+  const currentCombinationKey = (product?.variants || [])
+    .map(v => selectedOptions[v.name])
+    .filter(Boolean)
+    .join(' / ');
   const currentVariantItem = product?.variantItems?.find(vi => vi.combination === currentCombinationKey);
 
   // Price Calculation
   let displayedPrice = 0;
-  let originalPrice = Number(product?.retailPrice || 0);
+  let originalPrice = Number(product?.retailPrice || product?.price || 0);
 
-  if (role === 'dealer') {
-    displayedPrice = currentVariantItem?.wholesalePrice || product.wholesalePrice || 0;
+  if (isCustom) {
+    const area = Number(customWidth || 0) * Number(customHeight || 0);
+    const perSqFtPrice = role === 'dealer' 
+      ? Number(product.pricePerSqFtDealer || product.wholesalePrice || product.price || 0) 
+      : Number(product.pricePerSqFtRetail || product.retailPrice || product.price || 0);
+    displayedPrice = area * perSqFtPrice;
   } else {
-    displayedPrice = currentVariantItem?.retailPrice || product.retailPrice || 0;
+    if (role === 'dealer') {
+      displayedPrice = currentVariantItem?.wholesalePrice || currentVariantItem?.price || product.wholesalePrice || product.price || 0;
+    } else {
+      displayedPrice = currentVariantItem?.retailPrice || currentVariantItem?.price || product.retailPrice || product.price || 0;
+    }
   }
 
   const stockAvailable = currentVariantItem ? currentVariantItem.stock : (product?.stock || 0);
   const mainImageUrl = getImageUrl(allImages[selectedImageIndex]);
 
+  const handleAddToCart = () => {
+    addToCart({ 
+      ...product, 
+      price: Number(displayedPrice), 
+      selectedVariant: isCustom ? `Custom ${customWidth}x${customHeight}` : currentCombinationKey,
+      isCustom,
+      customDimensions: isCustom ? { width: customWidth, height: customHeight } : null,
+      customColor: customColor || null
+    });
+  };
+
   const handleBuyNow = () => {
-    addToCart({ ...product, price: Number(displayedPrice), selectedVariant: currentCombinationKey });
+    handleAddToCart();
     navigate('/checkout');
   };
 
@@ -195,49 +221,151 @@ const ProductDetails = () => {
               {product.description}
             </p>
 
-            {/* Variants Picker */}
+            {/* Standard/Custom Size Toggle */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-[11px] uppercase tracking-[0.2em] font-black text-gray-400">Order Options</h3>
+                <span className="text-[10px] bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md font-bold text-gray-600">
+                  {isCustom ? "Custom" : "Standard"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setIsCustom(false);
+                    if (product?.variants?.some(v => v.name === 'Size')) {
+                      setSelectedOptions(prev => ({ ...prev, Size: 'Standard' }));
+                    }
+                  }}
+                  className={`flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${!isCustom ? 'border-[#1e293b] bg-[#1e293b] text-white shadow-xl' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
+                >
+                  Standard
+                </button>
+                <button
+                  onClick={() => {
+                    setIsCustom(true);
+                    if (product?.variants?.some(v => v.name === 'Size')) {
+                      setSelectedOptions(prev => ({ ...prev, Size: 'Custom' }));
+                    }
+                  }}
+                  className={`flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${isCustom ? 'border-[#1e293b] bg-[#1e293b] text-white shadow-xl' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
+                >
+                  Custom
+                </button>
+              </div>
+            </div>
+
+            {/* Variants Picker (Standard) or Size Inputs (Custom) */}
             <div className="space-y-8 mb-12">
-                {product.variants && product.variants.map((variant, vIdx) => (
+              {!isCustom ? (
+                product.variants && product.variants
+                  .filter(v => v.name !== 'Size' || (v.options?.length > 2)) // Skip basic Size toggle redundant variants
+                  .map((variant, vIdx) => (
                     <div key={vIdx} className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-[11px] uppercase tracking-[0.2em] font-black text-gray-400">{variant.name}</h3>
-                            <span className="text-[10px] bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md font-bold text-gray-600">{selectedOptions[variant.name]}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2.5">
-                            {variant.options.map((opt, oIdx) => (
-                                <button 
-                                    key={oIdx}
-                                    onClick={() => setSelectedOptions({ ...selectedOptions, [variant.name]: opt })}
-                                    className={`px-5 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${selectedOptions[variant.name] === opt ? 'border-primary bg-primary text-white shadow-xl shadow-blue-900/10 scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200 hover:text-gray-600'}`}
-                                >
-                                    {opt}
-                                </button>
-                            ))}
-                        </div>
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-[11px] uppercase tracking-[0.2em] font-black text-gray-400">{variant.name}</h3>
+                        <span className="text-[10px] bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md font-bold text-gray-600">{selectedOptions[variant.name]}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2.5">
+                        {variant.options.map((opt, oIdx) => (
+                          <button
+                            key={oIdx}
+                            onClick={() => {
+                              setSelectedOptions({ ...selectedOptions, [variant.name]: opt });
+                              if (variant.name === 'Size') {
+                                if (opt === 'Custom') setIsCustom(true);
+                                else setIsCustom(false);
+                              }
+                            }}
+                            className={`px-5 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${selectedOptions[variant.name] === opt ? 'border-primary bg-primary text-white shadow-xl shadow-blue-900/10 scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200 hover:text-gray-600'}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                ))}
+                  ))
+              ) : (
+                <div className="space-y-6 bg-gray-50/50 p-6 rounded-[1.5rem] border border-gray-100 ring-4 ring-gray-50/20">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest font-black text-gray-400 ml-1">Width (ft)</label>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={customWidth}
+                        onChange={(e) => setCustomWidth(e.target.value)}
+                        className="w-full px-5 py-4 bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest font-black text-gray-400 ml-1">Height (ft)</label>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={customHeight}
+                        onChange={(e) => setCustomHeight(e.target.value)}
+                        className="w-full px-5 py-4 bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
+                      />
+                    </div>
+                  </div>
+                  
+                  {(customWidth && customHeight) && (
+                    <div className="pt-4 border-t border-dashed border-gray-200">
+                      <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-bold">
+                        <span className="text-gray-400">Total Calculation:</span>
+                        <div className="flex items-center gap-2">
+                           <span className="text-gray-600">{customWidth} × {customHeight} =</span>
+                           <span className="text-primary font-black">{Number(customWidth) * Number(customHeight)} SQ. FT</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center text-[10px] uppercase tracking-widest font-bold mt-2">
+                        <span className="text-gray-400">Price per sq ft:</span>
+                        <span className="text-gray-900 font-black">₹{role === 'dealer' 
+                          ? (Number(product.pricePerSqFtDealer) || Number(product.wholesalePrice) || Number(product.price) || 0)
+                          : (Number(product.pricePerSqFtRetail) || Number(product.retailPrice) || Number(product.price) || 0)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Custom Color Input */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-[11px] uppercase tracking-[0.2em] font-black text-gray-400">Custom Color</h3>
+                  {customColor && <span className="text-[10px] bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md font-bold text-gray-600">{customColor}</span>}
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter color (e.g. Royal Blue, #FF5733)"
+                  value={customColor}
+                  onChange={(e) => setCustomColor(e.target.value)}
+                  className="w-full px-5 py-4 bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
+                />
+              </div>
             </div>
 
             {/* Cart Actions */}
             <div className="flex flex-col gap-4 mb-12">
               {/* Add to Cart */}
               <button 
-                onClick={() => addToCart({ ...product, price: Number(displayedPrice), selectedVariant: currentCombinationKey })}
-                disabled={stockAvailable <= 0}
+                onClick={handleAddToCart}
+                disabled={!isCustom && stockAvailable <= 0}
                 className="w-full h-16 bg-[#1e293b] hover:bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-4 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed group"
               >
                 <ShoppingCart size={18} className="group-hover:translate-x-1 transition-transform" />
-                <span>{stockAvailable > 0 ? 'Add To Cart' : 'Currently Unavailable'}</span>
+                <span>{(!isCustom && stockAvailable <= 0) ? 'Currently Unavailable' : 'Add To Cart'}</span>
               </button>
 
               {/* Buy Now */}
               <button
                 onClick={handleBuyNow}
-                disabled={stockAvailable <= 0}
+                disabled={!isCustom && stockAvailable <= 0}
                 className="w-full h-16 bg-action hover:brightness-110 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-action/20 active:scale-[0.98] flex items-center justify-center gap-4 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed group"
               >
                 <Zap size={18} className="group-hover:scale-110 transition-transform" />
-                <span>{stockAvailable > 0 ? 'Buy Now' : 'Currently Unavailable'}</span>
+                <span>{(!isCustom && stockAvailable <= 0) ? 'Currently Unavailable' : 'Buy Now'}</span>
               </button>
             </div>
           </div>
