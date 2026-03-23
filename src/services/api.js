@@ -1,6 +1,6 @@
   import axios from 'axios';
 
-  const API_URL = '/api';
+  const API_URL = import.meta.env.VITE_API_URL || '/api';
 
   const api = axios.create({
     baseURL: API_URL,
@@ -12,11 +12,9 @@
     config.headers['x-user-role'] = role;
     
     // Try to get admin token if it exists
-    const isAuth = sessionStorage.getItem("cromsen_auth");
+    const isAuth = localStorage.getItem("cromsen_auth") || sessionStorage.getItem("cromsen_auth");
     if (isAuth) {
-      // For now we use a mock token or session-basedauth logic 
-      // If you add real JWT, include it here:
-      // config.headers['Authorization'] = `Bearer ${sessionStorage.getItem("cromsen_token")}`;
+      // For now we use a mock token or session-based auth logic
     }
     
     return config;
