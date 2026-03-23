@@ -26,6 +26,7 @@ import UsersTab from './pages/admin/tabs/UsersTab';
 import AdminsTab from './pages/admin/tabs/AdminsTab';
 import SettingsTab from './pages/admin/tabs/SettingsTab';
 import InquiriesTab from './pages/admin/tabs/InquiriesTab';
+import HomepageTab from './pages/admin/tabs/HomepageTab';
 
 import { useState } from 'react';
 import RoleSelector from './components/RoleSelector';
@@ -122,6 +123,21 @@ function App() {
           <Route path="/my-orders" element={<Orders />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/:type" element={<PolicyPage />} />
+          
+          {/* Admin Routes Consolidated */}
+
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminDashboard />}>
+             <Route index element={<DashboardOverviewWrapper />} />
+             <Route path="inventory" element={<InventoryTab />} />
+             <Route path="categories" element={<CategoriesTab />} />
+             <Route path="homepage" element={<HomepageTab />} />
+             <Route path="orders" element={<OrdersTab />} />
+             <Route path="inquiries" element={<InquiriesTab />} />
+             <Route path="customers" element={<UsersTab />} />
+             <Route path="admins" element={<AdminsTab />} />
+             <Route path="settings" element={<SettingsTab />} />
+          </Route>
         </Routes>
       </main>
       <Footer />

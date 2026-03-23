@@ -20,6 +20,13 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         const data = await getProductById(id);
+        
+        // Redirection logic: if accessed by ID but slug exists, redirect to slug
+        if (data && data.slug && id === data._id) {
+          navigate(`/product/${data.slug}`, { replace: true });
+          return;
+        }
+
         setProduct(data);
         if (data && data.variants && data.variants.length > 0) {
           const initialOptions = {};
@@ -37,7 +44,7 @@ const ProductDetails = () => {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, navigate]);
 
   const allImages = product ? [product.image, ...(product.images || [])].filter(Boolean) : [];
 

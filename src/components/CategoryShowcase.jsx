@@ -5,11 +5,17 @@ import { useState, useEffect } from 'react';
 import { getCategories } from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
 
-const CategoryShowcase = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+const CategoryShowcase = ({ initialItems }) => {
+  const [categories, setCategories] = useState(initialItems || []);
+  const [loading, setLoading] = useState(!initialItems);
 
   useEffect(() => {
+    if (initialItems) {
+      setCategories(initialItems);
+      setLoading(false);
+      return;
+    }
+
     const fetchCats = async () => {
       try {
         const data = await getCategories();
@@ -21,7 +27,7 @@ const CategoryShowcase = () => {
       }
     };
     fetchCats();
-  }, []);
+  }, [initialItems]);
 
   if (loading || categories.length === 0) return null;
   return (

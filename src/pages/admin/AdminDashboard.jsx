@@ -206,6 +206,7 @@ export default function AdminDashboard() {
           <SidebarLink to="/admin" icon={<Layout size={18}/>} label="Dashboard" active={location.pathname === "/admin"} />
           <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Inventory" active={location.pathname === "/admin/inventory"} />
           <SidebarLink to="/admin/categories" icon={<Layers size={18}/>} label="Categories" active={location.pathname === "/admin/categories"} />
+          <SidebarLink to="/admin/homepage" icon={<Layout size={18}/>} label="Homepage" active={location.pathname === "/admin/homepage"} />
           <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders" && !location.search.includes("status=Abandoned")} badge={location.pathname.startsWith("/admin/orders") ? 0 : pendingOrdersCount} />
           <AnimatePresence>
             {location.pathname.startsWith("/admin/orders") && (

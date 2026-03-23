@@ -347,7 +347,7 @@ export default function InventoryTab() {
   const [formData, setFormData] = useState({
     name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
     category: [], stock: "", isActive: true, featured: false,
-    variants: [], variantItems: []
+    slug: "", variants: [], variantItems: []
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -397,14 +397,14 @@ export default function InventoryTab() {
         wholesalePrice: product.wholesalePrice,
         category: Array.isArray(product.category) ? product.category.map(c => c._id || c) : (product.category?._id || product.category || []),
         stock: product.stock, isActive: product.isActive ?? true,
-        featured: product.featured || false,
+        featured: product.featured || false, slug: product.slug || "",
         variants: product.variants || [], variantItems: product.variantItems || []
       });
       setImagePreview(product.image ? getImageUrl(product.image) : "");
       setImagesPreviews(product.images ? product.images.map(img => getImageUrl(img)) : []);
     } else {
       setEditingProduct(null);
-      setFormData({ name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "", category: [], stock: "", isActive: true, featured: false, variants: [], variantItems: [] });
+      setFormData({ name: "", sku: "", slug: "", description: "", retailPrice: "", wholesalePrice: "", category: [], stock: "", isActive: true, featured: false, variants: [], variantItems: [] });
       setImagePreview(""); setImagesPreviews([]);
     }
     setImageFile(null); setImagesFiles([]);
@@ -606,6 +606,12 @@ export default function InventoryTab() {
                       <label>SKU (Internal Code)</label>
                       <input type="text" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} />
                     </div>
+                  </div>
+
+                  <div className="fg">
+                    <label>Product Slug (URL friendly name)</label>
+                    <input type="text" placeholder="auto-generated if empty" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} />
+                    <p style={{ fontSize: '10px', color: 'var(--text3)', marginTop: '4px' }}>Leave empty to auto-generate from name.</p>
                   </div>
 
                   <div className="fg">
