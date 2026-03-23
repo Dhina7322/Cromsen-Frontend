@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
 
-const API = "/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function CategoriesTab() {
   const { showToast } = useOutletContext();

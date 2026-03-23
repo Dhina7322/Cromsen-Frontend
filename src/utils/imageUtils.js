@@ -10,12 +10,13 @@ export const getImageUrl = (filename) => {
   // to ensure we don't double prepend
   const cleanPath = filename.startsWith('/') ? filename.slice(1) : filename;
   
-  // 3. Construct the final URL (using relative path so Vite proxy handles it)
-  // If cleanPath already starts with 'uploads/', use it directly
+  const UPLOAD_BASE = (import.meta.env.VITE_API_URL || "").replace('/api', '') || "";
+  
+  // 3. Construct the final URL
   if (cleanPath.startsWith('uploads/')) {
-    return `/${cleanPath}`;
+    return `${UPLOAD_BASE}/${cleanPath}`;
   }
 
   // Otherwise prepend uploads/
-  return `/uploads/${cleanPath}`;
+  return `${UPLOAD_BASE}/uploads/${cleanPath}`;
 };

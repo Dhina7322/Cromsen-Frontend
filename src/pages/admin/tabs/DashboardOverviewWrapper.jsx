@@ -11,7 +11,8 @@ export default function DashboardOverviewWrapper() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get("/api/admin/stats");
+        const API = import.meta.env.VITE_API_URL || "/api";
+        const res = await axios.get(`${API}/admin/stats`);
         setStats({
           products: res.data.totalProducts,
           categories: res.data.totalCategories,

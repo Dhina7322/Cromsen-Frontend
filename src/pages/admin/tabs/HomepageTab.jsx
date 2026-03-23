@@ -186,7 +186,7 @@ export default function HomepageTab() {
   }
 
   return (
-    <div className="section-gap max-w-6xl animate-in fade-in duration-500">
+    <div className="section-gap max-w-6xl animate-in fade-in duration-500 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-8 border-b border-gray-100">
         <div>
           <div className="flex items-center gap-2 mb-1">

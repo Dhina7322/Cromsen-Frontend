@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
+const API = import.meta.env.VITE_API_URL || "/api";
 import { User, Camera, Save, ArrowLeft, Check, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Upload, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -269,7 +270,7 @@ export default function Profile() {
     if (!loggedUser) { navigate('/login'); return; }
     (async () => {
       try {
-        const res = await axios.get(`/api/users/${loggedUser._id}/profile`);
+        const res = await axios.get(`${API}/users/${loggedUser._id}/profile`);
         setUser(res.data);
         setFormData(p => ({
           ...p,
@@ -306,7 +307,7 @@ export default function Profile() {
     try {
       setSaving(true);
       const res = await axios.post(
-        `/api/users/${loggedUser._id}/upload-avatar`, fd,
+        `${API}/users/${loggedUser._id}/upload-avatar`, fd,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
       const newAvatar = res.data.avatar;
@@ -361,7 +362,7 @@ export default function Profile() {
     try {
       const { confirmPassword, newPassword, ...submitData } = formData;
       if (newPassword) submitData.password = newPassword;
-      const res = await axios.put(`/api/users/${loggedUser._id}/profile`, submitData);
+      const res = await axios.put(`${API}/users/${loggedUser._id}/profile`, submitData);
       const updatedUser = { ...loggedUser, name: res.data.name, avatar: res.data.avatar };
       localStorage.setItem('userInfo', JSON.stringify(updatedUser));
       window.dispatchEvent(new Event('avatar-updated'));

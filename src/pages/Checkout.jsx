@@ -9,6 +9,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getImageUrl } from '../utils/imageUtils';
 
+const API = import.meta.env.VITE_API_URL || "/api";
+
 // ─── Strict email: nothing allowed after the TLD (e.g. .comweweq → invalid) ──
 const isValidEmail = (v) => {
   if (!v) return false;
@@ -309,7 +311,7 @@ const Checkout = () => {
   const fetchAddresses = async () => {
     setFetchingAddresses(true);
     try {
-      const { data } = await axios.get(`/api/addresses?email=${userEmail}`);
+      const { data } = await axios.get(`${API}/addresses?email=${userEmail}`);
       setSavedAddresses(data || []);
       const def = data.find(a => a.isDefault) || data[0];
       if (def) { setSelectedAddressId(def._id); applyAddress(def); }
@@ -363,8 +365,8 @@ const Checkout = () => {
     if (!phoneRegex.test(addressForm.phone)) return alert('Phone must be 10–15 digits.');
     setLoading(true);
     try {
-      if (editingAddress) await axios.put('/api/addresses', { email: userEmail, addressId: editingAddress._id, address: addressForm });
-      else                await axios.post('/api/addresses', { email: userEmail, address: addressForm });
+      if (editingAddress) await axios.put(`${API}/addresses`, { email: userEmail, addressId: editingAddress._id, address: addressForm });
+      else                await axios.post(`${API}/addresses`, { email: userEmail, address: addressForm });
       setShowAddressModal(false); fetchAddresses();
     } catch { alert('Error saving address.'); }
     finally { setLoading(false); }
@@ -373,7 +375,7 @@ const Checkout = () => {
   const handleDeleteAddress = async (e, id) => {
     e.stopPropagation();
     if (!window.confirm('Delete this address?')) return;
-    try { await axios.delete(`/api/addresses?email=${userEmail}&addressId=${id}`); fetchAddresses(); } catch { alert('Error.'); }
+    try { await axios.delete(`${API}/addresses?email=${userEmail}&addressId=${id}`); fetchAddresses(); } catch { alert('Error.'); }
   };
 
   const loadRazorpay = () => new Promise(res => {
@@ -395,23 +397,23 @@ const Checkout = () => {
       const shippingAddr = { name: `${ship.firstName} ${ship.lastName}`, address: ship.address, city: ship.city, state: ship.state, zip: ship.zip, phone: `${getDialCode(ship.country)}${ship.phone}`, country: ship.country };
 
       if (finalPayable <= 0 && exchangeContext) {
-        const res = await axios.post('/api/payment/verify-payment', { razorpay_order_id: 'order_exchange_' + Date.now(), razorpay_payment_id: 'pay_exchange_' + Date.now(), razorpay_signature: 'mock', orderDetails: { user: userEmail, items: buildItems(cartItems), totalAmount: finalPayable, shippingAddress: shippingAddr } });
-        if (res.status === 200) { await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: 'Replacement Completed' }); localStorage.removeItem('exchangeContext'); setFinalAmount(finalPayable); setOrderComplete(true); setNewOrderId(res.data.orderId); clearCart(); }
+        const res = await axios.post(`${API}/payment/verify-payment`, { razorpay_order_id: 'order_exchange_' + Date.now(), razorpay_payment_id: 'pay_exchange_' + Date.now(), razorpay_signature: 'mock', orderDetails: { user: userEmail, items: buildItems(cartItems), totalAmount: finalPayable, shippingAddress: shippingAddr } });
+        if (res.status === 200) { await axios.put(`${API}/orders/${exchangeContext.oldOrderId}`, { status: 'Replacement Completed' }); localStorage.removeItem('exchangeContext'); setFinalAmount(finalPayable); setOrderComplete(true); setNewOrderId(res.data.orderId); clearCart(); }
         return;
       }
 
       if (!await loadRazorpay()) { alert('Razorpay SDK failed.'); return; }
-      const { data: kd } = await axios.get('/api/payment/get-key');
-      const { data: od } = await axios.post('/api/payment/create-order', { amount: finalPayable, receipt: `receipt_${Date.now()}`, orderDetails: { user: userEmail, replacementFor: exchangeContext?.oldOrderId || null, items: buildItems(cartItems), totalAmount: finalPayable, shippingAddress: shippingAddr } });
+      const { data: kd } = await axios.get(`${API}/payment/get-key`);
+      const { data: od } = await axios.post(`${API}/payment/create-order`, { amount: finalPayable, receipt: `receipt_${Date.now()}`, orderDetails: { user: userEmail, replacementFor: exchangeContext?.oldOrderId || null, items: buildItems(cartItems), totalAmount: finalPayable, shippingAddress: shippingAddr } });
 
       new window.Razorpay({
         key: kd.key, amount: od.amount, currency: od.currency,
         name: 'Cromsen Importers', description: 'Luxury Blinds & Curtains', order_id: od.id,
         handler: async (response) => {
           try {
-            const vr = await axios.post('/api/payment/verify-payment', { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, orderDetails: { user: ship.email, items: buildItems(cartItems), totalAmount: finalPayable, shippingAddress: shippingAddr } });
+            const vr = await axios.post(`${API}/payment/verify-payment`, { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, orderDetails: { user: ship.email, items: buildItems(cartItems), totalAmount: finalPayable, shippingAddress: shippingAddr } });
             if (vr.data.message === 'Payment verified successfully') {
-              if (exchangeContext) { await axios.put(`/api/orders/${exchangeContext.oldOrderId}`, { status: 'Replacement Completed', replacementOrderId: vr.data.orderId }); localStorage.removeItem('exchangeContext'); }
+              if (exchangeContext) { await axios.put(`${API}/orders/${exchangeContext.oldOrderId}`, { status: 'Replacement Completed', replacementOrderId: vr.data.orderId }); localStorage.removeItem('exchangeContext'); }
               setFinalAmount(finalPayable); setOrderComplete(true); setNewOrderId(vr.data.orderId); clearCart();
             }
           } catch (err) { alert(`Verification failed: ${err.response?.data?.message || err.message}`); }

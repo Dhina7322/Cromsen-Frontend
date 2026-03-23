@@ -4,7 +4,7 @@ import axios from "axios";
 import { Shield, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const API = "/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function AdminLogin() {
   const navigate = useNavigate();

@@ -3,7 +3,14 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./orders.css";
 
-const API = ""; // uses Vite proxy → /api → localhost:5001
+const API = import.meta.env.VITE_API_URL || "/api";
+
+const imgUrl = (p) => { 
+  if (!p) return null; 
+  if (p.startsWith("http")) return p; 
+  const UPLOAD_BASE = API.replace('/api', '');
+  return `${UPLOAD_BASE}/uploads/${p.replace(/^uploads\//, "")}`; 
+};
 
 const STATUS_STEPS = [
   { label: "Order Placed",     key: "createdAt",        offset: 0 },
@@ -88,7 +95,6 @@ const REPLACE_REASONS = [
   "Other reason",
 ];
 
-const imgUrl   = (p) => { if (!p) return null; if (p.startsWith("http")) return p; return `/uploads/${p.replace(/^uploads\//, "")}`; };
 const addDays  = (d, n) => new Date(new Date(d).getTime() + n * 86400000);
 const fmtFull  = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"numeric", month:"long",  year:"numeric" }) : "—";
 const fmtShort = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" }) : "—";
@@ -361,7 +367,7 @@ export default function Orders() {
         const pid = item.product?._id || item.product;
         if (!pid) return item;
         try {
-          const res = await axios.get(`/api/products/${pid}`);
+          const res = await axios.get(`${API}/products/${pid}`);
           const p = res.data;
           return { ...item, image: p.image || p.images?.[0] || "", slug: p.slug || "" };
         } catch { return item; }
@@ -380,7 +386,7 @@ export default function Orders() {
     try {
       const params = {};
       if (userEmail) params.email = userEmail;
-      const res  = await axios.get(`/api/orders`, { params });
+      const res  = await axios.get(`${API}/orders`, { params });
       const raw  = res.data?.orders ?? res.data;
       let list   = Array.isArray(raw) ? raw : [];
       if (list.length > 0 && userEmail) {
@@ -405,7 +411,7 @@ export default function Orders() {
     setCancelLoading(true);
     try {
       // Use PUT /api/orders/:id - same endpoint as admin uses
-      await axios.put(`/api/orders/${orderId}`, { 
+      await axios.put(`${API}/orders/${orderId}`, { 
         status: "Refund Tracking",
         cancelReason: reason,
         cancelledAt: new Date().toISOString()
@@ -453,7 +459,7 @@ export default function Orders() {
       {replaceTarget && <ReplaceModal order={replaceTarget} onClose={() => setReplaceTarget(null)} onConfirm={async (id, reason, cb) => {
         setReplaceLoading(true);
         try {
-          await axios.put(`/api/orders/${id}`, { 
+          await axios.put(`${API}/orders/${id}`, { 
             status: "Replacement Requested",
             cancelReason: reason,
             replacementRequestedAt: new Date().toISOString()

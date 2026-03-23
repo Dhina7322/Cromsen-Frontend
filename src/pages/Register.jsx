@@ -48,10 +48,11 @@ const Register = () => {
       return setFeedback({ show: true, type: 'error', message: 'Phone number must be 10-15 digits only.' });
     }
     
+    const API = import.meta.env.VITE_API_URL || "/api";
     setLoading(true);
     try {
       const role = localStorage.getItem('userRole') || 'customer';
-      await axios.post('/api/users/register', {
+      await axios.post(`${API}/users/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
