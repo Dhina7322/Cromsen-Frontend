@@ -23,7 +23,7 @@ import "../../styles/admin.css";
 
 import Logo from "../../assets/cromsen.png";
 
-const API = "/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();

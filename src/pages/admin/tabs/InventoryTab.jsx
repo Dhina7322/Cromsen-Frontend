@@ -7,13 +7,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
 
-const API = "/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 const adminHeaders = { headers: { 'x-user-role': 'admin' } };
 
 const getImageUrl = (filename) => {
   if (!filename) return null;
   if (filename.startsWith('http')) return filename;
-  return `http://localhost:5001/uploads/${filename}`;
+  const UPLOAD_BASE = (import.meta.env.VITE_API_URL || "").replace('/api', '') || "http://localhost:5001";
+  return `${UPLOAD_BASE}/uploads/${filename}`;
 };
 
 // ── CSV Helpers ───────────────────────────────────────────────────────────────

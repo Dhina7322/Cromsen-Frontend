@@ -47,10 +47,11 @@ const Login = () => {
       });
     }
 
+    const API = import.meta.env.VITE_API_URL || "/api";
     setLoading(true);
     try {
       const requiredRole = localStorage.getItem('userRole') || 'customer';
-      const { data } = await axios.post('/api/users/login', { email: identifier, password, requiredRole });
+      const { data } = await axios.post(`${API}/users/login`, { email: identifier, password, requiredRole });
       
       localStorage.setItem('userInfo', JSON.stringify(data));
       localStorage.setItem('userRole', data.role);

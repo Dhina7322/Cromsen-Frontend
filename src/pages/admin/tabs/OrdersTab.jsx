@@ -9,7 +9,7 @@ import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { getImageUrl } from "../../../utils/imageUtils";
 import Invoice from "../../../components/admin/Invoice";
 
-const API = "/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 const adminHeaders = { headers: { 'x-user-role': 'admin' } };
 
 const PAYMENT_LABELS = {
