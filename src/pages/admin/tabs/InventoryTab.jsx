@@ -479,7 +479,7 @@ export default function InventoryTab() {
               {selectedCategories.length > 0 ? `${selectedCategories.length} Categories` : 'All Categories'}
             </button>
             {isFilterOpen && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 z-[200] p-4">
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-100 z-[200] p-4">
                 <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-50">
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Filter Categories</span>
                   {selectedCategories.length > 0 && (
@@ -527,7 +527,7 @@ export default function InventoryTab() {
                 <td>
                   <div className="prod-cell">
                     {p.image ? (
-                      <img src={getImageUrl(p.image)} alt="" className="prod-thumb shadow-sm group-hover:scale-110 transition-transform duration-300" />
+                      <img src={getImageUrl(p.image)} alt="" className="prod-thumb group-hover:scale-110 transition-transform duration-300" />
                     ) : (
                       <div className="prod-thumb-ph">{p.name[0]}</div>
                     )}
@@ -615,10 +615,10 @@ export default function InventoryTab() {
 
                   <div style={{ width: '100%', marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>Categories (Select one or more)</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-gray-50 border border-gray-200">
                       {categories.map(cat => (
                         <label key={cat._id}
-                          className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all select-none group shadow-sm"
+                          className="flex items-center justify-between p-3 bg-white border border-gray-200 cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all select-none group"
                           style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', margin: 0 }}
                         >
                           <span className="text-[11px] sm:text-xs font-bold text-gray-700 group-hover:text-blue-700 transition-colors uppercase tracking-tight text-left flex-1"

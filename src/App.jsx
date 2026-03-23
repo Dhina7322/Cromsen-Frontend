@@ -1,5 +1,4 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-// import { SpeedInsights } from '@vercel/speed-insights/react'; // Removed to fix resolve error outdoors
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -14,9 +13,9 @@ import Services from './pages/Services';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
+import ScrollToTop from './components/ScrollToTop';
 
-
-// Simplified Admin Imports
+// Admin Imports
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import DashboardOverviewWrapper from './pages/admin/tabs/DashboardOverviewWrapper';
@@ -28,48 +27,93 @@ import AdminsTab from './pages/admin/tabs/AdminsTab';
 import SettingsTab from './pages/admin/tabs/SettingsTab';
 import InquiriesTab from './pages/admin/tabs/InquiriesTab';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import RoleSelector from './components/RoleSelector';
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole'));
   const location = useLocation();
   const navigate = useNavigate();
+
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isLoggedIn = !!localStorage.getItem('userInfo');
 
   const handleRoleSelect = (role) => {
     localStorage.setItem('userRole', role);
     setUserRole(role);
     if (role === 'admin') {
-      navigate('/admin/login');
+      navigate('/admin/login', { replace: true });
     } else {
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
   };
 
-  useEffect(() => {
-    // Check if role is set, if not we show selector
-    if (!userRole && !isAdminRoute && location.pathname !== '/') {
-      navigate('/', { replace: true });
-    }
-  }, [userRole, isAdminRoute, location.pathname, navigate]);
+  // ── 1. Admin routes — always pass through ────────────────────────────────
+  if (isAdminRoute) {
+    const isAdminLoginPage = location.pathname === '/admin/login';
+    return (
+      <div className="flex flex-col min-h-screen">
+        <ScrollToTop />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />}>
+              <Route index element={<DashboardOverviewWrapper />} />
+              <Route path="inventory" element={<InventoryTab />} />
+              <Route path="categories" element={<CategoriesTab />} />
+              <Route path="orders" element={<OrdersTab />} />
+              <Route path="inquiries" element={<InquiriesTab />} />
+              <Route path="customers" element={<UsersTab />} />
+              <Route path="admins" element={<AdminsTab />} />
+              <Route path="settings" element={<SettingsTab />} />
+            </Route>
+          </Routes>
+        </main>
+      </div>
+    );
+  }
 
-  if (!userRole && !isAdminRoute) {
+  // ── 2. NOT logged in ──────────────────────────────────────────────────────
+  if (!isLoggedIn) {
+    const isLoginPage = location.pathname === '/login';
+    const isRegisterPage = location.pathname === '/register';
+
+    // Allow login/register to render WITH Navbar and Footer
+    if (isLoginPage || isRegisterPage) {
+      return (
+        <div className="flex flex-col min-h-screen">
+          <ScrollToTop />
+          <Navbar />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      );
+    }
+
+    // Every other path when not logged in → RoleSelector, URL silently set to /
+    if (location.pathname !== '/') {
+      window.history.replaceState(null, '', '/');
+    }
     return <RoleSelector onSelect={handleRoleSelect} />;
   }
 
-  const isLoginPage = location.pathname === '/admin/login';
-
+  // ── 3. Logged in — render full app ───────────────────────────────────────
   return (
     <div className="flex flex-col min-h-screen">
-      {!isAdminRoute && !isLoginPage && <Navbar />}
+      <ScrollToTop />
+      <Navbar />
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/services" element={<Services />} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/:type" element={<PolicyPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -77,24 +121,10 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-orders" element={<Orders />} />
           <Route path="/profile" element={<Profile />} />
-          
-          {/* Admin Routes Consolidated */}
-
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />}>
-             <Route index element={<DashboardOverviewWrapper />} />
-             <Route path="inventory" element={<InventoryTab />} />
-             <Route path="categories" element={<CategoriesTab />} />
-             <Route path="orders" element={<OrdersTab />} />
-             <Route path="inquiries" element={<InquiriesTab />} />
-             <Route path="customers" element={<UsersTab />} />
-             <Route path="admins" element={<AdminsTab />} />
-             <Route path="settings" element={<SettingsTab />} />
-          </Route>
+          <Route path="/:type" element={<PolicyPage />} />
         </Routes>
       </main>
-      {!isAdminRoute && !isLoginPage && <Footer />}
-      {/* <SpeedInsights /> */}
+      <Footer />
     </div>
   );
 }

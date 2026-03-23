@@ -24,13 +24,13 @@ const categories = [
     subheading: 'From roller to venetian — perfect light control for any room.',
   },
   {
-    id: 'accessories',
-    name: 'Accessories',
-    description: 'Functional and elegant accessories that bring convenience, detail, and refinement to every space.',
-    href: '/shop?category=accessories',
-    image: 'https://images.unsplash.com/photo-1616489953149-8ba5dc422934?q=80&w=2070&auto=format&fit=crop',
-    heading: 'Elegant\nAccessories',
-    subheading: 'Rods, rings, tiebacks and more — the finishing touches that matter.',
+   id: 'accessories',
+name: 'Accessories',
+description: 'Functional and elegant accessories that bring convenience, detail, and refinement to every space.',
+href: '/shop?category=accessories',
+image: 'https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=2074&auto=format&fit=crop',
+heading: 'Elegant\nAccessories',
+subheading: 'Rods, rings, tiebacks and more — the finishing touches that matter.',
   },
 
 ];
