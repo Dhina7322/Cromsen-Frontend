@@ -37,7 +37,6 @@ function App() {
   const navigate = useNavigate();
 
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const isLoggedIn = !!localStorage.getItem('userInfo');
 
   const handleRoleSelect = (role) => {
     localStorage.setItem('userRole', role);
@@ -75,36 +74,16 @@ function App() {
     );
   }
 
-  // ── 2. NOT logged in ──────────────────────────────────────────────────────
-  if (!isLoggedIn) {
-    const isLoginPage = location.pathname === '/login';
-    const isRegisterPage = location.pathname === '/register';
-
-    // Allow login/register to render WITH Navbar and Footer
-    if (isLoginPage || isRegisterPage) {
-      return (
-        <div className="flex flex-col min-h-screen">
-          <ScrollToTop />
-          <Navbar />
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      );
-    }
-
-    // Every other path when not logged in → RoleSelector, URL silently set to /
+  // ── 2. First Time Visitors — Select Role ───────────────────────────────────
+  if (!userRole) {
+    // Silently route all paths to / until a role is selected
     if (location.pathname !== '/') {
       window.history.replaceState(null, '', '/');
     }
     return <RoleSelector onSelect={handleRoleSelect} />;
   }
 
-  // ── 3. Logged in — render full app ───────────────────────────────────────
+  // ── 3. Render full app ───────────────────────────────────────────────
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />

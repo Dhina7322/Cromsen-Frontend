@@ -51,12 +51,17 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, quantity = 1) => {
     setCartItems(prev => {
-      const existing = prev.find(item => 
-        item._id === product._id && item.selectedVariant === product.selectedVariant
+      const isSameItem = (a, b) => (
+        a._id === b._id &&
+        a.selectedVariant === b.selectedVariant &&
+        a.customColor === b.customColor &&
+        JSON.stringify(a.customDimensions || null) === JSON.stringify(b.customDimensions || null)
       );
+
+      const existing = prev.find(item => isSameItem(item, product));
       if (existing) {
         return prev.map(item =>
-          (item._id === product._id && item.selectedVariant === product.selectedVariant) 
+          isSameItem(item, product)
             ? { ...item, quantity: item.quantity + quantity } 
             : item
         );
@@ -65,14 +70,24 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  const removeFromCart = (id, variant) => {
-    setCartItems(prev => prev.filter(item => !(item._id === id && item.selectedVariant === variant)));
+  const removeFromCart = (id, variant, customColor, customDimensions) => {
+    setCartItems(prev => prev.filter(item => !(
+      item._id === id && 
+      item.selectedVariant === variant &&
+      item.customColor === customColor &&
+      JSON.stringify(item.customDimensions || null) === JSON.stringify(customDimensions || null)
+    )));
   };
 
-  const updateQuantity = (id, variant, newQuantity) => {
+  const updateQuantity = (id, variant, customColor, customDimensions, newQuantity) => {
     if (newQuantity < 1) return;
     setCartItems(prev =>
-      prev.map(item => (item._id === id && item.selectedVariant === variant ? { ...item, quantity: newQuantity } : item))
+      prev.map(item => (
+        item._id === id && 
+        item.selectedVariant === variant &&
+        item.customColor === customColor &&
+        JSON.stringify(item.customDimensions || null) === JSON.stringify(customDimensions || null)
+      ) ? { ...item, quantity: newQuantity } : item)
     );
   };
 

@@ -612,16 +612,7 @@ export default function InventoryTab() {
                     </div>
                   </div>
 
-                  <div className="form-r2" style={{ marginTop: '16px' }}>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Retail)</label>
-                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
-                    </div>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Dealer)</label>
-                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
-                    </div>
-                  </div>
+                  {/* custom price block moved below variants */}
 
                   <div className="fg">
                     <label>Product Slug (URL friendly name)</label>
@@ -808,6 +799,17 @@ export default function InventoryTab() {
                         </table>
                       </div>
                     )}
+                  </div>
+
+                  <div className="form-r2" style={{ marginTop: '16px', marginBottom: '16px' }}>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Retail)</label>
+                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
+                    </div>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Dealer)</label>
+                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '20px' }}>
