@@ -98,6 +98,7 @@ export default function ReviewsTab() {
               <th>Product</th>
               <th>Rating</th>
               <th>Comment</th>
+              <th>Media</th>
               <th>Status</th>
               <th>Date</th>
               <th style={{ textAlign: 'right' }}>Actions</th>
@@ -127,6 +128,16 @@ export default function ReviewsTab() {
                   </td>
                   <td style={{ maxWidth: '300px' }}>
                     <div className="text-gray-600 text-xs italic line-clamp-2" title={review.comment}>"{review.comment}"</div>
+                  </td>
+                  <td>
+                    <div className="flex gap-1 overflow-x-auto no-scrollbar max-w-[100px]">
+                      {review.images?.map((img, i) => (
+                        <img key={i} src={`${API.replace('/api', '')}/uploads/${img}`} className="w-8 h-8 object-cover rounded border border-gray-100 cursor-pointer" onClick={() => window.open(`${API.replace('/api', '')}/uploads/${img}`, '_blank')} />
+                      ))}
+                      {review.videos?.map((vid, i) => (
+                        <div key={i} className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-400" title="Video"><Search size={10}/></div>
+                      ))}
+                    </div>
                   </td>
                   <td>
                     <span className={`status-tag ${

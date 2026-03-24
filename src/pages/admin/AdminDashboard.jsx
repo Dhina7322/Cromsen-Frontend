@@ -196,37 +196,36 @@ export default function AdminDashboard() {
       </AnimatePresence>
 
       <aside className="sidebar">
-        <div className="sidebar-brand">
+        <div className="sidebar-brand flex items-center justify-between">
           <div>
             <div className="brand-name">Cromsen</div>
             <div className="brand-sub">Admin Control</div>
           </div>
+          <button 
+            onClick={() => navigate('/admin/settings')} 
+            className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-all ml-auto"
+            title="Settings"
+          >
+            <Settings size={20} />
+          </button>
         </div>
         <div className="sb-section-label">Main Menu</div>
         <nav>
           <SidebarLink to="/admin" icon={<Layout size={18}/>} label="Dashboard" active={location.pathname === "/admin"} />
           <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Inventory" active={location.pathname === "/admin/inventory"} />
           <SidebarLink to="/admin/categories" icon={<Layers size={18}/>} label="Categories" active={location.pathname === "/admin/categories"} />
-          <SidebarLink to="/admin/homepage" icon={<Layout size={18}/>} label="Homepage" active={location.pathname === "/admin/homepage"} />
           <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders" && !location.search.includes("status=Abandoned")} badge={location.pathname.startsWith("/admin/orders") ? 0 : pendingOrdersCount} />
-          <AnimatePresence>
-            {location.pathname.startsWith("/admin/orders") && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
-                <SidebarLink to="/admin/orders?status=Abandoned" icon={<XCircle size={16}/>} label="Abandoned Orders" active={location.pathname === "/admin/orders" && location.search.includes("status=Abandoned")} style={{ marginLeft: "20px", fontSize: "0.9em", paddingLeft: "12px", borderLeft: "2px solid rgba(255,255,255,0.2)" }} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
+          <SidebarLink to="/admin/homepage" icon={<Layout size={18}/>} label="Homepage" active={location.pathname === "/admin/homepage"} />
           <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Enquiries" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
           <SidebarLink to="/admin/reviews" icon={<Star size={18}/>} label="Reviews" active={location.pathname === "/admin/reviews"} />
-          <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
+          <SidebarLink to="/admin/policies" icon={<Shield size={18}/>} label="Policy" active={location.pathname === "/admin/policies"} />
         </nav>
         {user.role === "main" && (
           <>
             <div className="sb-section-label">Administration</div>
             <nav>
-              <SidebarLink to="/admin/policies" icon={<Shield size={18}/>} label="Policies" active={location.pathname === "/admin/policies"} />
               <SidebarLink to="/admin/admins" icon={<Shield size={18}/>} label="Admins" active={location.pathname === "/admin/admins"} />
-              <SidebarLink to="/admin/settings" icon={<Settings size={18}/>} label="Settings" active={location.pathname === "/admin/settings"} />
             </nav>
           </>
         )}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { getProductById, getReviewsByProduct, createReview, getProducts } from '../services/api';
 import {
   ShoppingCart, ChevronRight, CheckCircle, Zap,
@@ -9,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../utils/imageUtils';
 import ProductCard from '../components/ProductCard';
+
+const API = import.meta.env.VITE_API_URL || "/api";
 
 const StarRating = ({ rating, size = 16 }) => (
   <div className="flex items-center gap-0.5">
@@ -39,7 +42,7 @@ const ProductDetails = () => {
 
   // Reviews
   const [reviews, setReviews]             = useState([]);
-  const [newReview, setNewReview]         = useState({ rating: 5, comment: '', userName: '' });
+  const [newReview, setNewReview]         = useState({ rating: 5, comment: '', userName: '', images: [], videos: [] });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMsg, setReviewMsg]         = useState('');
 
@@ -180,13 +183,28 @@ const ProductDetails = () => {
     if (!newReview.comment.trim() || !newReview.userName.trim()) return;
     try {
       setSubmittingReview(true);
-      const payload = { productId: String(product._id), userName: newReview.userName.trim(), rating: Number(newReview.rating), comment: newReview.comment.trim() };
-      console.log('[Review Submit] payload:', payload);
-      await createReview(payload);
+      
+      const formData = new FormData();
+      formData.append('productId', String(product._id));
+      formData.append('userName', newReview.userName.trim());
+      formData.append('rating', String(newReview.rating));
+      formData.append('comment', newReview.comment.trim());
+      
+      if (newReview.images && newReview.images.length > 0) {
+        Array.from(newReview.images).forEach(f => formData.append('images', f));
+      }
+      if (newReview.videos && newReview.videos.length > 0) {
+        Array.from(newReview.videos).forEach(f => formData.append('videos', f));
+      }
+
+      const res = await axios.post(`${API}/reviews`, formData);
+
       setReviewMsg('✓ Review submitted! It will appear after moderation.');
-      setNewReview({ rating: 5, comment: '', userName: '' });
-    } catch {
-      setReviewMsg('Failed to submit review. Please try again.');
+      setNewReview({ rating: 5, comment: '', userName: '', images: [], videos: [] });
+    } catch (err) {
+      console.error('[Review Submit] error:', err);
+      const errMsg = err.response?.data?.message || 'Failed to submit review. Please try again.';
+      setReviewMsg(errMsg);
     } finally {
       setSubmittingReview(false);
     }
@@ -404,7 +422,7 @@ const ProductDetails = () => {
             {/* Short Description */}
             {product.shortDescription && (
               <div className="lg:col-span-4">
-                <h3 className="text-[11px] uppercase tracking-[0.25em] font-black text-gray-400 mb-3">Overview</h3>
+                <h3 className="text-[11px] uppercase tracking-[0.25em] font-black text-gray-400 mb-3">Description</h3>
                 <p className="text-base text-gray-700 font-semibold leading-relaxed border-l-4 border-action pl-4 py-1">
                   {product.shortDescription}
                 </p>
@@ -481,6 +499,29 @@ const ProductDetails = () => {
                   className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold h-28 outline-none focus:border-action resize-none"
                 />
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Photos (Up to 5)</label>
+                    <input 
+                      type="file" 
+                      multiple 
+                      accept="image/*" 
+                      className="text-[10px] text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all cursor-pointer"
+                      onChange={e => setNewReview({ ...newReview, images: e.target.files })}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Videos (Up to 2)</label>
+                    <input 
+                      type="file" 
+                      multiple 
+                      accept="video/*" 
+                      className="text-[10px] text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all cursor-pointer"
+                      onChange={e => setNewReview({ ...newReview, videos: e.target.files })}
+                    />
+                  </div>
+                </div>
+
                 <button type="submit" disabled={submittingReview}
                   className="w-full py-3 bg-gray-900 text-white rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black transition-all disabled:opacity-50">
                   <Send size={13} />
@@ -521,6 +562,28 @@ const ProductDetails = () => {
                         </span>
                       </div>
                       <p className="text-gray-600 leading-relaxed text-sm pl-12">"{review.comment}"</p>
+                      
+                      {(review.images?.length > 0 || review.videos?.length > 0) && (
+                        <div className="flex flex-wrap gap-3 mt-4 ml-12">
+                          {review.images?.map((img, i) => (
+                            <img 
+                              key={i} 
+                              src={getImageUrl(img)} 
+                              alt="Review" 
+                              className="w-20 h-20 object-cover rounded-lg border border-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(getImageUrl(img), '_blank')}
+                            />
+                          ))}
+                          {review.videos?.map((vid, i) => (
+                            <video 
+                              key={i} 
+                              src={getImageUrl(vid)} 
+                              className="w-20 h-20 object-cover rounded-lg border border-gray-100 cursor-pointer"
+                              controls
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
