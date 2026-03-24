@@ -282,18 +282,18 @@ const ExportModal = ({ onClose, filteredProducts, showToast }) => {
   // Escape key + outside click
   useModalClose(true, onClose);
 
-  const handleExport = async () => {
-    try {
-      showToast("info", "Preparing export...");
-      // For large exports, it's better to open in new tab or handle with blob
-      // A direct link or opening in new window works well for simple CSV downloads
-      window.open(`${API}/products/export`, '_blank');
-      showToast("success", "Export started successfully!");
-      onClose();
-    } catch (err) {
-      console.error(err);
-      showToast("error", "Failed to start export");
-    }
+  const handleExport = () => {
+    downloadCSV(
+      `products_export_${new Date().toISOString().slice(0, 10)}.csv`,
+      filteredProducts.map(p => ({
+        sku: p.sku || "", name: p.name || "",
+        retailPrice: p.retailPrice || 0, wholesalePrice: p.wholesalePrice || 0,
+        description: p.description || "", category: p.category?.name || "", stock: p.stock ?? 0
+      })),
+      CSV_PROD_HEADERS
+    );
+    showToast("success", `Exported ${filteredProducts.length} product${filteredProducts.length !== 1 ? "s" : ""}!`);
+    onClose();
   };
 
   return (
@@ -612,7 +612,16 @@ export default function InventoryTab() {
                     </div>
                   </div>
 
-                  {/* custom price block moved below variants */}
+                  <div className="form-r2" style={{ marginTop: '16px' }}>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Retail)</label>
+                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
+                    </div>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Dealer)</label>
+                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
+                    </div>
+                  </div>
 
                   <div className="fg">
                     <label>Product Slug (URL friendly name)</label>
@@ -799,17 +808,6 @@ export default function InventoryTab() {
                         </table>
                       </div>
                     )}
-                  </div>
-
-                  <div className="form-r2" style={{ marginTop: '16px', marginBottom: '16px' }}>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Retail)</label>
-                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
-                    </div>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Dealer)</label>
-                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
-                    </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '20px' }}>
