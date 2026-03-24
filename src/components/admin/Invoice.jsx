@@ -154,6 +154,7 @@ const Invoice = ({ order }) => {
               <td>
                 <div className="font-bold text-gray-900">{item.name}</div>
                 {item.variant && <div className="text-[10px] text-action font-semibold mt-0.5 uppercase tracking-wider">Variant: {item.variant}</div>}
+                {item.customColor && <div className="text-[10px] text-gray-500 font-semibold mt-0.5 uppercase tracking-wider">Color: {item.customColor}</div>}
               </td>
               <td className="text-right font-medium">₹{Number(item.price).toLocaleString()}</td>
               <td className="text-center font-bold text-gray-900">{item.quantity}</td>

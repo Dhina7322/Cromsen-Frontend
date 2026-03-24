@@ -96,8 +96,13 @@ const Cart = () => {
                         Variant: {item.selectedVariant}
                       </span>
                     )}
+                    {item.customColor && (
+                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 bg-gray-50 self-start px-2 py-1 border border-gray-100 rounded-sm">
+                        Color: {item.customColor}
+                      </span>
+                    )}
                     <button 
-                      onClick={() => removeFromCart(item._id, item.selectedVariant)}
+                      onClick={() => removeFromCart(item._id, item.selectedVariant, item.customColor, item.customDimensions)}
                       className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors self-start underline underline-offset-4"
                     >
                       <Trash2 size={12} /> Remove
@@ -115,7 +120,7 @@ const Cart = () => {
                   <div className="md:hidden text-xs font-bold uppercase text-gray-500">Quantity</div>
                   <div className="flex items-center border border-gray-200 bg-white">
                     <button 
-                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.quantity - 1)}
+                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.customColor, item.customDimensions, item.quantity - 1)}
                       className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                       disabled={item.quantity <= 1}
                     >
@@ -123,7 +128,7 @@ const Cart = () => {
                     </button>
                     <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
                     <button 
-                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.quantity + 1)}
+                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.customColor, item.customDimensions, item.quantity + 1)}
                       className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                     >
                       <Plus size={14} />

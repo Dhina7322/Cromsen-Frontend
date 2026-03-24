@@ -570,6 +570,7 @@ const Checkout = () => {
                     <div className="flex-grow">
                       <p className="text-sm font-serif text-primary font-bold line-clamp-1">{item.name}</p>
                       {item.selectedVariant && <p className="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">Variant: {item.selectedVariant}</p>}
+                      {item.customColor && <p className="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">Color: {item.customColor}</p>}
                       <p className="text-[10px] text-gray-400 uppercase tracking-widest">Qty: {item.quantity}</p>
                     </div>
                     <p className="text-sm font-bold text-primary">₹{(Number(item.price || 0) * item.quantity).toFixed(2)}</p>

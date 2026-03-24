@@ -584,6 +584,11 @@ export default function Orders() {
                                   Variant: {item.variant}
                                 </div>
                               )}
+                              {item.customColor && (
+                                <div className="ord-item-variant" style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 2 }}>
+                                  Color: {item.customColor}
+                                </div>
+                              )}
                               <div className="ord-item-sub"><span>Qty: {qty}</span><span>.</span><span>Rs.{Number(item.price || 0).toLocaleString()} each</span></div>
                             </div>
                             <div className="ord-item-price">Rs.{(qty * Number(item.price || 0)).toLocaleString()}</div>

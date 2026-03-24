@@ -237,7 +237,7 @@ const ProductDetails = () => {
                       setSelectedOptions(prev => ({ ...prev, Size: 'Standard' }));
                     }
                   }}
-                  className={`flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${!isCustom ? 'border-[#1e293b] bg-[#1e293b] text-white shadow-xl' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
+                  className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${!isCustom ? 'border-[#1e293b] bg-[#1e293b] text-white shadow-xl' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
                 >
                   Standard
                 </button>
@@ -248,7 +248,7 @@ const ProductDetails = () => {
                       setSelectedOptions(prev => ({ ...prev, Size: 'Custom' }));
                     }
                   }}
-                  className={`flex-1 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${isCustom ? 'border-[#1e293b] bg-[#1e293b] text-white shadow-xl' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
+                  className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${isCustom ? 'border-[#1e293b] bg-[#1e293b] text-white shadow-xl' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
                 >
                   Custom
                 </button>
@@ -277,7 +277,7 @@ const ProductDetails = () => {
                                 else setIsCustom(false);
                               }
                             }}
-                            className={`px-5 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${selectedOptions[variant.name] === opt ? 'border-primary bg-primary text-white shadow-xl shadow-blue-900/10 scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200 hover:text-gray-600'}`}
+                            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-200 border-2 ${selectedOptions[variant.name] === opt ? 'border-primary bg-primary text-white shadow-xl shadow-blue-900/10 scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200 hover:text-gray-600'}`}
                           >
                             {opt}
                           </button>
@@ -295,7 +295,7 @@ const ProductDetails = () => {
                         placeholder="0"
                         value={customWidth}
                         onChange={(e) => setCustomWidth(e.target.value)}
-                        className="w-full px-5 py-4 bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
+                        className="w-full px-4 py-2 text-sm bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
                       />
                     </div>
                     <div className="space-y-2">
@@ -305,7 +305,7 @@ const ProductDetails = () => {
                         placeholder="0"
                         value={customHeight}
                         onChange={(e) => setCustomHeight(e.target.value)}
-                        className="w-full px-5 py-4 bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
+                        className="w-full px-4 py-2 text-sm bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
                       />
                     </div>
                   </div>
@@ -331,19 +331,21 @@ const ProductDetails = () => {
               )}
 
               {/* Custom Color Input */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-[11px] uppercase tracking-[0.2em] font-black text-gray-400">Custom Color</h3>
-                  {customColor && <span className="text-[10px] bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md font-bold text-gray-600">{customColor}</span>}
+              {isCustom && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-[11px] uppercase tracking-[0.2em] font-black text-gray-400">Custom Color</h3>
+                    {customColor && <span className="text-[10px] bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md font-bold text-gray-600">{customColor}</span>}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Enter color (e.g. Royal Blue, #FF5733)"
+                    value={customColor}
+                    onChange={(e) => setCustomColor(e.target.value)}
+                    className="w-full px-4 py-2 text-sm bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
+                  />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Enter color (e.g. Royal Blue, #FF5733)"
-                  value={customColor}
-                  onChange={(e) => setCustomColor(e.target.value)}
-                  className="w-full px-5 py-4 bg-white border-2 border-gray-100 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-gray-700"
-                />
-              </div>
+              )}
             </div>
 
             {/* Cart Actions */}
