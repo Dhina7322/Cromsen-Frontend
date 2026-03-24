@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Check, X, Trash2, MessageCircle, Star, Search, Filter, Clock } from "lucide-react";
+import { Check, X, Trash2, MessageCircle, Star, Search, Filter, Clock, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const API = import.meta.env.VITE_API_URL || "/api";
@@ -10,6 +10,7 @@ export default function ReviewsTab() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedReview, setSelectedReview] = useState(null);
 
   useEffect(() => {
     fetchReviews();
@@ -158,6 +159,13 @@ export default function ReviewsTab() {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="panel-actions">
+                      <button 
+                        onClick={() => setSelectedReview(review)}
+                        className="p-1.5 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white transition-all"
+                        title="View Details"
+                      >
+                        <Eye size={14} />
+                      </button>
                       {review.status !== 'approved' && (
                         <button 
                           onClick={() => updateStatus(review._id, 'approved')}
@@ -197,6 +205,94 @@ export default function ReviewsTab() {
           </tbody>
         </table>
       </div>
+      
+      <AnimatePresence>
+        {selectedReview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+            >
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h3 className="text-lg font-bold text-gray-900">Review Details</h3>
+                <button 
+                  onClick={() => setSelectedReview(null)}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-1">User Name</span>
+                    <span className="font-bold text-gray-900">{selectedReview.userName}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-1">Product</span>
+                    <span className="font-bold text-gray-900">{selectedReview.product?.name || "Deleted Product"}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-1">Date Submitted</span>
+                    <span className="font-bold text-gray-900">{new Date(selectedReview.createdAt).toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-1">Rating</span>
+                    <div className="flex items-center gap-1 text-orange">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} size={14} fill={s <= selectedReview.rating ? "currentColor" : "none"} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <span className="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-2">Comment</span>
+                  <div className="p-4 bg-gray-50 rounded-xl text-gray-700 text-sm leading-relaxed border border-gray-100 whitespace-pre-wrap">
+                    "{selectedReview.comment}"
+                  </div>
+                </div>
+
+                {(selectedReview.images?.length > 0 || selectedReview.videos?.length > 0) && (
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest font-black text-gray-400 block mb-2">Media</span>
+                    <div className="flex flex-wrap gap-3">
+                      {selectedReview.images?.map((img, i) => (
+                        <img 
+                          key={i} 
+                          src={`${API.replace('/api', '')}/uploads/${img}`} 
+                          className="w-24 h-24 object-cover rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:opacity-80 transition-opacity" 
+                          onClick={() => window.open(`${API.replace('/api', '')}/uploads/${img}`, '_blank')}
+                        />
+                      ))}
+                      {selectedReview.videos?.map((vid, i) => (
+                        <video 
+                          key={i} 
+                          src={`${API.replace('/api', '')}/uploads/${vid}`} 
+                          className="w-24 h-24 object-cover rounded-xl border border-gray-200 shadow-sm"
+                          controls
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 flex-shrink-0">
+                <button 
+                  onClick={() => setSelectedReview(null)}
+                  className="px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

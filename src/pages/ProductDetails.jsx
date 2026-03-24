@@ -417,29 +417,15 @@ const ProductDetails = () => {
         </div>
 
         {/* ══ Description Section ══════════════════════════════════════ */}
-        <div className="mt-16 border-t border-gray-100 pt-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            {/* Short Description */}
-            {product.shortDescription && (
-              <div className="lg:col-span-4">
-                <h3 className="text-[11px] uppercase tracking-[0.25em] font-black text-gray-400 mb-3">Description</h3>
-                <p className="text-base text-gray-700 font-semibold leading-relaxed border-l-4 border-action pl-4 py-1">
-                  {product.shortDescription}
-                </p>
-              </div>
-            )}
-            {/* Full Description */}
-            {product.description && (
-              <div className={product.shortDescription ? 'lg:col-span-8' : 'lg:col-span-12'}>
-                <h3 className="text-[11px] uppercase tracking-[0.25em] font-black text-gray-400 mb-3">Product Details</h3>
-                <div
-                  className="text-gray-600 leading-relaxed text-sm prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              </div>
-            )}
+        {product.description && (
+          <div className="mt-16 border-t border-gray-100 pt-12">
+            <h3 className="text-[11px] uppercase tracking-[0.25em] font-black text-gray-400 mb-3">Product Details</h3>
+            <div
+              className="text-gray-600 leading-relaxed text-sm prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
           </div>
-        </div>
+        )}
 
         {/* ══ Reviews Section ══════════════════════════════════════════ */}
         <div className="mt-20 border-t border-gray-100 pt-16">
@@ -616,12 +602,6 @@ const ProductDetails = () => {
           <div className="mt-20 border-t border-gray-100 pt-16">
             <div className="flex items-baseline justify-between mb-10">
               <h2 className="text-2xl font-bold text-gray-900">Recently Viewed</h2>
-              <button
-                onClick={() => { localStorage.removeItem('recentlyViewed'); setRecentlyViewed([]); }}
-                className="text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors"
-              >
-                Clear
-              </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {recentlyViewed.map(p => <ProductCard key={p._id} product={p} />)}
