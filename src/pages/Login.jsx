@@ -90,7 +90,7 @@ const Login = () => {
 
   const handleBackToPortal = () => {
     localStorage.removeItem('userRole');
-    navigate('/', { replace: true });
+    window.location.href = '/';
   };
 
   const isEmailValid = isValidEmail(email);

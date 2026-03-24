@@ -16,7 +16,7 @@ const RoleSelector = ({ onSelect }) => {
              </div>
              <div className="text-left">
                <h3 className="text-white text-3xl font-brand font-black uppercase tracking-[0.25em]">Cromsen</h3>
-               <p className="text-white/50 text-[10px] font-black uppercase tracking-[0.45em] -mt-1">Importers</p>
+               <p className="text-white/50 text-[10px] font-black uppercase tracking-[1.65em] -mt-1">Importers</p>
              </div>
           </div>
 
