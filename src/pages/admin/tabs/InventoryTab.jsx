@@ -409,7 +409,7 @@ export default function InventoryTab() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${API}/products`, adminHeaders);
+      const res = await axios.get(`${API}/products?limit=1000`, adminHeaders);
       setProducts(res.data.products || res.data);
     } catch (err) { console.error(err); }
   };
@@ -495,6 +495,8 @@ export default function InventoryTab() {
         showToast("success", "Product created successfully");
       }
       setIsModalOpen(false);
+      setSearchTerm("");
+      setSelectedCategories([]);
       fetchProducts();
     } catch (err) {
       showToast("error", err.response?.data?.message || "Failed to save product");
@@ -653,6 +655,28 @@ export default function InventoryTab() {
                     <div className="fg">
                       <label>SKU (Internal Code)</label>
                       <input type="text" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} />
+                    </div>
+                  </div>
+
+                  <div className="form-r2" style={{ marginTop: '16px' }}>
+                    <div className="fg">
+                      <label>Retail Price (Standard)</label>
+                      <input required type="number" value={formData.retailPrice} onChange={e => setFormData({ ...formData, retailPrice: e.target.value })} />
+                    </div>
+                    <div className="fg">
+                      <label>Wholesale/Dealer Price (Standard)</label>
+                      <input required type="number" value={formData.wholesalePrice} onChange={e => setFormData({ ...formData, wholesalePrice: e.target.value })} />
+                    </div>
+                  </div>
+
+                  <div className="form-r2" style={{ marginTop: '16px' }}>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Retail)</label>
+                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
+                    </div>
+                    <div className="fg">
+                      <label>Custom Price Per Sq Ft (Dealer)</label>
+                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
                     </div>
                   </div>
 
