@@ -614,6 +614,17 @@ export default function InventoryTab() {
 
                   <div className="form-r2" style={{ marginTop: '16px' }}>
                     <div className="fg">
+                      <label>Retail Price (Standard)</label>
+                      <input required type="number" value={formData.retailPrice} onChange={e => setFormData({ ...formData, retailPrice: e.target.value })} />
+                    </div>
+                    <div className="fg">
+                      <label>Wholesale/Dealer Price (Standard)</label>
+                      <input required type="number" value={formData.wholesalePrice} onChange={e => setFormData({ ...formData, wholesalePrice: e.target.value })} />
+                    </div>
+                  </div>
+
+                  <div className="form-r2" style={{ marginTop: '16px' }}>
+                    <div className="fg">
                       <label>Custom Price Per Sq Ft (Retail)</label>
                       <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
                     </div>
