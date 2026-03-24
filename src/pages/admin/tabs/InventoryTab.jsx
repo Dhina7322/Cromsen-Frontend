@@ -370,7 +370,7 @@ export default function InventoryTab() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${API}/products`, adminHeaders);
+      const res = await axios.get(`${API}/products?limit=1000`, adminHeaders);
       setProducts(res.data.products || res.data);
     } catch (err) { console.error(err); }
   };
@@ -451,6 +451,8 @@ export default function InventoryTab() {
         showToast("success", "Product created successfully");
       }
       setIsModalOpen(false);
+      setSearchTerm("");
+      setSelectedCategories([]);
       fetchProducts();
     } catch (err) {
       showToast("error", err.response?.data?.message || "Failed to save product");
