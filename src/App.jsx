@@ -27,6 +27,8 @@ import AdminsTab from './pages/admin/tabs/AdminsTab';
 import SettingsTab from './pages/admin/tabs/SettingsTab';
 import InquiriesTab from './pages/admin/tabs/InquiriesTab';
 import HomepageTab from './pages/admin/tabs/HomepageTab';
+import ReviewsTab from './pages/admin/tabs/ReviewsTab';
+import PolicyTab from './pages/admin/tabs/PolicyTab';
 
 import { useState } from 'react';
 import RoleSelector from './components/RoleSelector';
@@ -65,6 +67,8 @@ function App() {
               <Route path="orders" element={<OrdersTab />} />
               <Route path="inquiries" element={<InquiriesTab />} />
               <Route path="customers" element={<UsersTab />} />
+              <Route path="reviews" element={<ReviewsTab />} />
+              <Route path="policies" element={<PolicyTab />} />
               <Route path="admins" element={<AdminsTab />} />
               <Route path="settings" element={<SettingsTab />} />
             </Route>

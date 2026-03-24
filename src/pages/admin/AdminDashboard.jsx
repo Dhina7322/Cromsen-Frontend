@@ -14,7 +14,8 @@ import {
   HelpCircle,
   Bell,
   X,
-  Plus
+  Plus,
+  Star
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Outlet, Link, useLocation } from "react-router-dom";
@@ -216,12 +217,14 @@ export default function AdminDashboard() {
             )}
           </AnimatePresence>
           <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Enquiries" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
+          <SidebarLink to="/admin/reviews" icon={<Star size={18}/>} label="Reviews" active={location.pathname === "/admin/reviews"} />
           <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
         </nav>
         {user.role === "main" && (
           <>
             <div className="sb-section-label">Administration</div>
             <nav>
+              <SidebarLink to="/admin/policies" icon={<Shield size={18}/>} label="Policies" active={location.pathname === "/admin/policies"} />
               <SidebarLink to="/admin/admins" icon={<Shield size={18}/>} label="Admins" active={location.pathname === "/admin/admins"} />
               <SidebarLink to="/admin/settings" icon={<Settings size={18}/>} label="Settings" active={location.pathname === "/admin/settings"} />
             </nav>

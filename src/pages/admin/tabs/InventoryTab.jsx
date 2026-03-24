@@ -18,7 +18,8 @@ const getImageUrl = (filename) => {
 };
 
 // ── CSV Helpers ───────────────────────────────────────────────────────────────
-const CSV_PROD_HEADERS = ["sku", "name", "retailPrice", "wholesalePrice", "description", "category", "stock"];
+// isCustomSizeEnabled intentionally excluded — managed separately in the product editor
+const CSV_PROD_HEADERS = ["sku", "type", "name", "slug", "shortDescription", "description", "retailPrice", "wholesalePrice", "category", "stock"];
 
 const parseCSV = (text) => {
   const lines = text.trim().split("\n").map(l => l.trim()).filter(Boolean);
@@ -107,18 +108,42 @@ const BulkImportModal = ({ onClose, categories, onImportDone, showToast }) => {
       try {
         const fd = new FormData();
         const catName = categories.find(c => c._id === catId)?.name || "";
-        fd.append("sku", (row.sku || "").trim() || generateSKU(row.name, catName));
-        fd.append("name", row.name?.trim() || "");
-        fd.append("retailPrice", Number(row.retailprice || row.retailPrice) || 0);
-        fd.append("wholesalePrice", Number(row.wholesaleprice || row.wholesalePrice) || 0);
-        fd.append("description", row.description?.trim() || "");
-        if (catId) fd.append("category", catId);
-        fd.append("stock", Number(row.stock) || 0);
+
+        // parseCSV lowercases all header keys, so always use lowercase keys here
+        const name = (row.name || "").trim();
+        const sku = (row.sku || "").trim() || generateSKU(name, catName);
+        const type = (row.type || "simple").toLowerCase().trim();
+        const slug = (row.slug || "").trim();
+        const shortDescription = (row.shortdescription || "").trim();
+        // description is required by backend — fall back to name so it never fails on this field
+        const description = (row.description || "").trim() || name;
+        const retailPrice = Number(row.retailprice || row.retailPrice) || 0;
+        const wholesalePrice = Number(row.wholesaleprice || row.wholesalePrice) || 0;
+        const stock = Number(row.stock) || 0;
+
+        fd.append("sku", sku);
+        fd.append("type", type);
+        fd.append("name", name);
+        fd.append("slug", slug);
+        fd.append("shortDescription", shortDescription);
+        fd.append("description", description);
+        fd.append("retailPrice", retailPrice);
+        fd.append("wholesalePrice", wholesalePrice);
+        fd.append("stock", stock);
+        fd.append("isActive", "true");
+        // Send category as JSON array so backend handles both single & multi-category schemas
+        if (catId) fd.append("category", JSON.stringify([catId]));
+
         await axios.post(`${API}/products`, fd, { headers: { 'x-user-role': 'admin' } });
         done++;
       } catch (err) {
         failedCount++;
-        failed.push({ ...row, _error: err?.response?.data?.message || "Failed" });
+        const errMsg = err?.response?.data?.message
+          || err?.response?.data?.error
+          || (typeof err?.response?.data === "string" ? err.response.data : null)
+          || "Failed";
+        console.error("Import row failed:", row.name, "→", errMsg, err?.response?.data);
+        failed.push({ ...row, _error: errMsg });
       }
       setProgress({ done: done + failedCount, total: csvRows.length, failed: failedCount });
     }
@@ -130,8 +155,9 @@ const BulkImportModal = ({ onClose, categories, onImportDone, showToast }) => {
   const downloadTemplate = () => {
     const exCat = categories[0]?.name || "Electronics";
     downloadCSV("products_template.csv", [{
-      sku: "ELC-SAMP-1234", name: "Sample Product", retailPrice: "999",
-      wholesalePrice: "799", description: "Description here", category: exCat, stock: "50"
+      sku: "ELC-SAMP-1234", type: "simple", name: "Sample Product", slug: "sample-product",
+      shortDescription: "Short hook here", description: "Detailed description here", 
+      retailPrice: "999", wholesalePrice: "799", category: exCat, stock: "50"
     }], CSV_PROD_HEADERS);
   };
 
@@ -152,7 +178,7 @@ const BulkImportModal = ({ onClose, categories, onImportDone, showToast }) => {
                 </button>
                 <p style={{ fontSize: 12, color: "var(--text3)", margin: 0 }}>
                   Columns: <code style={{ background: "var(--card2)", padding: "1px 5px", borderRadius: 4 }}>
-                    sku, name, retailPrice, wholesalePrice, description, category, stock
+                    sku, type, name, slug, shortDescription, description, retailPrice, wholesalePrice, category, stock
                   </code>
                 </p>
               </div>
@@ -285,11 +311,24 @@ const ExportModal = ({ onClose, filteredProducts, showToast }) => {
   const handleExport = () => {
     downloadCSV(
       `products_export_${new Date().toISOString().slice(0, 10)}.csv`,
-      filteredProducts.map(p => ({
-        sku: p.sku || "", name: p.name || "",
-        retailPrice: p.retailPrice || 0, wholesalePrice: p.wholesalePrice || 0,
-        description: p.description || "", category: p.category?.name || "", stock: p.stock ?? 0
-      })),
+      filteredProducts.map(p => {
+        let catName = "";
+        if (Array.isArray(p.category)) catName = p.category[0]?.name || p.category[0] || "";
+        else catName = p.category?.name || p.category || "";
+
+        return {
+          sku: p.sku || "", 
+          type: p.type || "simple",
+          name: p.name || "", 
+          slug: p.slug || "", 
+          shortDescription: p.shortDescription || "",
+          retailPrice: p.retailPrice || 0, 
+          wholesalePrice: p.wholesalePrice || 0,
+          description: p.description || "", 
+          category: catName, 
+          stock: p.stock ?? 0
+        };
+      }),
       CSV_PROD_HEADERS
     );
     showToast("success", `Exported ${filteredProducts.length} product${filteredProducts.length !== 1 ? "s" : ""}!`);
@@ -346,7 +385,7 @@ export default function InventoryTab() {
   const filterRef = useRef(null);
 
   const [formData, setFormData] = useState({
-    name: "", sku: "", description: "", retailPrice: "", wholesalePrice: "",
+    name: "", sku: "", type: "simple", isCustomSizeEnabled: false, shortDescription: "", description: "", retailPrice: "", wholesalePrice: "",
     category: [], stock: "", isActive: true, featured: false,
     slug: "", variants: [], variantItems: [],
     pricePerSqFtRetail: "", pricePerSqFtDealer: ""
@@ -394,7 +433,9 @@ export default function InventoryTab() {
     if (product) {
       setEditingProduct(product);
       setFormData({
-        name: product.name, sku: product.sku || "",
+        name: product.name, sku: product.sku || "", type: product.type || "simple",
+        isCustomSizeEnabled: product.isCustomSizeEnabled ?? false,
+        shortDescription: product.shortDescription || "",
         description: product.description, retailPrice: product.retailPrice,
         wholesalePrice: product.wholesalePrice,
         category: Array.isArray(product.category) ? product.category.map(c => c._id || c) : (product.category?._id || product.category || []),
@@ -408,7 +449,7 @@ export default function InventoryTab() {
       setImagesPreviews(product.images ? product.images.map(img => getImageUrl(img)) : []);
     } else {
       setEditingProduct(null);
-      setFormData({ name: "", sku: "", slug: "", description: "", retailPrice: "", wholesalePrice: "", category: [], stock: "", isActive: true, featured: false, variants: [], variantItems: [], pricePerSqFtRetail: "", pricePerSqFtDealer: "" });
+      setFormData({ name: "", sku: "", type: "simple", isCustomSizeEnabled: false, slug: "", shortDescription: "", description: "", retailPrice: "", wholesalePrice: "", category: [], stock: "", isActive: true, featured: false, variants: [], variantItems: [], pricePerSqFtRetail: "", pricePerSqFtDealer: "" });
       setImagePreview(""); setImagesPreviews([]);
     }
     setImageFile(null); setImagesFiles([]);
@@ -432,9 +473,12 @@ export default function InventoryTab() {
     e.preventDefault();
     setLoading(true);
     const data = new FormData();
+    console.log('[Inventory] Saving product data:', formData);
     Object.keys(formData).forEach(key => {
       if (key === 'variants' || key === 'variantItems' || key === 'category') {
         data.append(key, JSON.stringify(formData[key]));
+      } else if (key === 'isCustomSizeEnabled' || key === 'isActive' || key === 'featured') {
+        data.append(key, formData[key] ? "true" : "false");
       } else if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) {
         data.append(key, formData[key]);
       }
@@ -612,16 +656,18 @@ export default function InventoryTab() {
                     </div>
                   </div>
 
-                  <div className="form-r2" style={{ marginTop: '16px' }}>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Retail)</label>
-                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
-                    </div>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Dealer)</label>
-                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
+                  <div className="form-r2" style={{ gap: '16px', marginBottom: '16px' }}>
+                    <div className="fg" style={{ flex: 1 }}>
+                      <label>Product Type</label>
+                      <select value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}
+                        style={{ width: '100%', padding: '10px', border: '1.5px solid var(--border)', borderRadius: '10px', fontSize: '13px', fontWeight: 600 }}>
+                        <option value="simple">Simple Product</option>
+                        <option value="variable">Variable Product</option>
+                        <option value="variation">Variation Product</option>
+                      </select>
                     </div>
                   </div>
+
 
                   <div className="fg">
                     <label>Product Slug (URL friendly name)</label>
@@ -630,8 +676,13 @@ export default function InventoryTab() {
                   </div>
 
                   <div className="fg">
-                    <label>Description</label>
-                    <textarea required rows="3" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                    <label>Short Description (Hook text below price)</label>
+                    <textarea rows="2" value={formData.shortDescription} onChange={e => setFormData({ ...formData, shortDescription: e.target.value })} />
+                  </div>
+
+                  <div className="fg">
+                    <label>Long Description (Detailed specs)</label>
+                    <textarea required rows="4" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                   </div>
 
                   <div style={{ width: '100%', marginBottom: '16px' }}>
@@ -767,6 +818,8 @@ export default function InventoryTab() {
                       </div>
                     ))}
 
+
+                  <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border)', width: '100%' }}>
                     {formData.variantItems && formData.variantItems.length > 0 && (
                       <div style={{ marginTop: '20px', background: 'white', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
@@ -806,6 +859,28 @@ export default function InventoryTab() {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                  {/* Custom Size Configuration - Moved to Bottom */}
+                  <div className="fg" style={{ border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', background: 'var(--card2)', marginTop: '20px', marginBottom: '20px' }}>
+                    <div className="fg" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginBottom: formData.isCustomSizeEnabled ? '16px' : '0' }}>
+                      <input type="checkbox" id="customEnabled" checked={formData.isCustomSizeEnabled} onChange={e => setFormData({ ...formData, isCustomSizeEnabled: e.target.checked })} style={{ width: 'auto' }} />
+                      <label htmlFor="customEnabled" style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>Enable Calculated Custom Size</label>
+                    </div>
+
+                    {formData.isCustomSizeEnabled && (
+                      <div className="form-r2" style={{ gap: '16px', borderTop: '1px dashed var(--border)', paddingTop: '16px' }}>
+                        <div className="fg">
+                          <label>Custom Price Per Sq Ft (Retail)</label>
+                          <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
+                        </div>
+                        <div className="fg">
+                          <label>Custom Price Per Sq Ft (Dealer)</label>
+                          <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
+                        </div>
                       </div>
                     )}
                   </div>
