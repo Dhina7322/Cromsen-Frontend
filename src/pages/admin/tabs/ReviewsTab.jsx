@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Check, X, Trash2, MessageCircle, Star, Search, Filter, Clock, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getImageUrl } from "../../utils/imageUtils";
+import { getImageUrl } from "../../../utils/imageUtils";
 
 const API = import.meta.env.VITE_API_URL || "/api";
 
