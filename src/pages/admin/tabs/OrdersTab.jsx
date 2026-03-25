@@ -158,7 +158,7 @@ export default function OrdersTab() {
 
   // ── KPI stats ──
   useEffect(() => {
-    axios.get("/api/admin/stats").then(res => {
+    axios.get(`${API}/admin/stats`).then(res => {
       setKpiStats({
         totalRevenue:  res.data.totalRevenue  || 0,
         totalProfit:   res.data.totalProfit   || 0,
