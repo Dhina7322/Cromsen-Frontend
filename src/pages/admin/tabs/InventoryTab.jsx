@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { 
   Plus, Edit2, Trash2, Search, X, Save, ImageIcon,
-  Download, Upload, RefreshCw, AlertCircle, Check
+  Download, Upload, RefreshCw, AlertCircle, Check, Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -613,7 +613,10 @@ export default function InventoryTab() {
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <div className="row-acts" onClick={e => e.stopPropagation()}>
+                  <div className="row-acts flex justify-end gap-1" onClick={e => e.stopPropagation()}>
+                    <a href={`/product/${p._id}`} target="_blank" rel="noopener noreferrer" className="icon-btn hover:bg-blue-50 text-blue-500 flex items-center justify-center" title="Preview Product">
+                      <Eye size={14} />
+                    </a>
                     <button className="icon-btn danger hover:bg-red-50" onClick={() => handleDelete(p._id)} title="Delete Product">
                       <Trash2 size={14} />
                     </button>
@@ -669,16 +672,7 @@ export default function InventoryTab() {
                     </div>
                   </div>
 
-                  <div className="form-r2" style={{ marginTop: '16px' }}>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Retail)</label>
-                      <input type="number" placeholder="e.g. 18" value={formData.pricePerSqFtRetail} onChange={e => setFormData({ ...formData, pricePerSqFtRetail: e.target.value })} />
-                    </div>
-                    <div className="fg">
-                      <label>Custom Price Per Sq Ft (Dealer)</label>
-                      <input type="number" placeholder="e.g. 15" value={formData.pricePerSqFtDealer} onChange={e => setFormData({ ...formData, pricePerSqFtDealer: e.target.value })} />
-                    </div>
-                  </div>
+
 
                   <div className="form-r2" style={{ gap: '16px', marginBottom: '16px' }}>
                     <div className="fg" style={{ flex: 1 }}>

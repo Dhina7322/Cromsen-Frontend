@@ -487,31 +487,65 @@ const ProductDetails = () => {
 
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Add Media (Photos & Videos)</label>
-                  <div className="relative">
+                  <div className="flex gap-2">
+                    {/* Photos input */}
                     <input 
                       type="file" 
                       multiple 
-                      accept="image/*,video/*" 
-                      id="media-upload"
+                      accept="image/*"
+                      id="photo-upload"
                       className="hidden"
                       onChange={e => {
-                        const files = Array.from(e.target.files);
-                        const imgs = files.filter(f => f.type.startsWith('image/')).slice(0, 5);
-                        const vids = files.filter(f => f.type.startsWith('video/')).slice(0, 2);
-                        setNewReview({ ...newReview, images: imgs, videos: vids });
+                        const newImgs = Array.from(e.target.files).slice(0, 5);
+                        setNewReview(prev => ({ ...prev, images: [...prev.images, ...newImgs].slice(0, 5) }));
+                        e.target.value = '';
                       }}
                     />
                     <label 
-                      htmlFor="media-upload"
-                      className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-100 transition-all text-[11px] font-bold text-gray-500"
+                      htmlFor="photo-upload"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-dashed border-blue-200 rounded-xl cursor-pointer hover:bg-blue-50 transition-all text-[11px] font-bold text-blue-400"
                     >
-                      <ImageIcon size={16} className="text-gray-400" />
-                      { (newReview.images.length > 0 || newReview.videos.length > 0) 
-                        ? `${newReview.images.length} Photos, ${newReview.videos.length} Videos selected`
-                        : 'Choose Photos & Videos'
-                      }
+                      <ImageIcon size={14} />
+                      {newReview.images.length > 0 ? `${newReview.images.length} Photo${newReview.images.length > 1 ? 's' : ''}` : 'Add Photos'}
+                    </label>
+                    {/* Videos input */}
+                    <input 
+                      type="file" 
+                      multiple
+                      accept="video/*"
+                      id="video-upload"
+                      className="hidden"
+                      onChange={e => {
+                        const newVids = Array.from(e.target.files).slice(0, 2);
+                        setNewReview(prev => ({ ...prev, videos: [...prev.videos, ...newVids].slice(0, 2) }));
+                        e.target.value = '';
+                      }}
+                    />
+                    <label 
+                      htmlFor="video-upload"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-dashed border-purple-200 rounded-xl cursor-pointer hover:bg-purple-50 transition-all text-[11px] font-bold text-purple-400"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                      {newReview.videos.length > 0 ? `${newReview.videos.length} Video${newReview.videos.length > 1 ? 's' : ''}` : 'Add Videos'}
                     </label>
                   </div>
+                  {/* Previews */}
+                  {(newReview.images.length > 0 || newReview.videos.length > 0) && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {newReview.images.map((img, i) => (
+                        <div key={`img-${i}`} className="relative w-14 h-14 rounded-lg overflow-hidden border border-blue-100">
+                          <img src={URL.createObjectURL(img)} className="w-full h-full object-cover" alt="" />
+                          <button type="button" onClick={() => setNewReview(prev => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">✕</button>
+                        </div>
+                      ))}
+                      {newReview.videos.map((vid, i) => (
+                        <div key={`vid-${i}`} className="relative w-14 h-14 rounded-lg overflow-hidden border border-purple-100 bg-purple-50 flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                          <button type="button" onClick={() => setNewReview(prev => ({ ...prev, videos: prev.videos.filter((_, idx) => idx !== i) }))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <button type="submit" disabled={submittingReview}

@@ -335,21 +335,29 @@ export default function ReviewsTab() {
               </div>
               
               <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 flex-shrink-0">
-                {selectedReview.status === 'pending' && (
+                {selectedReview.status !== 'rejected' ? (
                   <button 
                     onClick={() => updateStatus(selectedReview._id, 'rejected')}
-                    className="px-6 py-2.5 rounded-xl font-bold text-sm bg-orange text-white hover:bg-orange/90 transition-all flex items-center gap-2"
+                    className="px-6 py-2.5 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-600 transition-all flex items-center gap-2"
                   >
                     <X size={16} /> Reject
                   </button>
+                ) : (
+                  <div className="px-6 py-2.5 rounded-xl font-bold text-sm bg-gray-100 text-gray-400 flex items-center gap-2 cursor-not-allowed">
+                    <X size={16} /> Rejected
+                  </div>
                 )}
-                {selectedReview.status !== 'approved' && (
+                {selectedReview.status !== 'approved' ? (
                   <button 
                     onClick={() => updateStatus(selectedReview._id, 'approved')}
-                    className="px-6 py-2.5 rounded-xl font-bold text-sm bg-green text-white hover:bg-green/90 transition-all flex items-center gap-2"
+                    className="px-6 py-2.5 rounded-xl font-bold text-sm bg-green-500 text-white hover:bg-green-600 transition-all flex items-center gap-2"
                   >
                     <Check size={16} /> Approve
                   </button>
+                ) : (
+                  <div className="px-6 py-2.5 rounded-xl font-bold text-sm bg-gray-100 text-gray-400 flex items-center gap-2 cursor-not-allowed">
+                    <Check size={16} /> Approved
+                  </div>
                 )}
                 <button 
                   onClick={() => setSelectedReview(null)}

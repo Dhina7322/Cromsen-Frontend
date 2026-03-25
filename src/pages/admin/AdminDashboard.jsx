@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Package, 
   ShoppingCart, 
@@ -34,7 +34,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showToastMsg, setShowToastMsg] = useState({ show: false, type: "success", text: "" });
   const [newOrderNotify, setNewOrderNotify] = useState(null);
-  const [lastOrderCount, setLastOrderCount] = useState(null);
+  const knownOrdersRef = useRef(new Set());
+  const isFirstPollRef = useRef(true);
   
   // Stats are shared or managed by OverviewTab, but we can keep basic stats here for topbar if needed
   const [orderCount, setOrderCount] = useState(0);
@@ -113,13 +114,25 @@ export default function AdminDashboard() {
         }
       } catch (e) {}
 
-      if (lastOrderCount !== null && currentCount > lastOrderCount) {
-        // New order detected! Fetch the latest order details
-        const latestOrderRes = await axios.get(`${API}/orders`, { params: { limit: 1 } });
-        setNewOrderNotify(latestOrderRes.data.orders?.[0]);
-        // Audio notification could go here
+      // Check for new non-abandoned orders using a Set
+      try {
+        const latestOrderRes = await axios.get(`${API}/orders`, { params: { limit: 10 } });
+        const validOrders = (latestOrderRes.data.orders || []).filter(o => o.status !== "Abandoned");
+        
+        if (isFirstPollRef.current) {
+          validOrders.forEach(o => knownOrdersRef.current.add(o._id));
+          isFirstPollRef.current = false;
+        } else {
+          const newOrders = validOrders.filter(o => !knownOrdersRef.current.has(o._id));
+          if (newOrders.length > 0) {
+            setNewOrderNotify(newOrders[0]);
+            newOrders.forEach(o => knownOrdersRef.current.add(o._id));
+          }
+        }
+      } catch (err) {
+        console.error("Error checking latest orders:", err);
       }
-      setLastOrderCount(currentCount);
+
     } catch (err) {
       console.error("Poll error:", err);
     } finally {
