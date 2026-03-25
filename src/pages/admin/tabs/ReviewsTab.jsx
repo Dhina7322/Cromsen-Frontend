@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Check, X, Trash2, MessageCircle, Star, Search, Filter, Clock, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getImageUrl } from "../../utils/imageUtils";
 
 const API = import.meta.env.VITE_API_URL || "/api";
 
@@ -161,7 +162,7 @@ export default function ReviewsTab() {
                   <td>
                     <div className="flex gap-1 overflow-x-auto no-scrollbar max-w-[100px]">
                       {review.images?.map((img, i) => (
-                        <img key={i} src={`${API.replace('/api', '')}/uploads/${img}`} className="w-8 h-8 object-cover rounded border border-gray-100 cursor-pointer" onClick={() => window.open(`${API.replace('/api', '')}/uploads/${img}`, '_blank')} />
+                        <img key={i} src={getImageUrl(img)} className="w-8 h-8 object-cover rounded border border-gray-100 cursor-pointer" onClick={() => window.open(getImageUrl(img), '_blank')} />
                       ))}
                       {review.videos?.map((vid, i) => (
                         <div key={i} className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-400" title="Video"><Search size={10}/></div>
@@ -295,15 +296,15 @@ export default function ReviewsTab() {
                       {selectedReview.images?.map((img, i) => (
                         <img 
                           key={i} 
-                          src={`${API.replace('/api', '')}/uploads/${img}`} 
+                          src={getImageUrl(img)} 
                           className="w-24 h-24 object-cover rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:opacity-80 transition-opacity" 
-                          onClick={() => window.open(`${API.replace('/api', '')}/uploads/${img}`, '_blank')}
+                          onClick={() => window.open(getImageUrl(img), '_blank')}
                         />
                       ))}
                       {selectedReview.videos?.map((vid, i) => (
                         <video 
                           key={i} 
-                          src={`${API.replace('/api', '')}/uploads/${vid}`} 
+                          src={getImageUrl(vid)} 
                           className="w-24 h-24 object-cover rounded-xl border border-gray-200 shadow-sm"
                           controls
                         />
