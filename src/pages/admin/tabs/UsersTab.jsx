@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
+import { getImageUrl } from "../../../utils/imageUtils";
 
 const API = import.meta.env.VITE_API_URL || "/api";
 
@@ -114,7 +115,7 @@ export default function UsersTab() {
                 <td>
                   <div className="cust-cell">
                     {u.avatar ? (
-                      <img src={u.avatar} className="sb-avatar object-cover" alt="" />
+                      <img src={getImageUrl(u.avatar)} className="sb-avatar object-cover" alt="" />
                     ) : (
                       <div className="sb-avatar">{u.name ? u.name[0] : 'U'}</div>
                     )}
@@ -170,7 +171,7 @@ export default function UsersTab() {
             <div className="p-6 space-y-6">
               <div className="flex items-center gap-4">
                 {selectedUser.avatar ? (
-                  <img src={selectedUser.avatar} className="w-14 h-14 rounded-xl object-cover ring-2 ring-gray-50 shadow-sm" alt="" />
+                  <img src={getImageUrl(selectedUser.avatar)} className="w-14 h-14 rounded-xl object-cover ring-2 ring-gray-50 shadow-sm" alt="" />
                 ) : (
                   <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold border border-blue-100">
                     {selectedUser.name?.[0]}

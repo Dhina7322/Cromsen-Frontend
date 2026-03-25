@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
+import { getImageUrl } from "../../../utils/imageUtils";
 
 const API = import.meta.env.VITE_API_URL || "/api";
 
@@ -68,7 +69,7 @@ export default function CategoriesTab() {
     if (cat) {
       setEditingItem(cat);
       setCatForm({ name: cat.name, description: cat.description || "" });
-      setImagePreview(cat.image ? `/uploads/${cat.image}` : "");
+      setImagePreview(cat.image ? getImageUrl(cat.image) : "");
       setExistingImageFilename(cat.image || "");
     } else {
       setEditingItem(null);
@@ -201,7 +202,7 @@ export default function CategoriesTab() {
                 style={{ cursor: 'pointer', flex: '1 1 auto', minWidth: 0 }}
               >
                 {cat.image ? (
-                  <img src={`/uploads/${cat.image}`} alt="" className="prod-thumb" />
+                  <img src={getImageUrl(cat.image)} alt="" className="prod-thumb" />
                 ) : (
                   <div className="prod-thumb-ph"><Layers size={14} /></div>
                 )}
@@ -249,7 +250,7 @@ export default function CategoriesTab() {
                                 <div className="prod-cell">
                                   {prod.image || (prod.images && prod.images[0]) ? (
                                     <img
-                                      src={prod.image?.startsWith('http') ? prod.image : `/uploads/${prod.image || prod.images[0]}`}
+                                      src={getImageUrl(prod.image || prod.images?.[0])}
                                       alt=""
                                       className="prod-thumb"
                                       style={{ width: 30, height: 30 }}
@@ -376,7 +377,7 @@ export default function CategoriesTab() {
                           className="w-4 h-4 text-action bg-gray-100 border-gray-300 rounded focus:ring-action"
                         />
                         {p.image || (p.images && p.images[0]) ? (
-                           <img src={p.image?.startsWith('http') ? p.image : `/uploads/${p.image || p.images[0]}`} className="w-8 h-8 rounded object-cover" />
+                           <img src={getImageUrl(p.image || p.images?.[0])} className="w-8 h-8 rounded object-cover" />
                         ) : (
                            <div className="w-8 h-8 rounded bg-gray-200" />
                         )}
