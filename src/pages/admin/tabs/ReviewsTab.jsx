@@ -11,6 +11,14 @@ export default function ReviewsTab() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedReview, setSelectedReview] = useState(null);
+  const [adminReply, setAdminReply] = useState("");
+  const [savingReply, setSavingReply] = useState(false);
+
+  useEffect(() => {
+    if (selectedReview) {
+      setAdminReply(selectedReview.adminReply || "");
+    }
+  }, [selectedReview]);
 
   useEffect(() => {
     fetchReviews();
@@ -36,8 +44,28 @@ export default function ReviewsTab() {
         headers: { 'x-user-role': 'admin' }
       });
       setReviews(reviews.map(r => r._id === id ? { ...r, status } : r));
+      if (selectedReview && selectedReview._id === id) {
+        setSelectedReview({ ...selectedReview, status });
+      }
     } catch (err) {
       console.error("Error updating review status:", err);
+    }
+  };
+
+  const saveReply = async () => {
+    if (!selectedReview) return;
+    try {
+      setSavingReply(true);
+      await axios.put(`${API}/reviews/admin/${selectedReview._id}/status`, { adminReply }, {
+        headers: { 'x-user-role': 'admin' }
+      });
+      setReviews(reviews.map(r => r._id === selectedReview._id ? { ...r, adminReply } : r));
+      setSelectedReview({ ...selectedReview, adminReply });
+      alert("Reply saved successfully!");
+    } catch (err) {
+      console.error("Error saving reply:", err);
+    } finally {
+      setSavingReply(false);
     }
   };
 
@@ -208,12 +236,16 @@ export default function ReviewsTab() {
       
       <AnimatePresence>
         {selectedReview && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setSelectedReview(null)}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <h3 className="text-lg font-bold text-gray-900">Review Details</h3>
@@ -279,9 +311,46 @@ export default function ReviewsTab() {
                     </div>
                   </div>
                 )}
+
+                {selectedReview.status === 'approved' && (
+                  <div className="mt-8 pt-8 border-t border-gray-100">
+                    <span className="text-[10px] uppercase tracking-widest font-black text-action block mb-2">Admin Reply</span>
+                    <textarea 
+                      value={adminReply}
+                      onChange={(e) => setAdminReply(e.target.value)}
+                      placeholder="Write your response to the customer here..."
+                      className="w-full h-24 p-4 text-sm bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-action resize-none font-medium text-gray-700"
+                    />
+                    <div className="flex justify-end mt-2">
+                       <button 
+                        onClick={saveReply}
+                        disabled={savingReply}
+                        className="px-4 py-2 bg-action text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:brightness-110 transition-all disabled:opacity-50"
+                       >
+                         {savingReply ? 'Saving...' : 'Save Reply'}
+                       </button>
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 flex-shrink-0">
+                {selectedReview.status === 'pending' && (
+                  <button 
+                    onClick={() => updateStatus(selectedReview._id, 'rejected')}
+                    className="px-6 py-2.5 rounded-xl font-bold text-sm bg-orange text-white hover:bg-orange/90 transition-all flex items-center gap-2"
+                  >
+                    <X size={16} /> Reject
+                  </button>
+                )}
+                {selectedReview.status !== 'approved' && (
+                  <button 
+                    onClick={() => updateStatus(selectedReview._id, 'approved')}
+                    className="px-6 py-2.5 rounded-xl font-bold text-sm bg-green text-white hover:bg-green/90 transition-all flex items-center gap-2"
+                  >
+                    <Check size={16} /> Approve
+                  </button>
+                )}
                 <button 
                   onClick={() => setSelectedReview(null)}
                   className="px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-all"

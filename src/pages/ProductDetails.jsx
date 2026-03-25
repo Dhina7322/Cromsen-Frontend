@@ -485,26 +485,32 @@ const ProductDetails = () => {
                   className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-semibold h-28 outline-none focus:border-action resize-none"
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Photos (Up to 5)</label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Add Media (Photos & Videos)</label>
+                  <div className="relative">
                     <input 
                       type="file" 
                       multiple 
-                      accept="image/*" 
-                      className="text-[10px] text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all cursor-pointer"
-                      onChange={e => setNewReview({ ...newReview, images: e.target.files })}
+                      accept="image/*,video/*" 
+                      id="media-upload"
+                      className="hidden"
+                      onChange={e => {
+                        const files = Array.from(e.target.files);
+                        const imgs = files.filter(f => f.type.startsWith('image/')).slice(0, 5);
+                        const vids = files.filter(f => f.type.startsWith('video/')).slice(0, 2);
+                        setNewReview({ ...newReview, images: imgs, videos: vids });
+                      }}
                     />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest pl-1">Videos (Up to 2)</label>
-                    <input 
-                      type="file" 
-                      multiple 
-                      accept="video/*" 
-                      className="text-[10px] text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all cursor-pointer"
-                      onChange={e => setNewReview({ ...newReview, videos: e.target.files })}
-                    />
+                    <label 
+                      htmlFor="media-upload"
+                      className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-100 transition-all text-[11px] font-bold text-gray-500"
+                    >
+                      <ImageIcon size={16} className="text-gray-400" />
+                      { (newReview.images.length > 0 || newReview.videos.length > 0) 
+                        ? `${newReview.images.length} Photos, ${newReview.videos.length} Videos selected`
+                        : 'Choose Photos & Videos'
+                      }
+                    </label>
                   </div>
                 </div>
 
@@ -568,6 +574,15 @@ const ProductDetails = () => {
                               controls
                             />
                           ))}
+                        </div>
+                      )}
+
+                      {review.adminReply && (
+                        <div className="mt-5 ml-12 p-4 bg-orange/5 border-l-4 border-orange rounded-r-xl">
+                          <p className="text-[10px] uppercase tracking-widest font-black text-orange mb-1">Response from Cromsen Importers</p>
+                          <p className="text-gray-700 text-sm leading-relaxed font-medium">
+                            {review.adminReply}
+                          </p>
                         </div>
                       )}
                     </div>

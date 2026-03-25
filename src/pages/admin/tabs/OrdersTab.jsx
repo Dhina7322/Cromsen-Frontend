@@ -268,8 +268,7 @@ export default function OrdersTab() {
       </div>
 
       {/* ── Filter bar ── */}
-      {statusFilter !== "Abandoned" && (
-        <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
 
           {/* Left: pills — two rows like original */}
           <div className="flex flex-col gap-2">
@@ -321,6 +320,15 @@ export default function OrdersTab() {
                 Cancelled
                 <span className="spill-cnt">{allCounts["Cancelled"] || 0}</span>
               </button>
+
+              {/* Abandoned */}
+              <button
+                className={`spill ${statusFilter === "Abandoned" ? "spill--on" : ""}`}
+                onClick={() => handleStatusFilterChange("Abandoned")}
+              >
+                Abandoned
+                <span className="spill-cnt">{allCounts["Abandoned"] || 0}</span>
+              </button>
             </div>
           </div>
 
@@ -341,7 +349,7 @@ export default function OrdersTab() {
             )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* ── Orders Table ── */}
       <div className="bg-white border border-gray-100 overflow-hidden">
