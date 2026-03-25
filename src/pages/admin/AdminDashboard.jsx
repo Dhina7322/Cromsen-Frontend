@@ -97,15 +97,19 @@ export default function AdminDashboard() {
         const inqRes = await axios.get(`${API}/inquiries`);
         const inqList = inqRes.data.inquiries || inqRes.data || [];
         const lastSeen = localStorage.getItem("lastSeenInquiries");
-        if (lastSeen && location.pathname !== "/admin/inquiries") {
+        
+        if (location.pathname === "/admin/inquiries") {
+          // Currently on the inquiries page — no badge needed
+          setInquiriesCount(0);
+        } else if (lastSeen) {
+          // Count only enquiries received AFTER the last time the page was visited
           const lastSeenDate = new Date(lastSeen);
           const newInquiries = inqList.filter(inq => new Date(inq.createdAt) > lastSeenDate);
           setInquiriesCount(newInquiries.length);
-        } else if (location.pathname === "/admin/inquiries") {
-          setInquiriesCount(0);
         } else {
-          // First time ever — no lastSeen stored, show all as new
-          setInquiriesCount(inqList.length);
+          // First-ever login: set "now" as the baseline — don't count existing enquiries as new
+          localStorage.setItem("lastSeenInquiries", new Date().toISOString());
+          setInquiriesCount(0);
         }
       } catch (e) {}
 
