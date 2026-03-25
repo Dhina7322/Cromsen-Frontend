@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { getImageUrl } from "../../../utils/imageUtils";
 import Invoice from "../../../components/admin/Invoice";
 
@@ -59,7 +59,6 @@ function KPI({ label, value, icon, color }) {
 }
 
 // ─── Dropdown pill ────────────────────────────────────────────────────────────
-// counts always comes from allCounts (all orders), never filtered
 function DropdownPill({ label, options, statusFilter, counts, onSelect }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -117,12 +116,9 @@ export default function OrdersTab() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const searchParams = new URLSearchParams(location.search);
+  const [searchParams] = useSearchParams();
   const initialStatus = searchParams.get("status") || "All";
 
-  // Two separate order lists:
-  //   allOrders  — always fetched with NO status filter, used ONLY for badge counts
-  //   orders     — fetched with the active status filter, used for the table
   const [allOrders,     setAllOrders]     = useState([]);
   const [orders,        setOrders]        = useState([]);
   const [loading,       setLoading]       = useState(false);
@@ -135,28 +131,23 @@ export default function OrdersTab() {
     activeOrders: 0, totalUsers: 0, totalProducts: 0,
   });
 
-  // Status groups
   const mainStatuses    = ["All", "Processing", "Shipped", "Delivered"];
   const refundStatuses  = ["Refund Tracking", "Refund Processed", "Refund Completed"];
   const replaceStatuses = ["Replacement Requested", "Replacement Processed", "Replacement Completed"];
 
-  // ── sync filter from URL ──
   useEffect(() => {
-    const s = searchParams.get("status");
-    if (s && s !== statusFilter) setStatusFilter(s);
-  }, [location.search]);
+    const s = searchParams.get("status") || "All";
+    if (s !== statusFilter) setStatusFilter(s);
+  }, [location.search, statusFilter, searchParams]);
 
-  // ── fetch ALL orders once (for counts) ──
   useEffect(() => {
     axios.get(`${API}/orders`, { params: { limit: 1000 } })
       .then(res => setAllOrders(res.data.orders || []))
       .catch(() => {});
   }, []);
 
-  // ── fetch filtered orders whenever filter changes ──
   useEffect(() => { fetchOrders(); }, [statusFilter]);
 
-  // ── KPI stats ──
   useEffect(() => {
     axios.get(`${API}/admin/stats`).then(res => {
       setKpiStats({
@@ -170,7 +161,6 @@ export default function OrdersTab() {
     }).catch(() => {});
   }, []);
 
-  // ── enrich modal items ──
   useEffect(() => {
     if (!selectedOrder) { setEnrichedItems([]); return; }
     const items = selectedOrder.items || [];
@@ -201,18 +191,16 @@ export default function OrdersTab() {
   };
 
   const handleStatusFilterChange = (s) => {
-    setStatusFilter(s);
-    navigate(s === "Abandoned" ? "?status=Abandoned" : "?");
+    if (s === "All") navigate("/admin/orders");
+    else navigate(`?status=${encodeURIComponent(s)}`);
   };
 
-  // ── counts always from allOrders — never affected by active filter ──
   const allCounts = {};
   allOrders.forEach(o => {
     allCounts[o.status] = (allCounts[o.status] || 0) + 1;
   });
   const totalNonAbandoned = allOrders.filter(o => o.status !== "Abandoned").length;
 
-  // ── filtered table rows (search only, status already handled by API) ──
   const filteredOrders = orders.filter(o => {
     const term = searchTerm.toLowerCase().trim();
     if (!term) return statusFilter === "All" ? o.status !== "Abandoned" : true;
@@ -230,7 +218,6 @@ export default function OrdersTab() {
     try {
       await axios.put(`${API}/orders/${id}`, { status });
       showToast("success", `Order marked as ${status}`);
-      // refresh both lists
       fetchOrders();
       axios.get(`${API}/orders`, { params: { limit: 1000 } })
         .then(res => setAllOrders(res.data.orders || [])).catch(() => {});
@@ -248,7 +235,7 @@ export default function OrdersTab() {
   };
 
   const getAvailableStatuses = (status) => {
-    if (status === "Abandoned")           return ["Abandoned"];
+    if (status === "Abandoned")           return ["Processing", "Cancelled", "Abandoned"];
     if (status?.includes("Refund"))       return refundStatuses;
     if (status?.includes("Replacement"))  return replaceStatuses;
     return ["Processing", "Shipped", "Delivered", "Cancelled"];
@@ -270,84 +257,83 @@ export default function OrdersTab() {
       {/* ── Filter bar ── */}
       <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
 
-          {/* Left: pills — two rows like original */}
-          <div className="flex flex-col gap-2">
-            <div className="spill-row" style={{ margin: 0, flexWrap: "wrap", gap: "8px" }}>
-              {/* All */}
+        {/* Left: pills */}
+        <div className="flex flex-col gap-2">
+          <div className="spill-row" style={{ margin: 0, flexWrap: "wrap", gap: "8px" }}>
+            {/* All */}
+            <button
+              className={`spill ${statusFilter === "All" ? "spill--on" : ""}`}
+              onClick={() => handleStatusFilterChange("All")}
+            >
+              All
+              <span className="spill-cnt">{totalNonAbandoned}</span>
+            </button>
+
+            {/* Processing, Shipped, Delivered */}
+            {mainStatuses.filter(s => s !== "All").map(s => (
               <button
-                className={`spill ${statusFilter === "All" ? "spill--on" : ""}`}
-                onClick={() => handleStatusFilterChange("All")}
+                key={s}
+                className={`spill ${statusFilter === s ? "spill--on" : ""}`}
+                onClick={() => handleStatusFilterChange(s)}
               >
-                All
-                <span className="spill-cnt">{totalNonAbandoned}</span>
+                {s}
+                <span className="spill-cnt">{allCounts[s] || 0}</span>
               </button>
+            ))}
 
-              {/* Processing, Shipped, Delivered */}
-              {mainStatuses.filter(s => s !== "All").map(s => (
-                <button
-                  key={s}
-                  className={`spill ${statusFilter === s ? "spill--on" : ""}`}
-                  onClick={() => handleStatusFilterChange(s)}
-                >
-                  {s}
-                  <span className="spill-cnt">{allCounts[s] || 0}</span>
-                </button>
-              ))}
-
-              {/* Refund dropdown */}
-              <DropdownPill
-                label="Refund"
-                options={refundStatuses}
-                statusFilter={statusFilter}
-                counts={allCounts}
-                onSelect={handleStatusFilterChange}
-              />
-
-              {/* Replacement dropdown */}
-              <DropdownPill
-                label="Replacement"
-                options={replaceStatuses}
-                statusFilter={statusFilter}
-                counts={allCounts}
-                onSelect={handleStatusFilterChange}
-              />
-
-              {/* Cancelled */}
-              <button
-                className={`spill ${statusFilter === "Cancelled" ? "spill--on" : ""}`}
-                onClick={() => handleStatusFilterChange("Cancelled")}
-              >
-                Cancelled
-                <span className="spill-cnt">{allCounts["Cancelled"] || 0}</span>
-              </button>
-
-              {/* Abandoned */}
-              <button
-                className={`spill ${statusFilter === "Abandoned" ? "spill--on" : ""}`}
-                onClick={() => handleStatusFilterChange("Abandoned")}
-              >
-                Abandoned
-                <span className="spill-cnt">{allCounts["Abandoned"] || 0}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Right: search */}
-          <div className="relative w-72 shrink-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search order ID or customer..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-200 pl-9 pr-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-action/20 focus:border-action transition-all placeholder:text-gray-400"
+            {/* Refund dropdown */}
+            <DropdownPill
+              label="Refund"
+              options={refundStatuses}
+              statusFilter={statusFilter}
+              counts={allCounts}
+              onSelect={handleStatusFilterChange}
             />
-            {searchTerm && (
-              <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
-                <X size={14} />
-              </button>
-            )}
+
+            {/* Replacement dropdown */}
+            <DropdownPill
+              label="Replacement"
+              options={replaceStatuses}
+              statusFilter={statusFilter}
+              counts={allCounts}
+              onSelect={handleStatusFilterChange}
+            />
+
+            {/* Cancelled */}
+            <button
+              className={`spill ${statusFilter === "Cancelled" ? "spill--on" : ""}`}
+              onClick={() => handleStatusFilterChange("Cancelled")}
+            >
+              Cancelled
+              <span className="spill-cnt">{allCounts["Cancelled"] || 0}</span>
+            </button>
+
+            {/* Abandoned */}
+            <button
+              className={`spill ${statusFilter === "Abandoned" ? "spill--on" : ""}`}
+              onClick={() => handleStatusFilterChange("Abandoned")}
+            >
+              Abandoned
+              <span className="spill-cnt">{allCounts["Abandoned"] || 0}</span>
+            </button>
           </div>
+        </div>
+
+        {/* Right: search */}
+        <div className="relative w-72 shrink-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder="Search order ID or customer..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full bg-white border border-gray-200 pl-9 pr-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-action/20 focus:border-action transition-all placeholder:text-gray-400"
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -449,7 +435,7 @@ export default function OrdersTab() {
                 );
               })}
               {filteredOrders.length === 0 && (
-                <tr><td colSpan="7" className="py-12 text-center text-gray-400 text-sm">No orders found</td></tr>
+                <tr><td colSpan="8" className="py-12 text-center text-gray-400 text-sm">No orders found</td></tr>
               )}
             </tbody>
           </table>
@@ -466,125 +452,126 @@ export default function OrdersTab() {
             </div>
 
             <div className="modal-overlay no-print">
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal">
-              <div className="modal-head">
-                <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
-                <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18}/></button>
-              </div>
-              <div className="om-body">
-                <div className="om-left">
-                  <div className="om-section-title">Order Items</div>
-                  <div className="activity-list" style={{ padding: 0 }}>
-                    {enrichedItems.map((item, idx) => (
-                      <div key={idx} className="om-item">
-                        <div className="om-item-ph" style={{ position: "relative", overflow: "hidden" }}>
-                          {getImageUrl(item.image || item.images?.[0]) ? (
-                            <>
-                              <img src={getImageUrl(item.image || item.images?.[0])} alt={item.name}
-                                style={{ width:"100%",height:"100%",objectFit:"cover",position:"absolute",top:0,left:0,zIndex:10 }}
-                                onError={e => { e.target.style.display = "none"; }} />
-                              <span style={{ position:"relative",zIndex:0 }}>{item.name?.[0]}</span>
-                            </>
-                          ) : item.name?.[0]}
-                        </div>
-                        <div className="om-item-info">
-                          <div className="om-item-name">{item.name}</div>
-                          {item.variant && <div className="text-[10px] uppercase font-bold text-action tracking-wider mb-0.5">Variant: {item.variant}</div>}
-                          {item.customColor && <div className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-0.5">Color: {item.customColor}</div>}
-                          <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
-                        </div>
-                        <div className="om-item-total">₹{item.quantity * item.price}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ marginTop:"24px" }}>
-                    <div className="om-section-title">Shipping Address</div>
-                    <div style={{ background:"#f8f9fa",padding:"12px",borderRadius:"8px",fontSize:"13px" }}>
-                      <strong>{selectedOrder.shippingAddress?.name}</strong><br/>
-                      {selectedOrder.shippingAddress?.address}<br/>
-                      {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state || ""} {selectedOrder.shippingAddress?.zip}<br/>
-                      {selectedOrder.shippingAddress?.country && <>{selectedOrder.shippingAddress.country}<br/></>}
-                      Phone: {selectedOrder.shippingAddress?.phone}
-                    </div>
-                  </div>
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal">
+                <div className="modal-head">
+                  <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
+                  <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18}/></button>
                 </div>
-
-                <div className="om-right">
-                  <div className="om-section-title">Order Summary</div>
-                  <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
-                  <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
-                  <div className="om-summary-row"><span>Payment Method</span><span className="font-bold text-action text-[11px] uppercase">{getPaymentLabel(selectedOrder)}</span></div>
-                  <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
-
-                  {(selectedOrder.replacementFor || selectedOrder.replacementOrderId) && (
-                    <div style={{ marginTop:"24px",background:"#f5f3ff",border:"1px solid #ddd6fe",padding:"12px",borderRadius:"8px" }}>
-                      <div className="om-section-title" style={{ color:"#7c3aed",marginBottom:"8px" }}>Order Linkage</div>
-                      {selectedOrder.replacementFor && (
-                        <div className="flex justify-between items-center text-[13px] mb-2">
-                          <span className="text-gray-500">Replacement for</span>
-                          <button onClick={() => { setSearchTerm(selectedOrder.replacementFor); setSelectedOrder(null); }} className="text-purple-600 font-bold hover:underline">
-                            #{selectedOrder.replacementFor.slice(-8).toUpperCase()}
-                          </button>
+                <div className="om-body">
+                  <div className="om-left">
+                    <div className="om-section-title">Order Items</div>
+                    <div className="activity-list" style={{ padding: 0 }}>
+                      {enrichedItems.map((item, idx) => (
+                        <div key={idx} className="om-item">
+                          <div className="om-item-ph" style={{ position: "relative", overflow: "hidden" }}>
+                            {getImageUrl(item.image || item.images?.[0]) ? (
+                              <>
+                                <img src={getImageUrl(item.image || item.images?.[0])} alt={item.name}
+                                  style={{ width:"100%",height:"100%",objectFit:"cover",position:"absolute",top:0,left:0,zIndex:10 }}
+                                  onError={e => { e.target.style.display = "none"; }} />
+                                <span style={{ position:"relative",zIndex:0 }}>{item.name?.[0]}</span>
+                              </>
+                            ) : item.name?.[0]}
+                          </div>
+                          <div className="om-item-info">
+                            <div className="om-item-name">{item.name}</div>
+                            {item.variant && <div className="text-[10px] uppercase font-bold text-action tracking-wider mb-0.5">Variant: {item.variant}</div>}
+                            {item.customColor && <div className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-0.5">Color: {item.customColor}</div>}
+                            <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
+                          </div>
+                          <div className="om-item-total">₹{item.quantity * item.price}</div>
                         </div>
-                      )}
-                      {selectedOrder.replacementOrderId && (
-                        <div className="flex justify-between items-center text-[13px]">
-                          <span className="text-gray-500">Replaced by</span>
-                          <button onClick={() => { setSearchTerm(selectedOrder.replacementOrderId); setSelectedOrder(null); }} className="text-blue-600 font-bold hover:underline">
-                            #{selectedOrder.replacementOrderId.slice(-8).toUpperCase()}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {selectedOrder.cancelReason && (
-                    <div style={{ marginTop:"24px",background:"#fef2f2",border:"1px solid #fee2e2",padding:"12px",borderRadius:"8px" }}>
-                      <div className="om-section-title" style={{ color:"#ef4444",marginBottom:"8px" }}>Cancellation/Replace Reason</div>
-                      <div style={{ fontSize:"13px",color:"#b91c1c" }}>{selectedOrder.cancelReason}</div>
-                    </div>
-                  )}
-
-                  {selectedOrder.status !== "Delivered" && selectedOrder.status !== "Cancelled" &&
-                   !selectedOrder.status?.includes("Refund") && !selectedOrder.status?.includes("Replacement") &&
-                   selectedOrder.status !== "Abandoned" && (
-                    <div style={{ marginTop:"24px" }}>
-                      <div className="om-section-title">Expected Delivery Date</div>
-                      <input
-                        type="date"
-                        className="bg-white border border-gray-200 text-sm px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 transition-shadow"
-                        value={selectedOrder.expectedDelivery ? selectedOrder.expectedDelivery.split("T")[0] : ""}
-                        onChange={e => updateOrderDelivery(selectedOrder._id, e.target.value)}
-                      />
-                    </div>
-                  )}
-
-                  <div style={{ marginTop:"24px" }}>
-                    <div className="om-section-title">Update Status</div>
-                    <div className="om-status-btns">
-                      {getAvailableStatuses(selectedOrder.status).map(s => (
-                        <button
-                          key={s}
-                          disabled={selectedOrder.status === s}
-                          className={`od-st-btn ${selectedOrder.status === s ? "od-st-btn--on" : ""}`}
-                          onClick={() => updateOrderStatus(selectedOrder._id, s)}
-                        >
-                          {s}
-                        </button>
                       ))}
                     </div>
+                    <div style={{ marginTop:"24px" }}>
+                      <div className="om-section-title">Shipping Address</div>
+                      <div style={{ background:"#f8f9fa",padding:"12px",borderRadius:"8px",fontSize:"13px" }}>
+                        <strong>{selectedOrder.shippingAddress?.name}</strong><br/>
+                        {selectedOrder.shippingAddress?.address}<br/>
+                        {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state || ""} {selectedOrder.shippingAddress?.zip}<br/>
+                        {selectedOrder.shippingAddress?.country && <>{selectedOrder.shippingAddress.country}<br/></>}
+                        Phone: {selectedOrder.shippingAddress?.phone}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="om-right">
+                    <div className="om-section-title">Order Summary</div>
+                    <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
+                    <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
+                    <div className="om-summary-row"><span>Payment Method</span><span className="font-bold text-action text-[11px] uppercase">{getPaymentLabel(selectedOrder)}</span></div>
+                    <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
+
+                    {(selectedOrder.replacementFor || selectedOrder.replacementOrderId) && (
+                      <div style={{ marginTop:"24px",background:"#f5f3ff",border:"1px solid #ddd6fe",padding:"12px",borderRadius:"8px" }}>
+                        <div className="om-section-title" style={{ color:"#7c3aed",marginBottom:"8px" }}>Order Linkage</div>
+                        {selectedOrder.replacementFor && (
+                          <div className="flex justify-between items-center text-[13px] mb-2">
+                            <span className="text-gray-500">Replacement for</span>
+                            <button onClick={() => { setSearchTerm(selectedOrder.replacementFor); setSelectedOrder(null); }} className="text-purple-600 font-bold hover:underline">
+                              #{selectedOrder.replacementFor.slice(-8).toUpperCase()}
+                            </button>
+                          </div>
+                        )}
+                        {selectedOrder.replacementOrderId && (
+                          <div className="flex justify-between items-center text-[13px]">
+                            <span className="text-gray-500">Replaced by</span>
+                            <button onClick={() => { setSearchTerm(selectedOrder.replacementOrderId); setSelectedOrder(null); }} className="text-blue-600 font-bold hover:underline">
+                              #{selectedOrder.replacementOrderId.slice(-8).toUpperCase()}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedOrder.cancelReason && (
+                      <div style={{ marginTop:"24px",background:"#fef2f2",border:"1px solid #fee2e2",padding:"12px",borderRadius:"8px" }}>
+                        <div className="om-section-title" style={{ color:"#ef4444",marginBottom:"8px" }}>Cancellation/Replace Reason</div>
+                        <div style={{ fontSize:"13px",color:"#b91c1c" }}>{selectedOrder.cancelReason}</div>
+                      </div>
+                    )}
+
+                    {selectedOrder.status !== "Delivered" && selectedOrder.status !== "Cancelled" &&
+                     !selectedOrder.status?.includes("Refund") && !selectedOrder.status?.includes("Replacement") &&
+                     selectedOrder.status !== "Abandoned" && (
+                      <div style={{ marginTop:"24px" }}>
+                        <div className="om-section-title">Expected Delivery Date</div>
+                        <input
+                          type="date"
+                          className="bg-white border border-gray-200 text-sm px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 transition-shadow"
+                          value={selectedOrder.expectedDelivery ? selectedOrder.expectedDelivery.split("T")[0] : ""}
+                          onChange={e => updateOrderDelivery(selectedOrder._id, e.target.value)}
+                        />
+                      </div>
+                    )}
+
+                    <div style={{ marginTop:"24px" }}>
+                      <div className="om-section-title">Update Status</div>
+                      <div className="om-status-btns">
+                        {getAvailableStatuses(selectedOrder.status).map(s => (
+                          <button
+                            key={s}
+                            disabled={selectedOrder.status === s}
+                            className={`od-st-btn ${selectedOrder.status === s ? "od-st-btn--on" : ""}`}
+                            onClick={() => updateOrderStatus(selectedOrder._id, s)}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="modal-foot">
-                <button className="btn-secondary" onClick={() => window.print()}>Print Invoice</button>
-                <button className="btn-primary" onClick={() => setSelectedOrder(null)}>Close</button>
-              </div>
-            </motion.div>
+                <div className="modal-foot">
+                  <button className="btn-secondary" onClick={() => window.print()}>Print Invoice</button>
+                  <button className="btn-primary" onClick={() => setSelectedOrder(null)}>Close</button>
+                </div>
+              </motion.div>
             </div>
           </>
         )}
       </AnimatePresence>
+
     </div>
   );
 }
