@@ -275,13 +275,16 @@ const Navbar = () => {
                 <div className="flex items-center space-x-2 group cursor-pointer relative">
                   {/* Avatar */}
                   {userInfo.avatar ? (
-                    <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shrink-0">
+                    <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20 shrink-0 relative bg-white/10">
                       <img
                         src={getImageUrl(userInfo.avatar)}
                         alt={userInfo.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.target.style.display = 'none'; }}
+                        className="w-full h-full object-cover absolute inset-0 text-transparent"
+                        onError={(e) => { e.target.style.display = 'none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex'; }}
                       />
+                      <div className="w-full h-full hidden items-center justify-center text-xs font-bold text-white bg-primary">
+                        {userInfo.name?.charAt(0)}
+                      </div>
                     </div>
                   ) : (
                     <User size={16} className="text-action" />
@@ -457,8 +460,11 @@ const Navbar = () => {
                     <>
                       <div className="flex items-center space-x-2 text-action px-1">
                         {userInfo.avatar ? (
-                          <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 shrink-0">
-                            <img src={getImageUrl(userInfo.avatar)} alt="Avatar" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                          <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20 shrink-0 relative bg-white/10">
+                            <img src={getImageUrl(userInfo.avatar)} alt="Avatar" className="w-full h-full object-cover absolute inset-0 text-transparent" onError={(e) => { e.target.style.display = 'none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex'; }} />
+                            <div className="w-full h-full hidden items-center justify-center text-[10px] font-bold text-white bg-primary">
+                              {userInfo.name?.charAt(0)}
+                            </div>
                           </div>
                         ) : <User size={16} />}
                         <span className="text-sm uppercase tracking-widest font-medium">{userInfo.name}</span>

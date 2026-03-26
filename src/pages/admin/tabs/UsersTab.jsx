@@ -115,7 +115,12 @@ export default function UsersTab() {
                 <td>
                   <div className="cust-cell">
                     {u.avatar ? (
-                      <img src={getImageUrl(u.avatar)} className="sb-avatar object-cover" alt="" />
+                      <div className="relative sb-avatar overflow-hidden">
+                        <img src={getImageUrl(u.avatar)} className="w-full h-full object-cover absolute inset-0 text-transparent" alt="" onError={(e) => { e.target.style.display = 'none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex'; }} />
+                        <div className="w-full h-full hidden items-center justify-center absolute inset-0 bg-gray-100 font-bold text-gray-500">
+                          {u.name ? u.name[0] : 'U'}
+                        </div>
+                      </div>
                     ) : (
                       <div className="sb-avatar">{u.name ? u.name[0] : 'U'}</div>
                     )}
@@ -171,7 +176,12 @@ export default function UsersTab() {
             <div className="p-6 space-y-6">
               <div className="flex items-center gap-4">
                 {selectedUser.avatar ? (
-                  <img src={getImageUrl(selectedUser.avatar)} className="w-14 h-14 rounded-xl object-cover ring-2 ring-gray-50 shadow-sm" alt="" />
+                  <div className="relative w-14 h-14 rounded-xl overflow-hidden ring-2 ring-gray-50 shadow-sm bg-gray-50">
+                    <img src={getImageUrl(selectedUser.avatar)} className="w-full h-full object-cover absolute inset-0 z-10 text-transparent" alt="" onError={(e) => { e.target.style.display = 'none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex'; }} />
+                    <div className="w-full h-full hidden items-center justify-center absolute inset-0 text-xl font-bold text-blue-600 bg-blue-50">
+                      {selectedUser.name?.[0]}
+                    </div>
+                  </div>
                 ) : (
                   <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold border border-blue-100">
                     {selectedUser.name?.[0]}

@@ -402,11 +402,22 @@ export default function Profile() {
               className="relative group cursor-pointer shrink-0"
               onClick={() => !cropSrc && fileInputRef.current.click()}
             >
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200 flex items-center justify-center shadow-inner">
-                {formData.avatar
-                  ? <img src={getImageUrl(formData.avatar)} alt="Avatar" className="w-full h-full object-cover" />
-                  : <User size={32} className="text-gray-300" />
-                }
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-200 flex items-center justify-center shadow-inner relative">
+                {formData.avatar ? (
+                  <>
+                    <img 
+                      src={getImageUrl(formData.avatar)} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover absolute inset-0 z-10 text-transparent" 
+                      onError={(e) => { e.target.style.display = 'none'; if(e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex'; }}
+                    />
+                    <div className="w-full h-full hidden items-center justify-center absolute inset-0 bg-gray-100">
+                      <User size={32} className="text-gray-300" />
+                    </div>
+                  </>
+                ) : (
+                  <User size={32} className="text-gray-300" />
+                )}
               </div>
               {!cropSrc && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all rounded-full">
