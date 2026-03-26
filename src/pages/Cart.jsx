@@ -217,7 +217,7 @@ const Cart = () => {
 
               <div className="flex flex-col gap-3">
                 <button 
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/roleselector')}
                   className="w-full bg-primary text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-action transition-all shadow-md"
                 >
                   Login Now

@@ -78,16 +78,7 @@ function App() {
     );
   }
 
-  // ── 2. First Time Visitors — Select Role ───────────────────────────────────
-  if (!userRole) {
-    // Silently route all paths to / until a role is selected
-    if (location.pathname !== '/') {
-      window.history.replaceState(null, '', '/');
-    }
-    return <RoleSelector onSelect={handleRoleSelect} />;
-  }
-
-  // ── 3. Render full app ───────────────────────────────────────────────
+  // ── 2. Render full app ───────────────────────────────────────────────
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
@@ -95,7 +86,7 @@ function App() {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/roleselector" element={<RoleSelector onSelect={handleRoleSelect} />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/services" element={<Services />} />
           <Route path="/product/:id" element={<ProductDetails />} />

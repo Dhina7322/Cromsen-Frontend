@@ -74,7 +74,7 @@ const Login = () => {
       });
 
       setTimeout(() => {
-        navigate('/home', { replace: true });
+        navigate('/', { replace: true });
       }, 1500);
 
     } catch (err) {
@@ -90,7 +90,7 @@ const Login = () => {
 
   const handleBackToPortal = () => {
     localStorage.removeItem('userRole');
-    window.location.href = '/';
+    navigate('/roleselector');
   };
 
   const isEmailValid = isValidEmail(email);

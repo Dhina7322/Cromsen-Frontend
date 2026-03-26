@@ -225,7 +225,6 @@ export default function UsersTab() {
                     <p className="text-[11px] font-semibold text-gray-700">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
-
                 {selectedUser.role === 'dealer' && (
                   <>
                     <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3 md:col-span-2">
@@ -241,6 +240,14 @@ export default function UsersTab() {
                       <div className="flex-1">
                         <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">GST Number</p>
                         <p className="text-[11px] font-semibold text-gray-700">{selectedUser.gstNumber || "Not provided"}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center gap-3">
+                      <div className="bg-white p-1.5 rounded-lg text-gray-400 shadow-sm"><FileText size={14} /></div>
+                      <div className="flex-1">
+                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">PAN Number</p>
+                        <p className="text-[11px] font-semibold text-gray-700">{selectedUser.panNumber || "Not provided"}</p>
                       </div>
                     </div>
                   </>

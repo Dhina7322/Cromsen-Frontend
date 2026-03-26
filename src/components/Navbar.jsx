@@ -31,7 +31,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { cartCount } = useCart();
   const userRole = localStorage.getItem('userRole') || 'customer';
-  const isHomePage = location.pathname === '/' || location.pathname === '/home';
+  const isHomePage = location.pathname === '/';
 
   // Re-read userInfo on every route change (catches post-login navigation)
   useEffect(() => {
@@ -113,7 +113,7 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: 'Home',     path: '/home' },
+    { name: 'Home',     path: '/' },
     { name: 'Shop',     path: '/shop' },
     { name: 'Services', path: '/services' },
     { name: 'Contact',  path: '/contact' },
@@ -130,7 +130,7 @@ const Navbar = () => {
       >
         <div className="container mx-auto max-w-[1200px] px-5 flex items-center justify-between py-4">
 
-          <Link to="/home" className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <img src={Logo} alt="Cromsen Importers" className="h-8 lg:h-10 w-auto object-contain invert" />
           </Link>
 
@@ -303,7 +303,7 @@ const Navbar = () => {
                 </div>
               </div>
             ) : (
-              <Link to="/login" className="hover:text-action transition-colors">Login</Link>
+              <Link to="/roleselector" className="hover:text-action transition-colors">Login</Link>
             )}
 
             <span className="text-white/30">|</span>
@@ -475,7 +475,7 @@ const Navbar = () => {
                     </>
                   ) : (
                     <>
-                      <Link to="/login" onClick={() => setIsOpen(false)} className="text-sm uppercase tracking-widest font-medium text-gray-300 hover:text-white">Login</Link>
+                      <Link to="/roleselector" onClick={() => setIsOpen(false)} className="text-sm uppercase tracking-widest font-medium text-gray-300 hover:text-white">Login</Link>
                       <Link to="/register" onClick={() => setIsOpen(false)} className="text-sm uppercase tracking-widest font-medium text-gray-300 hover:text-white">Register</Link>
                     </>
                   )}

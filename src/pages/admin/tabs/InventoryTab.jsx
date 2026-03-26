@@ -19,7 +19,7 @@ const getImageUrl = (filename) => {
 
 // ── CSV Helpers ───────────────────────────────────────────────────────────────
 // isCustomSizeEnabled intentionally excluded — managed separately in the product editor
-const CSV_PROD_HEADERS = ["sku", "type", "name", "slug", "shortDescription", "description", "retailPrice", "wholesalePrice", "category", "stock"];
+const CSV_PROD_HEADERS = ["sku", "type", "name", "slug", "shortDescription", "description", "retailPrice", "wholesalePrice", "category", "stock", "image", "image1", "image2", "image3", "image4", "image5", "image6"];
 
 const parseCSV = (text) => {
   const lines = text.trim().split("\n").map(l => l.trim()).filter(Boolean);
@@ -127,7 +127,11 @@ const BulkImportModal = ({ onClose, categories, onImportDone, showToast }) => {
         retailPrice: retailPrice,
         wholesalePrice: wholesalePrice,
         stock: stock,
-        isActive: true
+        isActive: true,
+        image: (row.image || "").trim(),
+        images: [row.image1, row.image2, row.image3, row.image4, row.image5, row.image6]
+          .map(i => (i || "").trim())
+          .filter(Boolean)
       };
       
       if (catId) pData.category = [catId];
@@ -161,7 +165,8 @@ const BulkImportModal = ({ onClose, categories, onImportDone, showToast }) => {
     downloadCSV("products_template.csv", [{
       sku: "ELC-SAMP-1234", type: "simple", name: "Sample Product", slug: "sample-product",
       shortDescription: "Short hook here", description: "Detailed description here", 
-      retailPrice: "999", wholesalePrice: "799", category: exCat, stock: "50"
+      retailPrice: "999", wholesalePrice: "799", category: exCat, stock: "50", 
+      image: "", image1: "", image2: "", image3: "", image4: "", image5: "", image6: ""
     }], CSV_PROD_HEADERS);
   };
 
@@ -330,7 +335,14 @@ const ExportModal = ({ onClose, filteredProducts, showToast }) => {
           wholesalePrice: p.wholesalePrice || 0,
           description: p.description || "", 
           category: catName, 
-          stock: p.stock ?? 0
+          stock: p.stock ?? 0,
+          image: p.image ? getImageUrl(p.image) : "",
+          image1: p.images?.[0] ? getImageUrl(p.images[0]) : "",
+          image2: p.images?.[1] ? getImageUrl(p.images[1]) : "",
+          image3: p.images?.[2] ? getImageUrl(p.images[2]) : "",
+          image4: p.images?.[3] ? getImageUrl(p.images[3]) : "",
+          image5: p.images?.[4] ? getImageUrl(p.images[4]) : "",
+          image6: p.images?.[5] ? getImageUrl(p.images[5]) : ""
         };
       }),
       CSV_PROD_HEADERS
@@ -396,8 +408,7 @@ export default function InventoryTab() {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
-  const [imagesFiles, setImagesFiles] = useState([]);
-  const [imagesPreviews, setImagesPreviews] = useState([]);
+  const [additionalImages, setAdditionalImages] = useState([]);
 
   // ── Escape key closes the product modal ──────────────────────────────────────
   useModalClose(isModalOpen, () => setIsModalOpen(false));
@@ -450,13 +461,13 @@ export default function InventoryTab() {
         pricePerSqFtDealer: product.pricePerSqFtDealer || ""
       });
       setImagePreview(product.image ? getImageUrl(product.image) : "");
-      setImagesPreviews(product.images ? product.images.map(img => getImageUrl(img)) : []);
+      setAdditionalImages(product.images ? product.images.map(img => ({ file: null, preview: getImageUrl(img), oldPath: img })) : []);
     } else {
       setEditingProduct(null);
       setFormData({ name: "", sku: "", type: "simple", isCustomSizeEnabled: false, slug: "", shortDescription: "", description: "", retailPrice: "", wholesalePrice: "", category: [], stock: "", isActive: true, featured: false, variants: [], variantItems: [], pricePerSqFtRetail: "", pricePerSqFtDealer: "" });
-      setImagePreview(""); setImagesPreviews([]);
+      setImagePreview(""); setAdditionalImages([]);
     }
-    setImageFile(null); setImagesFiles([]);
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
@@ -468,8 +479,8 @@ export default function InventoryTab() {
   const handleMultipleImagesChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length) {
-      setImagesFiles(files);
-      setImagesPreviews(files.map(file => URL.createObjectURL(file)));
+      const newImgs = files.map(file => ({ file, preview: URL.createObjectURL(file), oldPath: null }));
+      setAdditionalImages(prev => [...prev, ...newImgs]);
     }
   };
 
@@ -488,7 +499,10 @@ export default function InventoryTab() {
       }
     });
     if (imageFile) data.append("image", imageFile);
-    if (imagesFiles.length) imagesFiles.forEach(file => data.append("images", file));
+    const existingImgs = additionalImages.filter(img => img.oldPath).map(img => img.oldPath);
+    data.append('existingImages', JSON.stringify(existingImgs));
+    const uploadFiles = additionalImages.filter(img => img.file).map(img => img.file);
+    if (uploadFiles.length) uploadFiles.forEach(file => data.append("images", file));
     const uploadHeaders = { headers: { 'x-user-role': 'admin' } };
     try {
       if (editingProduct) {
@@ -753,19 +767,18 @@ export default function InventoryTab() {
 
                   <div className="fg">
                     <label>Additional Photos</label>
-                    <div className="upload-wrap" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div className="upload-wrap" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', width: '100%' }}>
                       <label className="upload-box" style={{ width: '80px', height: '80px', flexShrink: 0 }}>
                         <input type="file" multiple className="hidden-input" onChange={handleMultipleImagesChange} />
                         <ImageIcon size={20} /><span style={{ fontSize: '10px' }}>Upload</span>
                       </label>
-                      {imagesPreviews.map((src, i) => (
+                      {additionalImages.map((imgObj, i) => (
                         <div key={i} style={{ position: 'relative', width: '80px', height: '80px', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                          <img src={src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Preview ${i}`} />
+                          <img src={imgObj.preview} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Preview ${i}`} />
                           <button type="button"
                             style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', padding: '2px', cursor: 'pointer' }}
                             onClick={() => {
-                              setImagesPreviews(imagesPreviews.filter((_, idx) => idx !== i));
-                              setImagesFiles(imagesFiles.filter((_, idx) => idx !== i));
+                              setAdditionalImages(prev => prev.filter((_, idx) => idx !== i));
                             }}>
                             <X size={10} />
                           </button>

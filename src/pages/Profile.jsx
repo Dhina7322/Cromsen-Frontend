@@ -14,6 +14,7 @@ const isValidEmail = (v) => {
 };
 const phoneRegex = /^[0-9]{10,15}$/;
 const gstRegex   = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+const panRegex   = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 const EMAIL_DOMAINS = ['gmail.com','yahoo.com','outlook.com','hotmail.com','icloud.com','protonmail.com','ymail.com'];
 
 // ─── EmailInput ───────────────────────────────────────────────────────────────
@@ -260,7 +261,7 @@ export default function Profile() {
   const [cropSrc, setCropSrc]   = useState(null); // shows inline crop when set
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', company: '', companyAddress: '',
-    gstNumber: '', avatar: '', currentPassword: '', newPassword: '', confirmPassword: '',
+    gstNumber: '', panNumber: '', avatar: '', currentPassword: '', newPassword: '', confirmPassword: '',
   });
 
   const storedUser = localStorage.getItem('userInfo');
@@ -277,7 +278,8 @@ export default function Profile() {
           name: res.data.name || '', email: res.data.email || '',
           phone: res.data.phone || '', company: res.data.company || '',
           companyAddress: res.data.companyAddress || '',
-          gstNumber: res.data.gstNumber || '', avatar: res.data.avatar || '',
+          gstNumber: res.data.gstNumber || '', panNumber: res.data.panNumber || '',
+          avatar: res.data.avatar || '',
         }));
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
@@ -352,7 +354,9 @@ export default function Profile() {
     if (formData.phone && !phoneRegex.test(formData.phone))
       return setFeedback({ show: true, type: 'error', message: 'Phone number must be 10–15 digits.' });
     if (formData.gstNumber && !gstRegex.test(formData.gstNumber))
-      return setFeedback({ show: true, type: 'error', message: 'Enter a valid 15-character GST number.' });
+      return setFeedback({ show: true, type: 'error', message: 'Enter a valid 15-character GST number (e.g. 22AAAAA0000A1Z5).' });
+    if (formData.panNumber && !panRegex.test(formData.panNumber))
+      return setFeedback({ show: true, type: 'error', message: 'Enter a valid 10-character PAN number (e.g. ABCDE1234F).' });
     if (!formData.currentPassword)
       return setFeedback({ show: true, type: 'error', message: 'Current password is required to save changes.' });
     if (formData.newPassword && formData.newPassword !== formData.confirmPassword)
@@ -386,7 +390,7 @@ export default function Profile() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-xl font-bold text-gray-800">My Profile</h1>
-        <Link to="/home" className="text-xs text-gray-400 hover:text-black transition-colors flex items-center gap-1.5 font-bold uppercase tracking-wider">
+        <Link to="/" className="text-xs text-gray-400 hover:text-black transition-colors flex items-center gap-1.5 font-bold uppercase tracking-wider">
           <ArrowLeft size={14} /> Back
         </Link>
       </div>
@@ -494,8 +498,16 @@ export default function Profile() {
                   <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">GST Number (Optional)</label>
                   <input
                     type="text" name="gstNumber" value={formData.gstNumber}
-                    onChange={e => handleChange({ target: { name: 'gstNumber', value: e.target.value.toUpperCase().slice(0, 15) } })}
+                    onChange={e => handleChange({ target: { name: 'gstNumber', value: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15) } })}
                     className={baseInput} placeholder="GSTIN..."
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 ml-0.5">PAN Number (Optional)</label>
+                  <input
+                    type="text" name="panNumber" value={formData.panNumber}
+                    onChange={e => handleChange({ target: { name: 'panNumber', value: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) } })}
+                    className={baseInput} placeholder="PAN..."
                   />
                 </div>
               </>

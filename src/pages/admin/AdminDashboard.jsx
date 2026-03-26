@@ -154,6 +154,7 @@ export default function AdminDashboard() {
   const getPageTitle = () => {
     const path = location.pathname.split("/").pop();
     if (path === "admin") return "Dashboard";
+    if (path === "inventory") return "Product";
     return path.charAt(0).toUpperCase() + path.slice(1);
   };
 
@@ -230,7 +231,7 @@ export default function AdminDashboard() {
         <div className="sb-section-label">Main Menu</div>
         <nav>
           <SidebarLink to="/admin" icon={<Layout size={18}/>} label="Dashboard" active={location.pathname === "/admin"} />
-          <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Inventory" active={location.pathname === "/admin/inventory"} />
+          <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Products" active={location.pathname === "/admin/inventory"} />
           <SidebarLink to="/admin/categories" icon={<Layers size={18}/>} label="Categories" active={location.pathname === "/admin/categories"} />
           <SidebarLink to="/admin/orders" icon={<ShoppingCart size={18}/>} label="Orders" active={location.pathname === "/admin/orders" && !location.search.includes("status=Abandoned")} badge={location.pathname.startsWith("/admin/orders") ? 0 : pendingOrdersCount} />
           <SidebarLink to="/admin/customers" icon={<Users size={18}/>} label="Customers" active={location.pathname === "/admin/customers"} />
