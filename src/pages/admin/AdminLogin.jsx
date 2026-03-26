@@ -11,6 +11,7 @@ export default function AdminLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +26,9 @@ export default function AdminLogin() {
       });
       
       const admin = res.data;
-      const expire = new Date().getTime() + 30 * 60 * 1000;
+      const expire = rememberMe 
+        ? new Date().getTime() + 30 * 24 * 60 * 60 * 1000 // 30 days
+        : new Date().getTime() + 30 * 60 * 1000;          // 30 mins
       localStorage.setItem("cromsen_auth", "true");
       localStorage.setItem("cromsen_user", admin.username);
       localStorage.setItem("cromsen_role", admin.role || "sub");
@@ -99,6 +102,19 @@ export default function AdminLogin() {
               {error}
             </motion.div>
           )}
+
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="remember"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 text-[#f47121] focus:ring-[#f47121] border-gray-300 rounded cursor-pointer"
+            />
+            <label htmlFor="remember" className="text-sm text-gray-700 font-medium cursor-pointer select-none">
+              Remember me
+            </label>
+          </div>
 
           <button 
             type="submit" 

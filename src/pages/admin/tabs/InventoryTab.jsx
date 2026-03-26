@@ -101,55 +101,59 @@ const BulkImportModal = ({ onClose, categories, onImportDone, showToast }) => {
   };
 
   const startImport = async () => {
-    setStep("importing"); setProgress({ done: 0, total: csvRows.length, failed: 0 });
-    const failed = []; let done = 0, failedCount = 0;
-    for (const row of csvRows) {
+    setStep("importing"); 
+    setProgress({ done: 0, total: csvRows.length, failed: 0 });
+    
+    const formattedProducts = csvRows.map(row => {
       const catId = catNameToId(row.category);
-      try {
-        const fd = new FormData();
-        const catName = categories.find(c => c._id === catId)?.name || "";
+      const catName = categories.find(c => c._id === catId)?.name || "";
+      const name = (row.name || "").trim();
+      const sku = (row.sku || "").trim() || generateSKU(name, catName);
+      
+      let type = (row.type || "simple").toLowerCase().trim();
+      if (type === "varible") type = "variable";
 
-        // parseCSV lowercases all header keys, so always use lowercase keys here
-        const name = (row.name || "").trim();
-        const sku = (row.sku || "").trim() || generateSKU(name, catName);
-        const type = (row.type || "simple").toLowerCase().trim();
-        const slug = (row.slug || "").trim();
-        const shortDescription = (row.shortdescription || "").trim();
-        // description is required by backend — fall back to name so it never fails on this field
-        const description = (row.description || "").trim() || name;
-        const retailPrice = Number(row.retailprice || row.retailPrice) || 0;
-        const wholesalePrice = Number(row.wholesaleprice || row.wholesalePrice) || 0;
-        const stock = Number(row.stock) || 0;
+      const retailPrice = Number(row.retailprice || row.retailPrice) || 0;
+      const wholesalePrice = Number(row.wholesaleprice || row.wholesalePrice) || 0;
+      const stock = Number(row.stock) || 0;
+      
+      const pData = {
+        sku: sku,
+        type: type,
+        name: name,
+        slug: (row.slug || "").trim(),
+        shortDescription: (row.shortdescription || row.shortDescription || "").trim(),
+        description: (row.description || "").trim() || name,
+        retailPrice: retailPrice,
+        wholesalePrice: wholesalePrice,
+        stock: stock,
+        isActive: true
+      };
+      
+      if (catId) pData.category = [catId];
+      return pData;
+    });
 
-        fd.append("sku", sku);
-        fd.append("type", type);
-        fd.append("name", name);
-        fd.append("slug", slug);
-        fd.append("shortDescription", shortDescription);
-        fd.append("description", description);
-        fd.append("retailPrice", retailPrice);
-        fd.append("wholesalePrice", wholesalePrice);
-        fd.append("stock", stock);
-        fd.append("isActive", "true");
-        // Send category as JSON array so backend handles both single & multi-category schemas
-        if (catId) fd.append("category", JSON.stringify([catId]));
-
-        await axios.post(`${API}/products`, fd, { headers: { 'x-user-role': 'admin' } });
-        done++;
-      } catch (err) {
-        failedCount++;
-        const errMsg = err?.response?.data?.message
-          || err?.response?.data?.error
-          || (typeof err?.response?.data === "string" ? err.response.data : null)
-          || "Failed";
-        console.error("Import row failed:", row.name, "→", errMsg, err?.response?.data);
-        failed.push({ ...row, _error: errMsg });
+    try {
+      const res = await axios.post(`${API}/products/import`, { products: formattedProducts }, { headers: { 'x-user-role': 'admin' } });
+      const results = res.data?.results || { created: 0, updated: 0, errors: 0 };
+      
+      setProgress({ done: results.created + results.updated, total: csvRows.length, failed: results.errors });
+      setFailedRows([]); // Backend bulk doesn't currently return which ones failed easily, assumed empty if successful
+      setStep("done");
+      
+      if (results.created + results.updated > 0) { 
+        onImportDone(); 
+        showToast("success", `Import complete: ${results.created} created, ${results.updated} updated!`); 
       }
-      setProgress({ done: done + failedCount, total: csvRows.length, failed: failedCount });
+      if (results.errors > 0) showToast("error", `${results.errors} rows failed to import`);
+    } catch (err) {
+      console.error("Bulk import failed:", err);
+      setProgress({ done: 0, total: csvRows.length, failed: csvRows.length });
+      setFailedRows(csvRows); // Marks all as failed
+      setStep("done");
+      showToast("error", "Import request failed completely");
     }
-    setFailedRows(failed); setStep("done");
-    if (done > 0) { onImportDone(); showToast("success", `${done} product${done !== 1 ? "s" : ""} imported!`); }
-    if (failedCount > 0) showToast("error", `${failedCount} row${failedCount !== 1 ? "s" : ""} failed`);
   };
 
   const downloadTemplate = () => {
