@@ -7,6 +7,7 @@ import ServiceFeatures from '../components/ServiceFeatures';
 import KeyFactors from '../components/KeyFactors';
 import { MapPin, AtSign, Phone, RefreshCw } from 'lucide-react';
 import Testimonials from '../components/Testimonials';
+import ServicesSection from '../components/ServicesSection';
 import { getHomepageConfig } from '../services/api';
 
 const Home = () => {
@@ -54,6 +55,7 @@ const Home = () => {
 
       <ServiceFeatures />
       <KeyFactors />
+      <ServicesSection />
 
       {displayConfig.showPopular && (
         <ProductSection 

@@ -238,6 +238,7 @@ export default function AdminDashboard() {
           <SidebarLink to="/admin/homepage" icon={<Layout size={18}/>} label="Homepage" active={location.pathname === "/admin/homepage"} />
           <SidebarLink to="/admin/inquiries" icon={<HelpCircle size={18}/>} label="Enquiries" active={location.pathname === "/admin/inquiries"} badge={location.pathname === "/admin/inquiries" ? 0 : inquiriesCount} />
           <SidebarLink to="/admin/reviews" icon={<Star size={18}/>} label="Reviews" active={location.pathname === "/admin/reviews"} />
+          <SidebarLink to="/admin/services" icon={<Layers size={18}/>} label="Services" active={location.pathname === "/admin/services"} />
           <SidebarLink to="/admin/policies" icon={<FileText size={18}/>} label="Policy" active={location.pathname === "/admin/policies"} />
         </nav>
         {user.role === "main" && (

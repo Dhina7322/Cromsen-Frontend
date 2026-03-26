@@ -9,7 +9,8 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
-import Services from './pages/Services';
+import ServicesListing from './pages/ServicesListing';
+import ServiceDetail from './pages/ServiceDetail';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
@@ -29,6 +30,7 @@ import InquiriesTab from './pages/admin/tabs/InquiriesTab';
 import HomepageTab from './pages/admin/tabs/HomepageTab';
 import ReviewsTab from './pages/admin/tabs/ReviewsTab';
 import PolicyTab from './pages/admin/tabs/PolicyTab';
+import ServicesTab from './pages/admin/tabs/ServicesTab';
 
 import { useState } from 'react';
 import RoleSelector from './components/RoleSelector';
@@ -69,6 +71,7 @@ function App() {
               <Route path="customers" element={<UsersTab />} />
               <Route path="reviews" element={<ReviewsTab />} />
               <Route path="policies" element={<PolicyTab />} />
+              <Route path="services" element={<ServicesTab />} />
               <Route path="admins" element={<AdminsTab />} />
               <Route path="settings" element={<SettingsTab />} />
             </Route>
@@ -88,7 +91,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/roleselector" element={<RoleSelector onSelect={handleRoleSelect} />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/services" element={<Services />} />
+          <Route path="/services" element={<ServicesListing />} />
+          <Route path="/service/:slug" element={<ServiceDetail />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
@@ -111,6 +115,7 @@ function App() {
              <Route path="inquiries" element={<InquiriesTab />} />
              <Route path="customers" element={<UsersTab />} />
              <Route path="admins" element={<AdminsTab />} />
+             <Route path="services" element={<ServicesTab />} />
              <Route path="settings" element={<SettingsTab />} />
           </Route>
         </Routes>
