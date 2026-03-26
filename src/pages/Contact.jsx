@@ -196,36 +196,60 @@ const Contact = () => {
                   Whether you have a question about our collections, need help with measurements, or want to schedule a consultation, our team is here to help.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-4">
+              <div className="flex flex-col space-y-12">
+                <div className="space-y-6">
                   <div className="flex items-center space-x-3 text-accent mb-2">
                     <MapPin size={24} />
                     <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Visit Us</h3>
                   </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">
-                    No. 164, Trichy Road,<br />Opposite Ocean Restaurant,<br />Selvarajapuram, Coimbatore - 641103.
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3 text-accent mb-2">
-                    <Phone size={24} />
-                    <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Call Us</h3>
+                  <div className="space-y-6 pl-9">
+                    <div>
+                      <h4 className="text-[11px] uppercase tracking-widest font-black text-primary mb-1">Cromsen Head Office</h4>
+                      <a 
+                        href="https://maps.google.com/maps?q=164,%20Trichy%20Rd,%20opp.%20Ocean%20Restaurent,%20Selvaraja%20Puram,%20Coimbatore,%20Kannampalayam,%20Tamil%20Nadu%20641103"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-500 text-base leading-relaxed hover:text-action transition-colors"
+                      >
+                        No. 164, Trichy Road,<br />Opposite Ocean Restaurant,<br />Selvarajapuram, Coimbatore - 641103.
+                      </a>
+                    </div>
+                    <div>
+                      <h4 className="text-[11px] uppercase tracking-widest font-black text-primary mb-1">Manufacturing Unit</h4>
+                      <a 
+                        href="https://www.google.com/maps/search/?api=1&query=2,+Kallanthottam,+Kannampalayam,+Coimbatore,+TAMIL+NADU+641402"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-500 text-base leading-relaxed hover:text-action transition-colors"
+                      >
+                        2, Kallanthottam, Kannampalayam<br/>Coimbatore, TAMIL NADU, 641402
+                      </a>
+                    </div>
                   </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">+91-98422 33645<br />99444 30314</p>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3 text-accent mb-2">
-                    <Mail size={24} />
-                    <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Email Us</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 text-accent mb-2">
+                      <Phone size={24} />
+                      <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Call Us</h3>
+                    </div>
+                    <p className="text-gray-500 text-sm leading-relaxed">+91-98422 33645<br />99444 30314</p>
                   </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">cscromsen@gmail.com</p>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3 text-accent mb-2">
-                    <Clock size={24} />
-                    <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Opening Hours</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 text-accent mb-2">
+                      <Mail size={24} />
+                      <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Email Us</h3>
+                    </div>
+                    <p className="text-gray-500 text-sm leading-relaxed">cscromsen@gmail.com</p>
                   </div>
-                  <p className="text-gray-500 text-sm leading-relaxed">Mon - Sat: 9:00 - 18:00<br />Sun: Closed</p>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 text-accent mb-2">
+                      <Clock size={24} />
+                      <h3 className="text-sm uppercase tracking-widest font-bold text-neutral-dark">Opening Hours</h3>
+                    </div>
+                    <p className="text-gray-500 text-sm leading-relaxed">Mon - Sat: 9:00 - 18:00<br />Sun: Closed</p>
+                  </div>
                 </div>
               </div>
             </div>

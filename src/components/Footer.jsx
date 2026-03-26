@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Logo from '../assets/cromsen.png';
+import ServicesSection from './ServicesSection'; // Assuming ServicesSection is in a separate file
 
 const API = import.meta.env.VITE_API_URL || "/api";
 
@@ -25,58 +26,8 @@ const Footer = () => {
     <>
       <div className="w-full bg-white">
         <div className="container mx-auto max-w-[1200px] px-5">
-          {/* Pre-Footer Image Gallery */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 py-1">
-
-            {/* Curtains */}
-            <div className="relative h-48 group overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?q=80&w=800&auto=format&fit=crop"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                alt="Curtains"
-              />
-              <div className="absolute inset-x-0 bottom-4 text-center">
-                <span className="bg-white/90 text-neutral-dark text-[10px] uppercase tracking-widest px-4 py-2 font-black shadow-sm group-hover:bg-action group-hover:text-white transition-colors">Curtains</span>
-              </div>
-            </div>
-
-            {/* Window Blinds */}
-            <div className="relative h-48 group overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                alt="Window Blinds"
-              />
-              <div className="absolute inset-x-0 bottom-4 text-center">
-                <span className="bg-white/90 text-neutral-dark text-[10px] uppercase tracking-widest px-4 py-2 font-black shadow-sm group-hover:bg-action group-hover:text-white transition-colors">Window Blinds</span>
-              </div>
-            </div>
-
-            {/* Drapery Hardware */}
-            <div className="relative h-48 group overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=800&auto=format&fit=crop"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                alt="Drapery Hardware"
-              />
-              <div className="absolute inset-x-0 bottom-4 text-center">
-                <span className="bg-white/90 text-neutral-dark text-[10px] uppercase tracking-widest px-4 py-2 font-black shadow-sm group-hover:bg-action group-hover:text-white transition-colors">Drapery Hardware</span>
-              </div>
-            </div>
-
-            {/* Outdoor Screens */}
-            <div className="relative h-48 group overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1523217582562-09d0def993a6?q=80&w=800&auto=format&fit=crop"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                alt="Outdoor Screens"
-              />
-              <div className="absolute inset-x-0 bottom-4 text-center">
-                <span className="bg-white/90 text-neutral-dark text-[10px] uppercase tracking-widest px-4 py-2 font-black shadow-sm group-hover:bg-action group-hover:text-white transition-colors">Outdoor Screens</span>
-              </div>
-            </div>
-
-          </div>
+          {/* Dynamic Scrolling Services Section (Replaces static gallery) */}
+          <ServicesSection isFooterView={true} />
 
           {/* Main Footer */}
           <footer className="pt-20 pb-10 flex flex-col items-center">
