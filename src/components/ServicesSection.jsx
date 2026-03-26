@@ -53,10 +53,10 @@ const ServicesSection = ({ isFooterView = false }) => {
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover/item:scale-110" 
                />
                
-               {/* White Rectangular Label - Centered */}
-               <div className="absolute inset-0 flex items-center justify-center p-4">
-                  <div className="bg-white px-10 py-5 shadow-2xl transition-all duration-300 transform group-hover/item:scale-110">
-                     <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#222] whitespace-nowrap">
+               {/* White Rectangular Label - Bottom Centered & Compact (Refined) */}
+               <div className="absolute inset-0 flex items-end justify-center p-4 pb-8">
+                  <div className="bg-white px-4 py-2 shadow-xl transition-all duration-300 transform group-hover/item:scale-105 border border-gray-50">
+                     <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#222] whitespace-nowrap">
                         {s.heading}
                      </span>
                   </div>
