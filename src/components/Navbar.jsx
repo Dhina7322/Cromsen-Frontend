@@ -117,6 +117,7 @@ const Navbar = () => {
     { name: 'Shop',     path: '/shop' },
     { name: 'Services', path: '/services' },
     { name: 'Contact',  path: '/contact' },
+    { name: 'Blogs',    path: '/blogs' },
   ];
 
   const topOffset = isHomePage && !scrolled ? 50 : 0;

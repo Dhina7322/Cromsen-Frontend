@@ -240,6 +240,7 @@ export default function AdminDashboard() {
           <SidebarLink to="/admin/reviews" icon={<Star size={18}/>} label="Reviews" active={location.pathname === "/admin/reviews"} />
           <SidebarLink to="/admin/services" icon={<Layers size={18}/>} label="Services" active={location.pathname === "/admin/services"} />
           <SidebarLink to="/admin/policies" icon={<FileText size={18}/>} label="Policy" active={location.pathname === "/admin/policies"} />
+          <SidebarLink to="/admin/blogs" icon={<FileText size={18}/>} label="Blogs" active={location.pathname === "/admin/blogs"} />
         </nav>
         {user.role === "main" && (
           <>
