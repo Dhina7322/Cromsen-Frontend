@@ -341,14 +341,18 @@ const Contact = () => {
       </section>
 
       {/* Map */}
-      <section className="h-[500px] w-full relative overflow-hidden">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15668.618649363845!2d77.0655474!3d11.0000000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8500!2sCromsen%20Importers!5e0!3m2!1sen!2sin!4v1711200000000"
-          className="w-full h-full border-0"
-          allowFullScreen=""
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
+      <section className="py-20 bg-white">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+          <div className="h-[500px] w-full relative overflow-hidden rounded-3xl shadow-xl border border-gray-100">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15668.618649363845!2d77.0655474!3d11.0000000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8500!2sCromsen%20Importers!5e0!3m2!1sen!2sin!4v1711200000000"
+              className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-700"
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        </div>
       </section>
     </div>
   );
