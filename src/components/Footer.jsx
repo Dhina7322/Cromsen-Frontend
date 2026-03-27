@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { getPolicies } from '../services/api';
 import Logo from '../assets/cromsen.png';
-import ServicesSection from './ServicesSection'; // Assuming ServicesSection is in a separate file
-
-const API = import.meta.env.VITE_API_URL || "/api";
+import ServicesSection from './ServicesSection';
 
 const Footer = () => {
   const [policies, setPolicies] = useState([]);
@@ -12,8 +10,8 @@ const Footer = () => {
   useEffect(() => {
     const fetchPolicies = async () => {
       try {
-        const res = await axios.get(`${API}/policies`);
-        const activePolicies = res.data.filter(p => p.isActive);
+        const data = await getPolicies();
+        const activePolicies = data.filter(p => p.isActive);
         setPolicies(activePolicies);
       } catch (err) {
         console.error("Footer policies load failed", err);

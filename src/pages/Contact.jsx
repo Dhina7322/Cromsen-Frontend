@@ -2,6 +2,7 @@ import { Mail, Phone, MapPin, Clock, Send, CheckCircle, Check, AlertCircle } fro
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import { createInquiry } from '../services/api';
 
 // ─── Strict email: TLD max 6 chars, nothing after it ─────────────────────────
 const isValidEmail = (v) => {
@@ -162,7 +163,7 @@ const Contact = () => {
     setLoading(true);
     setError('');
     try {
-      await axios.post('/api/inquiries', formData);
+      await createInquiry(formData);
       setSubmitted(true);
       setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
     } catch {

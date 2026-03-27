@@ -136,4 +136,16 @@
     return response.data;
   };
 
+  // Inquiry API
+  export const createInquiry = async (inquiryData) => {
+    const response = await api.post('/inquiries', inquiryData);
+    return response.data;
+  };
+
+  // Policies API
+  export const getPolicies = async () => {
+    const response = await api.get('/policies');
+    return response.data;
+  };
+
   export default api;
