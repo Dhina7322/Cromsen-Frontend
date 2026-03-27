@@ -166,7 +166,8 @@ const Contact = () => {
       await createInquiry(formData);
       setSubmitted(true);
       setFormData({ firstName: '', lastName: '', email: '', phone: '', message: '' });
-    } catch {
+    } catch (err) {
+      console.error('Contact Submission Error:', err);
       setError('Failed to send message. Please try again later.');
     } finally {
       setLoading(false);
@@ -342,7 +343,7 @@ const Contact = () => {
       {/* Map */}
       <section className="h-[500px] w-full relative overflow-hidden">
         <iframe
-          src="https://maps.google.com/maps?q=164,%20Trichy%20Rd,%20opp.%20Ocean%20Restaurent,%20Selvaraja%20Puram,%20Coimbatore,%20Kannampalayam,%20Tamil%20Nadu%20641103&t=&z=13&ie=UTF8&iwloc=&output=embed"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15668.618649363845!2d77.0655474!3d11.0000000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8500!2sCromsen%20Importers!5e0!3m2!1sen!2sin!4v1711200000000"
           className="w-full h-full border-0"
           allowFullScreen=""
           loading="lazy"
