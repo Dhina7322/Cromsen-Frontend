@@ -94,8 +94,6 @@ const BlogsListing = () => {
                 <div className="flex-1 p-8 flex flex-col">
                   <div className="flex items-center gap-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">
                     <span className="flex items-center gap-1.5"><Calendar size={12} className="text-action" /> {new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-200" />
-                    <span className="flex items-center gap-1.5"><User size={12} className="text-action" /> Admin</span>
                   </div>
 
                   <h3 className="text-2xl font-serif text-primary mb-4 leading-tight group-hover:text-action transition-colors">
