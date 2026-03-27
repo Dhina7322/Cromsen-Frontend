@@ -110,9 +110,9 @@ const Register = () => {
 
   return (
     <div className="min-h-screen pt-32 pb-20 flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white p-8 md:p-12 shadow-xl w-full max-w-3xl border border-gray-100 rounded-3xl">
-        <h2 className="text-3xl font-brand font-bold text-center mb-10 uppercase tracking-widest text-primary">Register</h2>
-        <form onSubmit={handleRegister} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <div className="bg-white p-8 md:p-10 shadow-xl w-full max-w-2xl border border-gray-100 rounded-3xl">
+        <h2 className="text-2xl font-brand font-bold text-center mb-8 uppercase tracking-widest text-primary">Register</h2>
+        <form onSubmit={handleRegister} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
           <div>
             <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2 font-bold ml-1">Full Name</label>
             <input 
@@ -121,7 +121,7 @@ const Register = () => {
               required
               value={formData.name}
               onChange={handleChange}
-              className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
+              className="w-full bg-gray-50 border-none rounded-xl py-2.5 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
               placeholder="Enter your full name"
             />
           </div>
@@ -134,7 +134,7 @@ const Register = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 transition-all text-sm font-semibold outline-none ${
+                className={`w-full bg-gray-50 border-none rounded-xl py-2.5 px-6 focus:ring-2 transition-all text-sm font-semibold outline-none ${
                    formData.email ? (isEmailValid ? 'focus:ring-green-500' : 'focus:ring-red-400') : 'focus:ring-primary'
                 }`}
                 placeholder="Enter your email"
@@ -158,7 +158,7 @@ const Register = () => {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className={`w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 transition-all text-sm font-semibold outline-none ${
+                className={`w-full bg-gray-50 border-none rounded-xl py-2.5 px-6 focus:ring-2 transition-all text-sm font-semibold outline-none ${
                    formData.phone ? (isPhoneValid ? 'focus:ring-green-500' : 'focus:ring-red-400') : 'focus:ring-primary'
                 }`}
                 placeholder="10-15 digits only"
@@ -184,17 +184,16 @@ const Register = () => {
                   required
                   value={formData.company}
                   onChange={handleChange}
-                  className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
+                  className="w-full bg-gray-50 border-none rounded-xl py-2.5 px-6 focus:ring-2 focus:ring-primary focus:bg-white transition-all text-sm font-semibold outline-none"
                 />
               </div>
 
-              {/* ID Type Switcher */}
-              <div className="md:col-span-2">
-                <div className="bg-gray-50 p-2 rounded-2xl flex items-center gap-2 max-w-sm">
+              <div className="md:col-span-2 mt-2">
+                <div className="bg-gray-50 p-1.5 rounded-xl flex items-center gap-2 max-w-[280px]">
                   <button 
                     type="button"
                     onClick={() => setDealerIdType('gst')}
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    className={`flex-1 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
                       dealerIdType === 'gst' ? 'bg-white shadow-sm text-primary' : 'text-gray-400 hover:text-gray-600'
                     }`}
                   >
@@ -203,7 +202,7 @@ const Register = () => {
                   <button 
                     type="button"
                     onClick={() => setDealerIdType('pan')}
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    className={`flex-1 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
                       dealerIdType === 'pan' ? 'bg-white shadow-sm text-primary' : 'text-gray-400 hover:text-gray-600'
                     }`}
                   >
@@ -292,11 +291,11 @@ const Register = () => {
               placeholder="Confirm your password"
             />
           </div>
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 mt-2">
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-white py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 mt-4"
+              className="w-full bg-primary text-white py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-[0.98] disabled:opacity-70"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
