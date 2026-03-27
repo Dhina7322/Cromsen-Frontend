@@ -82,7 +82,23 @@ const HeroContent = ({ category, onPrev, onNext }) => (
       </motion.div>
     </AnimatePresence>
 
-    {/* Navigation arrows hidden as per request for 'only auto scroll' */}
+    {/* Navigation arrows - Desktop Only */}
+    <div className="hidden lg:flex items-center space-x-3 mt-10">
+      <button
+        onClick={onPrev}
+        aria-label="Previous"
+        className="w-9 h-9 border border-white/50 text-white flex items-center justify-center hover:bg-white hover:text-[#162d3a] transition-all"
+      >
+        <ChevronLeft size={17} />
+      </button>
+      <button
+        onClick={onNext}
+        aria-label="Next"
+        className="w-9 h-9 border border-white/50 text-white flex items-center justify-center hover:bg-white hover:text-[#162d3a] transition-all"
+      >
+        <ChevronRight size={17} />
+      </button>
+    </div>
   </div>
 );
 
@@ -165,7 +181,10 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Right side options panel hidden as per request */}
+      {/* Right side category panel - Desktop Only */}
+      <div className="absolute right-0 top-0 h-full w-[280px] z-20 bg-black/55 backdrop-blur-[2px] border-l border-white/5 hidden lg:block">
+        <CategorySelector activeId={active.id} onSelect={setActiveIndex} />
+      </div>
 
       {/* Mobile slide dots */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex space-x-2 z-20 lg:hidden">
