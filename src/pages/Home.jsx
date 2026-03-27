@@ -160,7 +160,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="h-[500px] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white grayscale-[20%] hover:grayscale-0 transition-all duration-700">
+          <div className="h-[450px] w-full overflow-hidden shadow-2xl grayscale-[20%] hover:grayscale-0 transition-all duration-700">
             <iframe 
               src="https://maps.google.com/maps?q=164,%20Trichy%20Rd,%20opp.%20Ocean%20Restaurent,%20Selvaraja%20Puram,%20Coimbatore,%20Kannampalayam,%20Tamil%20Nadu%20641103&t=&z=13&ie=UTF8&iwloc=&output=embed" 
               className="w-full h-full border-0" 
