@@ -14,6 +14,8 @@ import ServiceDetail from './pages/ServiceDetail';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
+import BlogsListing from './pages/BlogsListing';
+import BlogDetail from './pages/BlogDetail';
 import ScrollToTop from './components/ScrollToTop';
 
 // Admin Imports
@@ -31,6 +33,7 @@ import HomepageTab from './pages/admin/tabs/HomepageTab';
 import ReviewsTab from './pages/admin/tabs/ReviewsTab';
 import PolicyTab from './pages/admin/tabs/PolicyTab';
 import ServicesTab from './pages/admin/tabs/ServicesTab';
+import BlogsTab from './pages/admin/tabs/BlogsTab';
 
 import { useState } from 'react';
 import RoleSelector from './components/RoleSelector';
@@ -72,6 +75,7 @@ function App() {
               <Route path="reviews" element={<ReviewsTab />} />
               <Route path="policies" element={<PolicyTab />} />
               <Route path="services" element={<ServicesTab />} />
+              <Route path="blogs" element={<BlogsTab />} />
               <Route path="admins" element={<AdminsTab />} />
               <Route path="settings" element={<SettingsTab />} />
             </Route>
@@ -92,6 +96,8 @@ function App() {
           <Route path="/roleselector" element={<RoleSelector onSelect={handleRoleSelect} />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/services" element={<ServicesListing />} />
+          <Route path="/blogs" element={<BlogsListing />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/service/:slug" element={<ServiceDetail />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/contact" element={<Contact />} />
@@ -116,6 +122,7 @@ function App() {
              <Route path="customers" element={<UsersTab />} />
              <Route path="admins" element={<AdminsTab />} />
              <Route path="services" element={<ServicesTab />} />
+             <Route path="blogs" element={<BlogsTab />} />
              <Route path="settings" element={<SettingsTab />} />
           </Route>
         </Routes>

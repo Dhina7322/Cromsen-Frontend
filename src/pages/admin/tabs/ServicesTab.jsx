@@ -140,9 +140,8 @@ export default function ServicesTab() {
               </div>
             </div>
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2 truncate">{s.heading}</h3>
-              <p className="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed">{s.shortDescription}</p>
-              <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-gray-900 mb-0 truncate">{s.heading}</h3>
+              <div className="flex items-center gap-2 mt-4">
                 <span className={`w-2 h-2 rounded-full ${s.isActive ? 'bg-green-500' : 'bg-gray-300'}`} />
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                   {s.isActive ? 'Active' : 'Draft'}
