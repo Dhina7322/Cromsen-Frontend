@@ -302,7 +302,6 @@ const BlogsTab = () => {
                   <h2 className="text-lg font-serif text-primary leading-tight">
                     {currentBlog ? 'Edit Story' : 'Craft New Story'}
                   </h2>
-                  <p className="text-gray-400 text-[10px] uppercase tracking-widest">Creative Studio</p>
                 </div>
               </div>
               <button 
@@ -452,7 +451,6 @@ const BlogsTab = () => {
           <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col overflow-hidden" style={{ maxHeight: '88vh' }}>
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-action">Preview</span>
                 <h2 className="text-xl font-serif text-primary mt-0.5">{viewBlog.title}</h2>
               </div>
               <button onClick={() => setIsViewModalOpen(false)} className="p-2 bg-gray-50 rounded-lg text-gray-400 hover:text-red-500 transition-all">
