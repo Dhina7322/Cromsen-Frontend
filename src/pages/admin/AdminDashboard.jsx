@@ -16,7 +16,8 @@ import {
   X,
   Plus,
   Star,
-  FileText
+  FileText,
+  Menu
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Outlet, Link, useLocation } from "react-router-dom";
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showToastMsg, setShowToastMsg] = useState({ show: false, type: "success", text: "" });
   const [newOrderNotify, setNewOrderNotify] = useState(null);
   const knownOrdersRef = useRef(new Set());
@@ -214,14 +216,22 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      <aside className="sidebar">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[90] lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-brand flex items-center justify-between">
           <div>
             <div className="brand-name">Cromsen</div>
             <div className="brand-sub">Admin Control</div>
           </div>
           <button 
-            onClick={() => navigate('/admin/settings')} 
+            onClick={() => { setSidebarOpen(false); navigate('/admin/settings'); }} 
             className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-all ml-auto"
             title="Settings"
           >
@@ -229,7 +239,7 @@ export default function AdminDashboard() {
           </button>
         </div>
         <div className="sb-section-label">Main Menu</div>
-        <nav>
+        <nav onClick={() => setSidebarOpen(false)}>
           <SidebarLink to="/admin" icon={<Layout size={18}/>} label="Dashboard" active={location.pathname === "/admin"} />
           <SidebarLink to="/admin/inventory" icon={<Package size={18}/>} label="Products" active={location.pathname === "/admin/inventory"} />
           <SidebarLink to="/admin/categories" icon={<Layers size={18}/>} label="Categories" active={location.pathname === "/admin/categories"} />
@@ -244,7 +254,7 @@ export default function AdminDashboard() {
         {user.role === "main" && (
           <>
             <div className="sb-section-label">Administration</div>
-            <nav>
+            <nav onClick={() => setSidebarOpen(false)}>
               <SidebarLink to="/admin/admins" icon={<Shield size={18}/>} label="Admins" active={location.pathname === "/admin/admins"} />
             </nav>
           </>
@@ -261,7 +271,12 @@ export default function AdminDashboard() {
 
       <main className="main-area">
         <header className="topbar">
-          <h2 className="topbar-title">{getPageTitle()}</h2>
+          <div className="flex items-center gap-3">
+            <button className="lg:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-md transition-colors" onClick={() => setSidebarOpen(true)}>
+              <Menu size={20} />
+            </button>
+            <h2 className="topbar-title">{getPageTitle()}</h2>
+          </div>
           <div className="topbar-right">
              <button className="topbar-btn" onClick={() => window.location.reload()}><Clock size={14} /> Refresh</button>
              <div style={{ width: 1, height: 20, background: "#eee", margin: "0 10px" }} />
@@ -281,9 +296,9 @@ export default function AdminDashboard() {
   );
 }
 
-function SidebarLink({ to, icon, label, active, badge, style }) {
+function SidebarLink({ to, icon, label, active, badge, style, onClick }) {
   return (
-    <Link to={to} className={`sb-item ${active ? 'sb-item--on' : ''}`} style={style}>
+    <Link to={to} className={`sb-item ${active ? 'sb-item--on' : ''}`} style={style} onClick={onClick}>
       {icon}<span>{label}</span>{badge > 0 && <span className="sb-badge sb-badge--red">{badge}</span>}
     </Link>
   );

@@ -37,7 +37,7 @@ const Testimonials = () => {
 
   return (
     <section className="py-24 bg-primary text-white overflow-hidden">
-      <div className="container mx-auto px-5 max-w-[1200px] flex flex-col items-center">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1200px] flex flex-col items-center">
         {/* Header */}
         <div className="mb-16 flex flex-col items-center">
           <h2 className="text-xl md:text-2xl font-serif tracking-wide mb-2">Testimonials</h2>

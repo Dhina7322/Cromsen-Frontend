@@ -42,7 +42,7 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen pt-32 pb-20 bg-gray-50">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-serif mb-12 text-primary font-bold">Shopping Cart</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -57,7 +57,7 @@ const Cart = () => {
 
             {cartItems.map((item) => (
               <div key={`${item._id}-${item.selectedVariant}`} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-6 border-b border-gray-100 bg-white p-4 md:p-0 md:bg-transparent shadow-sm md:shadow-none rounded-lg md:rounded-none">
-                <div className="col-span-1 md:col-span-6 flex items-center space-x-6">
+                <div className="col-span-1 md:col-span-6 flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 text-center md:text-left">
                   <Link to={`/product/${item.slug || item._id}`} className="shrink-0 w-24 h-24 overflow-hidden rounded bg-gray-100 block border border-gray-200 relative">
                     {getImageUrl(item.image || item.images?.[0]) ? (
                       <>
@@ -82,7 +82,7 @@ const Cart = () => {
                       </div>
                     )}
                   </Link>
-                  <div className="flex flex-col">
+                  <div className="flex flex-col items-center md:items-start">
                     <span className="text-[10px] text-accent uppercase tracking-widest font-bold mb-1">
                       {Array.isArray(item.category) 
                         ? (item.category[0]?.name || item.category[0] || 'Product') 
@@ -103,7 +103,7 @@ const Cart = () => {
                     )}
                     <button 
                       onClick={() => removeFromCart(item._id, item.selectedVariant, item.customColor, item.customDimensions)}
-                      className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors self-start underline underline-offset-4"
+                      className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 transition-colors self-center md:self-start underline underline-offset-4"
                     >
                       <Trash2 size={12} /> Remove
                     </button>
@@ -113,34 +113,35 @@ const Cart = () => {
                 {/* Price (Desktop) */}
                 <div className="hidden md:block col-span-2 text-center text-sm font-sans tracking-tight">
                   ₹{(Number(item.price) || 0).toFixed(2)}
-                </div>
-
-                {/* Quantity */}
-                <div className="col-span-1 md:col-span-2 flex justify-between md:justify-center items-center">
-                  <div className="md:hidden text-xs font-bold uppercase text-gray-500">Quantity</div>
-                  <div className="flex items-center border border-gray-200 bg-white">
-                    <button 
-                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.customColor, item.customDimensions, item.quantity - 1)}
-                      className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
-                      disabled={item.quantity <= 1}
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
-                    <button 
-                      onClick={() => updateQuantity(item._id, item.selectedVariant, item.customColor, item.customDimensions, item.quantity + 1)}
-                      className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
-                    >
-                      <Plus size={14} />
-                    </button>
+                </div>                {/* Quantity & Actions wrapper for Mobile */}
+                <div className="col-span-1 md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+                  {/* Quantity */}
+                  <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row justify-center items-center">
+                    <div className="md:hidden text-xs font-bold uppercase text-gray-500 mb-2">Quantity</div>
+                    <div className="flex items-center border border-gray-200 bg-white">
+                      <button 
+                        onClick={() => updateQuantity(item._id, item.selectedVariant, item.customColor, item.customDimensions, item.quantity - 1)}
+                        className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                        disabled={item.quantity <= 1}
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
+                      <button 
+                        onClick={() => updateQuantity(item._id, item.selectedVariant, item.customColor, item.customDimensions, item.quantity + 1)}
+                        className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Total */}
-                <div className="col-span-1 md:col-span-2 flex justify-between md:justify-end items-center font-bold">
-                  <div className="md:hidden text-xs font-bold uppercase text-gray-500">Total</div>
-                  <div className="text-action text-lg tracking-tight">
-                    ₹{((Number(item.price) || 0) * item.quantity).toFixed(2)}
+                  {/* Total */}
+                  <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row justify-center md:justify-end items-center font-bold">
+                    <div className="md:hidden text-xs font-bold uppercase text-gray-500 mb-2">Total</div>
+                    <div className="text-action text-lg tracking-tight">
+                      ₹{((Number(item.price) || 0) * item.quantity).toFixed(2)}
+                    </div>
                   </div>
                 </div>
               </div>

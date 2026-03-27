@@ -442,7 +442,7 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen pt-32 pb-20 bg-gray-50 font-sans">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 mb-8 text-gray-400 hover:text-primary transition-colors">
           <ArrowLeft size={16} />
           <Link to="/cart" className="text-xs uppercase tracking-widest font-bold">Back to Cart</Link>

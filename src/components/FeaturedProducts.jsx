@@ -25,13 +25,13 @@ const FeaturedProducts = () => {
 
   return (
     <section className="section-padding bg-white">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 px-4">
           <span className="text-action lowercase font-serif italic text-lg mb-2 block">Shop</span>
           <h2 className="text-4xl md:text-5xl font-serif text-primary">Popular Right Now</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product, idx) => (
             <ProductCard key={product._id || idx} product={product} />
           ))}

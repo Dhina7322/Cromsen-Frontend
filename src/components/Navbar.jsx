@@ -128,7 +128,7 @@ const Navbar = () => {
         animate={{ top: topOffset }}
         transition={{ duration: 0.4, ease: 'easeInOut' }}
       >
-        <div className="container mx-auto max-w-[1200px] px-5 flex items-center justify-between py-4">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 flex items-center justify-between py-4">
 
           <Link to="/" className="flex items-center gap-3">
             <img src={Logo} alt="Cromsen Importers" className="h-8 lg:h-10 w-auto object-contain invert" />
@@ -319,22 +319,40 @@ const Navbar = () => {
               <ShoppingCart size={20} />
               {cartCount > 0 && <span className="absolute -top-2 -right-2 bg-action text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{cartCount}</span>}
             </Link>
-            <button className="text-white" onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ? <X size={26} /> : <Menu size={26} />}
+            <button className="text-white lg:hidden" onClick={() => setIsOpen(!isOpen)}>
+              {isOpen ? <X size={26} className="invisible" /> : <Menu size={26} />}
             </button>
           </div>
         </div>
       </motion.nav>
 
-      {/* Mobile dropdown */}
+      {/* Mobile Sidebar Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden fixed left-0 w-full z-40 bg-primary border-t border-white/10 shadow-lg"
-            style={{ top: topOffset + 60 }}
-          >
-            <div className="flex flex-col p-6 space-y-6">
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="lg:hidden fixed top-0 right-0 h-[100dvh] w-[85%] max-w-[400px] z-[70] bg-primary shadow-2xl overflow-y-auto"
+            >
+              <div className="flex flex-col p-6 space-y-6">
+                
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <img src={Logo} alt="Cromsen Logo" className="h-8 w-auto brightness-0 invert" />
+                  </div>
+                  <button className="text-white p-2 hover:bg-white/10 rounded-full transition-colors" onClick={() => setIsOpen(false)}>
+                    <X size={24} />
+                  </button>
+                </div>
               {/* Mobile search */}
               <div className="relative" ref={searchRef}>
                 <form onSubmit={(e) => { handleSearchSubmit(e); setIsOpen(false); }} className="relative flex items-center w-full">
@@ -483,6 +501,7 @@ const Navbar = () => {
               </div>
             </div>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

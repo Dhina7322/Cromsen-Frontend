@@ -32,7 +32,7 @@ const CategoryShowcase = ({ initialItems }) => {
   if (loading || categories.length === 0) return null;
   return (
     <section className="py-20 bg-white">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-serif text-neutral-dark mb-4 tracking-wide">Shop by Category</h2>
         </div>

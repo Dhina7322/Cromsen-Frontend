@@ -84,10 +84,10 @@ const Shop = () => {
 
   return (
     <div className="pt-32 pb-20">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         
         {/* Header Area */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-100 pb-8 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-end mb-12 border-b border-gray-100 pb-8 gap-4">
           <div>
             <h1 className="text-4xl font-serif mb-2 text-primary font-bold">
               {searchQuery ? `Search Results for "${searchQuery}"` : 'Shop All'}
@@ -136,23 +136,19 @@ const Shop = () => {
             </div>
 
             <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden ml-auto flex items-center space-x-2 border border-gray-200 px-4 py-2"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="md:hidden ml-auto flex items-center space-x-2 border border-gray-200 px-4 py-2 hover:bg-gray-50 transition-colors"
             >
               <Filter size={14} />
-              <span>Filter</span>
+              <span>{isSidebarOpen ? 'Close Filters' : 'Filter'}</span>
             </button>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar */}
-          <aside className={`fixed inset-0 z-[60] bg-white md:relative md:inset-auto md:z-0 md:w-64 shrink-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300`}>
-            <div className="p-8 md:p-6 bg-gray-50 rounded h-full border border-gray-100">
-              <div className="flex justify-between items-center mb-10 md:hidden">
-                <h2 className="text-xl font-heading font-bold uppercase tracking-widest text-primary">Filters</h2>
-                <button onClick={() => setIsSidebarOpen(false)}><X size={24} /></button>
-              </div>
+          <aside className={`${isSidebarOpen ? 'block' : 'hidden'} md:block md:w-64 shrink-0`}>
+            <div className="p-6 md:p-6 bg-gray-50 rounded h-full border border-gray-100">
 
               <div className="mb-12">
                 <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold mb-6 border-b border-gray-200 pb-4 text-primary">Categories</h3>
@@ -205,7 +201,7 @@ const Shop = () => {
               </div>
             ) : products.length > 0 ? (
               <>
-                <div className={`grid gap-x-6 gap-y-10 ${gridClasses[productsPerRow]}`}>
+                <div className={`grid gap-6 ${gridClasses[productsPerRow]}`}>
                   {products.map((product) => (
                     <ProductCard key={product.slug || product._id} product={product} />
                   ))}

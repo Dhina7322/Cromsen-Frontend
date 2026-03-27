@@ -3,7 +3,7 @@ import { Shield, Home, Settings, Clock, ThumbsUp, PenTool } from 'lucide-react';
 const KeyFactors = () => {
   return (
     <section className="py-20 bg-white">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           
           <div className="lg:pr-12">

@@ -1269,3 +1269,54 @@
 .gap-2 {
   gap: 8px;
 }
+
+/* ══ Responsive Dashboard ════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .main-area {
+    margin-left: 0;
+  }
+  .topbar {
+    padding: 0 16px;
+  }
+  .content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Tables horizontally scrollable */
+  .tbl-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tbl {
+    min-width: 600px; /* Forces scroll on small screens */
+  }
+
+  /* Forms full width */
+  .form-r2,
+  .form-r3,
+  .dash-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Adjust topbar */
+  .topbar-right {
+    gap: 6px;
+  }
+  .topbar-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .pending-pill {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+}

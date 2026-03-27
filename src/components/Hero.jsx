@@ -82,23 +82,7 @@ const HeroContent = ({ category, onPrev, onNext }) => (
       </motion.div>
     </AnimatePresence>
 
-    {/* Navigation arrows */}
-    <div className="flex items-center space-x-3 mt-10">
-      <button
-        onClick={onPrev}
-        aria-label="Previous"
-        className="w-9 h-9 border border-white/50 text-white flex items-center justify-center hover:bg-white hover:text-[#162d3a] transition-all"
-      >
-        <ChevronLeft size={17} />
-      </button>
-      <button
-        onClick={onNext}
-        aria-label="Next"
-        className="w-9 h-9 border border-white/50 text-white flex items-center justify-center hover:bg-white hover:text-[#162d3a] transition-all"
-      >
-        <ChevronRight size={17} />
-      </button>
-    </div>
+    {/* Navigation arrows hidden as per request for 'only auto scroll' */}
   </div>
 );
 
@@ -174,22 +158,14 @@ const HeroSection = () => {
       <HeroBackground image={active.image} />
 
       {/* Wrapped Content Container */}
-      <div className="container mx-auto max-w-[1200px] px-5 h-full relative z-10">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 h-full relative z-10">
         {/* Left text + arrows */}
         <div className="h-full lg:w-[calc(100%-280px)]">
           <HeroContent category={active} onPrev={goPrev} onNext={goNext} />
         </div>
       </div>
 
-      {/* Right side category panel - Absolute to screen edge */}
-      <div className="absolute right-0 top-0 h-full w-[280px] z-20 bg-black/55 backdrop-blur-[2px] border-l border-white/5 hidden lg:block">
-        <CategorySelector activeId={active.id} onSelect={setActiveIndex} />
-      </div>
-
-      {/* Mobile panel container fallback for smaller screens */}
-      <div className="lg:hidden absolute right-0 top-0 h-full w-[220px] bg-black/60 backdrop-blur-sm z-20">
-        <CategorySelector activeId={active.id} onSelect={setActiveIndex} />
-      </div>
+      {/* Right side options panel hidden as per request */}
 
       {/* Mobile slide dots */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex space-x-2 z-20 lg:hidden">

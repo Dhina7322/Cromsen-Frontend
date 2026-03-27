@@ -6,7 +6,7 @@ const About = () => {
     <div className="pt-20">
       {/* Page Header */}
       <section className="bg-primary/5 py-32 text-center">
-        <div className="container mx-auto max-w-[1200px] px-5">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
           <span className="text-primary uppercase tracking-[0.3em] text-xs font-semibold mb-4 block">Elegance in Every Thread</span>
           <h1 className="text-5xl md:text-7xl font-serif leading-tight">Our Story</h1>
         </div>
@@ -16,7 +16,7 @@ const About = () => {
 
       {/* Services Section */}
       <section className="section-padding bg-secondary">
-        <div className="container mx-auto max-w-[1200px] px-5">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-serif">What we offer</h2>
           </div>
@@ -46,7 +46,7 @@ const About = () => {
 
       {/* Team/Philosophy Section */}
       <section className="section-padding bg-white">
-        <div className="container mx-auto max-w-[1200px] px-5 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div>
             <h2 className="text-4xl font-serif mb-8">Our Philosophy</h2>
             <p className="text-gray-600 leading-relaxed mb-6 italic text-xl">

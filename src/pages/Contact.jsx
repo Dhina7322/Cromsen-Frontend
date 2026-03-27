@@ -178,14 +178,14 @@ const Contact = () => {
     <div className="pt-20">
       {/* Header */}
       <section className="bg-primary/5 py-32 text-center">
-        <div className="container mx-auto max-w-[1200px] px-5">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
           <span className="text-primary uppercase tracking-[0.3em] text-xs font-semibold mb-4 block">Get in touch</span>
           <h1 className="text-5xl md:text-7xl font-serif leading-tight">Contact Us</h1>
         </div>
       </section>
 
       <section className="section-padding bg-white">
-        <div className="container mx-auto max-w-[1200px] px-5">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
 
             {/* Contact Info */}

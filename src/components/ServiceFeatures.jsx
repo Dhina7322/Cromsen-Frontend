@@ -3,7 +3,7 @@ import { PenTool, Home, CheckCircle } from 'lucide-react';
 const ServiceFeatures = () => {
   return (
     <section className="bg-white">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3">
           
           <div className="flex flex-col items-center text-center p-12 border border-gray-100">

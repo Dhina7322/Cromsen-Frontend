@@ -88,7 +88,7 @@ const Home = () => {
 
       {/* Head Office Map Section */}
       <section className="py-20 bg-white border-t border-gray-100">
-        <div className="container mx-auto max-w-[1200px] px-5 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
             <span className="text-action font-sans text-xl mb-2 block font-medium">Contact</span>
             <hr className="w-12 border-t-2 border-action mb-6" />

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 const AboutSection = () => {
   return (
     <section className="section-padding bg-white overflow-hidden">
-      <div className="container mx-auto max-w-[1200px] px-5">
+      <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div className="relative">
             <motion.div

@@ -24,9 +24,9 @@ const Footer = () => {
   return (
     <>
       <div className="w-full bg-white">
-        <div className="container mx-auto max-w-[1200px] px-5">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
           {/* Pre-Footer Image Gallery */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 py-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 py-1">
 
             {/* Curtains */}
             <div className="relative h-48 group overflow-hidden">
@@ -99,12 +99,12 @@ const Footer = () => {
 
             <div className="w-full h-px bg-gray-100 mb-8" />
 
-            <div className="w-full flex flex-col items-start gap-6">
-              <div className="relative pb-2 flex flex-col items-start text-left">
+            <div className="w-full flex flex-col items-center md:items-start gap-6">
+              <div className="relative pb-2 flex flex-col items-center md:items-start text-center md:text-left">
                 <h3 className="text-xl font-medium text-[#0089d1] font-sans capitalize tracking-tight">Policy</h3>
                 <div className="w-12 h-0.5 bg-[#e67e22] mt-1" />
               </div>
-              <div className="flex flex-wrap items-center justify-start gap-x-8 gap-y-4 text-[11px] uppercase tracking-[0.2em] font-bold text-gray-800">
+              <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center md:justify-start gap-x-8 gap-y-4 text-[11px] uppercase tracking-[0.2em] font-bold text-gray-800">
                 {policies.length > 0 ? (
                   policies.map((p, idx) => (
                     <React.Fragment key={p._id}>
@@ -129,7 +129,7 @@ const Footer = () => {
 
       {/* Copyright Footer */}
       <div className="bg-primary text-center py-4 text-white text-xs uppercase tracking-[0.2em] opacity-90">
-        <div className="container mx-auto max-w-[1200px] px-5">
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
           &copy; {new Date().getFullYear()} Cromsen. Developed by <a href="https://madhuratech.com/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity" style={{ color: '#f57322' }}>Madhura Technologies</a>.
         </div>
       </div>
