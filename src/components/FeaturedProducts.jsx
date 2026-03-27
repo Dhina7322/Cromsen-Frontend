@@ -31,7 +31,7 @@ const FeaturedProducts = () => {
           <h2 className="text-4xl md:text-5xl font-serif text-primary">Popular Right Now</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {products.map((product, idx) => (
             <ProductCard key={product._id || idx} product={product} />
           ))}
