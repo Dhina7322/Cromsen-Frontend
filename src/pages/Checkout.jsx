@@ -382,7 +382,6 @@ const Checkout = () => {
     if (window.Razorpay) return res(true);
     const s = document.createElement('script');
     s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    s.async = true;
     s.onload = () => res(true);
     s.onerror = () => res(false);
     document.body.appendChild(s);

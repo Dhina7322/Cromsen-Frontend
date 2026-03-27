@@ -1,30 +1,34 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Eye, ImageIcon, Zap, CheckCircle } from 'lucide-react';
+import { ShoppingCart, Eye, ImageIcon, Zap } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const ProductCard = ({ product }) => {
-  const { addToCart, cartItems } = useCart();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const role = localStorage.getItem('userRole');
-
-  const isInCart = cartItems?.some(item => item._id === product._id);
 
   const handleBuyNow = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // For Buy Now, if selection is needed, it's better to go to detail page
-    // but we'll try to use default if possible to match user preference for "stay on page"
-    const selectedVariant = product.variants?.length > 0 
-      ? product.variants.map(v => v.options?.[0]).filter(Boolean).join(' / ') 
-      : null;
+    // Determine the base price based on role
+    const basePrice = Number(product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice)) || 0;
     
-    const rawPrice = product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice);
-    const priceToUse = Number(rawPrice) || 0;
-    addToCart({ ...product, price: priceToUse, selectedVariant });
+    // Check for variants and use first variant as default if available
+    const hasVariants = product.variants && product.variants.length > 0;
+    const defaultVariant = hasVariants ? product.variants[0] : null;
+    const variantPrice = defaultVariant ? (role === 'dealer' ? defaultVariant.wholesalePrice : defaultVariant.price) : null;
+    
+    const priceToUse = Number(variantPrice || basePrice) || 0;
+    
+    addToCart({ 
+      ...product, 
+      price: priceToUse,
+      selectedVariant: defaultVariant?.name || null
+    });
     navigate('/checkout');
   };
 
@@ -32,14 +36,21 @@ const ProductCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Instead of navigating to detail page, we add with default variants
-    const selectedVariant = product.variants?.length > 0 
-      ? product.variants.map(v => v.options?.[0]).filter(Boolean).join(' / ') 
-      : null;
+    // Determine the base price based on role
+    const basePrice = Number(product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice)) || 0;
+    
+    // Check for variants and use first variant as default if available
+    const hasVariants = product.variants && product.variants.length > 0;
+    const defaultVariant = hasVariants ? product.variants[0] : null;
+    const variantPrice = defaultVariant ? (role === 'dealer' ? defaultVariant.wholesalePrice : defaultVariant.price) : null;
+    
+    const priceToUse = Number(variantPrice || basePrice) || 0;
 
-    const rawPrice = product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice);
-    const priceToUse = Number(rawPrice) || 0;
-    addToCart({ ...product, price: priceToUse, selectedVariant });
+    addToCart({ 
+      ...product, 
+      price: priceToUse,
+      selectedVariant: defaultVariant?.name || null
+    });
   };
 
   const displayedPrice = Number(product.price || (role === 'dealer' ? product.wholesalePrice : product.retailPrice) || 0);
@@ -108,15 +119,11 @@ const ProductCard = ({ product }) => {
           )}
           <button 
             onClick={handleAddToCart}
-            className={`w-full mt-3 py-2 border text-[11px] font-bold uppercase tracking-widest transition-colors shrink-0 flex items-center justify-center space-x-2 ${
-              isInCart 
-                ? 'bg-action border-action text-white' 
-                : 'bg-white border-gray-200 text-gray-800 hover:bg-action hover:border-action hover:text-white'
-            }`}
+            className="w-full mt-3 py-2 bg-white border border-gray-200 text-gray-800 text-[11px] font-bold uppercase tracking-widest hover:bg-action hover:border-action hover:text-white transition-colors shrink-0 flex items-center justify-center space-x-2"
             title="Add to Cart"
           >
-            {isInCart ? <CheckCircle size={14} /> : <ShoppingCart size={14} />}
-            <span>{isInCart ? 'Added to Cart' : 'Add to Cart'}</span>
+            <ShoppingCart size={14} />
+            <span>Add to Cart</span>
           </button>
         </div>
       </div>
