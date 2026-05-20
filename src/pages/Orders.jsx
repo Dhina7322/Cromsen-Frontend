@@ -546,19 +546,18 @@ export default function Orders() {
       {returnTarget && <ReturnReplaceModal order={returnTarget} actionType="return" onClose={() => setReturnTarget(null)} onConfirm={async (id, reason, images, video, cb) => {
         setReplaceLoading(true);
         try {
-          const returnImages = await Promise.all(images.map(img => toBase64(img)));
-          const returnVideo = video ? await toBase64(video) : null;
+          const formData = new FormData();
+          formData.append("status", "Refund Tracking");
+          formData.append("cancelReason", reason);
+          images.forEach(img => formData.append("images", img));
+          if (video) formData.append("video", video);
 
-          const payload = {
-            status: "Refund Tracking",
-            cancelReason: reason,
-            cancelledAt: new Date().toISOString(),
-          };
-          if (returnImages.length > 0) payload.returnImages = returnImages;
-          if (returnVideo) payload.returnVideo = returnVideo;
-
-          await axios.put(`${API}/orders/${id}`, payload);
-          setOrders(prev => prev.map(o => o._id === id ? { ...o, ...payload } : o));
+          const res = await axios.put(`${API}/orders/${id}`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data"
+            }
+          });
+          setOrders(prev => prev.map(o => o._id === id ? { ...o, ...res.data } : o));
           cb();
         } catch(e) { 
           const msg = e.response?.data?.message || e.response?.data || e.message;
@@ -569,19 +568,18 @@ export default function Orders() {
       {replaceTarget && <ReturnReplaceModal order={replaceTarget} actionType="replace" onClose={() => setReplaceTarget(null)} onConfirm={async (id, reason, images, video, cb) => {
         setReplaceLoading(true);
         try {
-          const returnImages = await Promise.all(images.map(img => toBase64(img)));
-          const returnVideo = video ? await toBase64(video) : null;
+          const formData = new FormData();
+          formData.append("status", "Replacement Requested");
+          formData.append("cancelReason", reason);
+          images.forEach(img => formData.append("images", img));
+          if (video) formData.append("video", video);
 
-          const payload = {
-            status: "Replacement Requested",
-            cancelReason: reason,
-            replacementRequestedAt: new Date().toISOString(),
-          };
-          if (returnImages.length > 0) payload.returnImages = returnImages;
-          if (returnVideo) payload.returnVideo = returnVideo;
-
-          await axios.put(`${API}/orders/${id}`, payload);
-          setOrders(prev => prev.map(o => o._id === id ? { ...o, ...payload } : o));
+          const res = await axios.put(`${API}/orders/${id}`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data"
+            }
+          });
+          setOrders(prev => prev.map(o => o._id === id ? { ...o, ...res.data } : o));
           cb();
         } catch(e) { 
           const msg = e.response?.data?.message || e.response?.data || e.message;
