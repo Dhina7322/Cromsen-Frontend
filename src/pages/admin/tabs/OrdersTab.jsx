@@ -365,7 +365,7 @@ export default function OrdersTab() {
                   <tr key={o._id} className="border-b border-gray-100 hover:bg-gray-50/60 transition-colors" style={{ backgroundColor: rowBg }}>
                     <td className="py-4 px-6 whitespace-nowrap" style={tdStyle}>
                       <span className="font-semibold text-gray-900 border border-gray-200 bg-gray-50 px-2 py-1 rounded text-xs uppercase tracking-wider">
-                        #{o._id.slice(-8)}
+                        {o.orderId ? o.orderId.replace('-', '-#') : '#' + o._id.slice(-8).toUpperCase()}
                       </span>
                     </td>
                     <td className="py-4 px-6 whitespace-nowrap text-sm text-gray-500 font-medium" style={tdStyle}>
@@ -463,7 +463,7 @@ export default function OrdersTab() {
                   <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>
                     Order Details{" "}
                     <span style={{ color: "var(--orange)", fontFamily: "monospace" }}>
-                      #{selectedOrder._id.slice(-8).toUpperCase()}
+                      {selectedOrder.orderId ? selectedOrder.orderId.replace('-', '-#') : '#' + selectedOrder._id.slice(-8).toUpperCase()}
                     </span>
                   </h2>
                   <button className="icon-btn" onClick={() => setSelectedOrder(null)}>

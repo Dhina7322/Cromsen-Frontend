@@ -11,7 +11,8 @@ const Invoice = ({ order }) => {
     items = [],
     totalAmount = 0,
     user,
-    guestEmail
+    guestEmail,
+    orderId
   } = order;
 
   const date = new Date(createdAt).toLocaleDateString('en-IN', {
@@ -20,7 +21,7 @@ const Invoice = ({ order }) => {
     year: 'numeric'
   });
 
-  const invoiceNumber = _id ? _id.slice(-8).toUpperCase() : 'N/A';
+  const invoiceNumber = orderId ? orderId.replace('-', '-#').toUpperCase() : _id ? _id.slice(-8).toUpperCase() : 'N/A';
   
   // GST Logic (Assuming 18% inclusive)
   const isTN = shippingAddress?.state?.toLowerCase().trim() === 'tamil nadu' || 

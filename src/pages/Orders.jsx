@@ -132,7 +132,7 @@ function CancelModal({ order, onClose, onConfirm, loading }) {
             <div className="ord-modal-icon ord-modal-icon--warn">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
-            <div><h3 className="ord-modal-title">Cancel Order</h3><p className="ord-modal-sub">Order #{order._id?.slice(-8).toUpperCase()}</p></div>
+            <div><h3 className="ord-modal-title">Cancel Order</h3><p className="ord-modal-sub">Order {order.orderId ? order.orderId.replace('-', '-#') : '#' + order._id?.slice(-8).toUpperCase()}</p></div>
           </div>
           <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
             <p className="ord-modal-body-text">Please tell us why you want to cancel this order</p>
@@ -164,7 +164,7 @@ function CancelModal({ order, onClose, onConfirm, loading }) {
           </div>
           <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
             <div className="ord-confirm-box">
-              <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">{order.orderId ? order.orderId.replace('-', '-#') : '#' + order._id?.slice(-8).toUpperCase()}</span></div>
               <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
               <div className="ord-confirm-row"><span className="ord-confirm-label">Amount</span><span className="ord-confirm-val">Rs.{Number(order.totalAmount || 0).toLocaleString()}</span></div>
               <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
@@ -237,7 +237,7 @@ function ReturnReplaceModal({ order, actionType, onClose, onConfirm, loading }) 
             <div className="ord-modal-icon" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             </div>
-            <div><h3 className="ord-modal-title">{title}</h3><p className="ord-modal-sub">Order #{order._id?.slice(-8).toUpperCase()}</p></div>
+            <div><h3 className="ord-modal-title">{title}</h3><p className="ord-modal-sub">Order {order.orderId ? order.orderId.replace('-', '-#') : '#' + order._id?.slice(-8).toUpperCase()}</p></div>
             <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
           <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
@@ -269,7 +269,7 @@ function ReturnReplaceModal({ order, actionType, onClose, onConfirm, loading }) 
           </div>
           <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
             <div className="ord-confirm-box">
-              <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">{order.orderId ? order.orderId.replace('-', '-#') : '#' + order._id?.slice(-8).toUpperCase()}</span></div>
               <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
               <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
             </div>
@@ -617,7 +617,7 @@ export default function Orders() {
           const orderId = order._id, status = order.status || "Pending", isExpanded = expandedOrder === orderId;
           const products = order.items || order.products || [];
           const address  = order.address || order.shippingAddress || {};
-          const shortId  = orderId?.slice(-8).toUpperCase();
+          const shortId  = order.orderId ? order.orderId.replace('-', '-#') : orderId?.slice(-8).toUpperCase();
           const col      = STATUS_COLORS[status] || STATUS_COLORS.Pending;
           
           const actualMethod = (order.paymentInfo?.method || order.paymentMethod || "cod").toLowerCase();
@@ -640,7 +640,7 @@ export default function Orders() {
               <div className="ord-card-header" onClick={() => setExpandedOrder(isExpanded ? null : orderId)}>
                 <div className="ord-card-header-left">
                   <div className="ord-id-row">
-                    <span className="ord-id">Order #{shortId}</span>
+                    <span className="ord-id">Order {shortId.includes('#') ? shortId : '#' + shortId}</span>
                     <span className="ord-status-badge" style={{ color: col.color, background: col.bg }}>{status}</span>
                     <span className={`ord-pay-pill${isPaid ? " paid" : " cod"}`}>{isPaid ? "Paid" : "COD"}</span>
                   </div>

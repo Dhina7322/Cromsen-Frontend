@@ -29,7 +29,7 @@ export default function DashboardOverview({ stats }) {
               <tbody>
                 {stats.recentOrders.map(o => (
                   <tr key={o._id}>
-                    <td className="order-id">#{o._id.slice(-6)}</td>
+                    <td className="order-id">{o.orderId ? o.orderId.replace('-', '-#') : '#' + o._id.slice(-6).toUpperCase()}</td>
                     <td className="cust-name">{o.user?.name || "Guest"}</td>
                     <td className="amt">₹{o.totalAmount || 0}</td>
                     <td><span className={`status-tag s-${o.status?.toLowerCase()}`}>{o.status}</span></td>
