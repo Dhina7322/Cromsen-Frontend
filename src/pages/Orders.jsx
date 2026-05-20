@@ -243,8 +243,28 @@ function ReturnReplaceModal({ order, actionType, onClose, onConfirm, loading }) 
             <textarea className="ord-reason-textarea" placeholder="Please describe the issue..." value={other} onChange={e => setOther(e.target.value)} rows={3} />
           )}
 
+          <div className="ord-modal-footer" style={{ marginTop: '20px' }}>
+            <button className="ord-modal-btn ord-modal-btn--ghost" onClick={onClose}>Cancel</button>
+            <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={!selected || (selected === "Other reason" && !other.trim())} onClick={() => setStep(2)}>Continue</button>
+          </div>
+        </>)}
+
+        {step === 2 && (<>
+          <div className="ord-modal-header">
+            <div className="ord-modal-icon" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </div>
+            <div><h3 className="ord-modal-title">Confirm Request</h3><p className="ord-modal-sub">Review your {isReturn ? 'return' : 'replacement'} request</p></div>
+            <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div className="ord-confirm-box">
+            <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
+            <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
+            <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
+          </div>
+
           {/* Media Uploads */}
-          <div style={{ marginTop: '20px', padding: '16px', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #e5e7eb' }}>
+          <div style={{ marginTop: '16px', padding: '16px', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #e5e7eb' }}>
             <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Upload Images (Max 3)</p>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
               {images.map((img, idx) => (
@@ -278,28 +298,6 @@ function ReturnReplaceModal({ order, actionType, onClose, onConfirm, loading }) 
           </div>
 
           <div className="ord-modal-footer" style={{ marginTop: '20px' }}>
-            <button className="ord-modal-btn ord-modal-btn--ghost" onClick={onClose}>Cancel</button>
-            <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={!selected || (selected === "Other reason" && !other.trim())} onClick={() => setStep(2)}>Continue</button>
-          </div>
-        </>)}
-
-        {step === 2 && (<>
-          <div className="ord-modal-header">
-            <div className="ord-modal-icon" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            </div>
-            <div><h3 className="ord-modal-title">Confirm Request</h3><p className="ord-modal-sub">Review your {isReturn ? 'return' : 'replacement'} request</p></div>
-            <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-          </div>
-          <div className="ord-confirm-box">
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
-            {(images.length > 0 || video) && (
-              <div className="ord-confirm-row" style={{ marginTop: 8 }}><span className="ord-confirm-label">Attachments</span><span className="ord-confirm-val">{images.length} Image(s), {video ? '1' : '0'} Video</span></div>
-            )}
-          </div>
-          <div className="ord-modal-footer">
             <button className="ord-modal-btn ord-modal-btn--ghost" onClick={() => setStep(1)}>Back</button>
             <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={loading} onClick={() => onConfirm(order._id, reason, images, video, () => setStep(3))}>{loading ? <span className="ord-modal-spinner" /> : "Submit Request"}</button>
           </div>
