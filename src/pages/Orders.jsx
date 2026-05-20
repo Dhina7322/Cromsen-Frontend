@@ -7,7 +7,7 @@ const API = import.meta.env.VITE_API_URL || "/api";
 
 const imgUrl = (p) => { 
   if (!p) return null; 
-  if (p.startsWith("http")) return p; 
+  if (p.startsWith("http") || p.startsWith("data:")) return p; 
   const UPLOAD_BASE = API.replace('/api', '');
   return `${UPLOAD_BASE}/uploads/${p.replace(/^uploads\//, "")}`; 
 };
@@ -95,6 +95,16 @@ const REPLACE_REASONS = [
   "Other reason",
 ];
 
+const RETURN_REASONS = [
+  "Item is defective or broken",
+  "Item does not match description",
+  "Missing parts or accessories",
+  "Received wrong item",
+  "Quality is not as expected",
+  "No longer needed",
+  "Other reason",
+];
+
 const addDays  = (d, n) => new Date(new Date(d).getTime() + n * 86400000);
 const fmtFull  = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"numeric", month:"long",  year:"numeric" }) : "—";
 const fmtShort = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" }) : "—";
@@ -173,11 +183,41 @@ function CancelModal({ order, onClose, onConfirm, loading }) {
   );
 }
 
-function ReplaceModal({ order, onClose, onConfirm, loading }) {
+function ReturnReplaceModal({ order, actionType, onClose, onConfirm, loading }) {
   const [step, setStep] = useState(1);
   const [selected, setSelected] = useState("");
   const [other, setOther] = useState("");
+  const [images, setImages] = useState([]);
+  const [video, setVideo] = useState(null);
+  
+  const isReturn = actionType === "return";
+  const title = isReturn ? "Return Item" : "Replace Item";
+  const reasons = isReturn ? RETURN_REASONS : REPLACE_REASONS;
   const reason = selected === "Other reason" ? other : selected;
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (images.length + files.length > 3) {
+      alert("You can upload up to 3 images.");
+      return;
+    }
+    setImages(prev => [...prev, ...files]);
+  };
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) { // 20MB limit
+        alert("Video size must be less than 20MB");
+        return;
+      }
+      setVideo(file);
+    }
+  };
+
+  const removeImage = (idx) => {
+    setImages(prev => prev.filter((_, i) => i !== idx));
+  };
 
   return (
     <div className="ord-modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -187,14 +227,14 @@ function ReplaceModal({ order, onClose, onConfirm, loading }) {
             <div className="ord-modal-icon" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             </div>
-            <div><h3 className="ord-modal-title">Return Item</h3><p className="ord-modal-sub">Order #{order._id?.slice(-8).toUpperCase()}</p></div>
+            <div><h3 className="ord-modal-title">{title}</h3><p className="ord-modal-sub">Order #{order._id?.slice(-8).toUpperCase()}</p></div>
             <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
-          <p className="ord-modal-body-text">Please select a reason for the return:</p>
+          <p className="ord-modal-body-text">Please select a reason for the {isReturn ? 'return' : 'replacement'}:</p>
           <div className="ord-reason-list">
-            {REPLACE_REASONS.map((r) => (
+            {reasons.map((r) => (
               <label key={r} className={`ord-reason-item${selected === r ? " ord-reason-item--selected" : ""}`}>
-                <input type="radio" name="replace-reason" value={r} checked={selected === r} onChange={() => setSelected(r)} className="ord-reason-radio" />
+                <input type="radio" name={`${actionType}-reason`} value={r} checked={selected === r} onChange={() => setSelected(r)} className="ord-reason-radio" />
                 <span className="ord-reason-custom-radio" /><span className="ord-reason-label">{r}</span>
               </label>
             ))}
@@ -202,7 +242,42 @@ function ReplaceModal({ order, onClose, onConfirm, loading }) {
           {selected === "Other reason" && (
             <textarea className="ord-reason-textarea" placeholder="Please describe the issue..." value={other} onChange={e => setOther(e.target.value)} rows={3} />
           )}
-          <div className="ord-modal-footer">
+
+          {/* Media Uploads */}
+          <div style={{ marginTop: '20px', padding: '16px', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #e5e7eb' }}>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Upload Images (Max 3)</p>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              {images.map((img, idx) => (
+                <div key={idx} style={{ position: 'relative', width: '60px', height: '60px' }}>
+                  <img src={URL.createObjectURL(img)} alt={`upload-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                  <button type="button" onClick={() => removeImage(idx)} style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', border: 'none', cursor: 'pointer' }}>×</button>
+                </div>
+              ))}
+              {images.length < 3 && (
+                <label style={{ width: '60px', height: '60px', border: '1px dashed #9ca3af', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fff' }}>
+                  <span style={{ fontSize: '20px', color: '#9ca3af' }}>+</span>
+                  <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
+                </label>
+              )}
+            </div>
+
+            <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Upload Video (Max 1, &lt;20MB)</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {video ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', padding: '4px 8px', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                  <span style={{ fontSize: '12px', color: '#4b5563', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{video.name}</span>
+                  <button type="button" onClick={() => setVideo(null)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>Remove</button>
+                </div>
+              ) : (
+                <label style={{ padding: '6px 12px', background: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', color: '#374151', fontWeight: 500 }}>
+                  Select Video
+                  <input type="file" accept="video/*" onChange={handleVideoChange} style={{ display: 'none' }} />
+                </label>
+              )}
+            </div>
+          </div>
+
+          <div className="ord-modal-footer" style={{ marginTop: '20px' }}>
             <button className="ord-modal-btn ord-modal-btn--ghost" onClick={onClose}>Cancel</button>
             <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={!selected || (selected === "Other reason" && !other.trim())} onClick={() => setStep(2)}>Continue</button>
           </div>
@@ -213,17 +288,20 @@ function ReplaceModal({ order, onClose, onConfirm, loading }) {
             <div className="ord-modal-icon" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             </div>
-            <div><h3 className="ord-modal-title">Confirm Request</h3><p className="ord-modal-sub">Review your replacement request</p></div>
+            <div><h3 className="ord-modal-title">Confirm Request</h3><p className="ord-modal-sub">Review your {isReturn ? 'return' : 'replacement'} request</p></div>
             <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
           <div className="ord-confirm-box">
             <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
             <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
             <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
+            {(images.length > 0 || video) && (
+              <div className="ord-confirm-row" style={{ marginTop: 8 }}><span className="ord-confirm-label">Attachments</span><span className="ord-confirm-val">{images.length} Image(s), {video ? '1' : '0'} Video</span></div>
+            )}
           </div>
           <div className="ord-modal-footer">
             <button className="ord-modal-btn ord-modal-btn--ghost" onClick={() => setStep(1)}>Back</button>
-            <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={loading} onClick={() => onConfirm(order._id, reason, () => setStep(3))}>{loading ? <span className="ord-modal-spinner" /> : "Submit Request"}</button>
+            <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={loading} onClick={() => onConfirm(order._id, reason, images, video, () => setStep(3))}>{loading ? <span className="ord-modal-spinner" /> : "Submit Request"}</button>
           </div>
         </>)}
 
@@ -231,7 +309,7 @@ function ReplaceModal({ order, onClose, onConfirm, loading }) {
           <div className="ord-modal-done">
             <div className="ord-modal-done-icon" style={{ color: "#8b5cf6" }}><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 15 15"/></svg></div>
             <h3>Request Submitted</h3>
-            <p>Your return request has been received. Our team will contact you shortly.</p>
+            <p>Your {isReturn ? 'return' : 'replacement'} request has been received. Our team will contact you shortly.</p>
             <button className="ord-modal-btn ord-modal-btn--primary" style={{ marginTop: 20, background: "#8b5cf6" }} onClick={onClose}>Done</button>
           </div>
         )}
@@ -355,6 +433,7 @@ export default function Orders() {
   const [cancelTarget, setCancelTarget]   = useState(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [replaceTarget, setReplaceTarget] = useState(null);
+  const [returnTarget, setReturnTarget] = useState(null);
   const [replaceLoading, setReplaceLoading] = useState(false);
 
   // Enrich order items with product images fetched from API (for old orders without image field)
@@ -455,15 +534,33 @@ export default function Orders() {
 
   return (
     <div className="ord-page">
-      {cancelTarget && <CancelModal order={cancelTarget} onClose={() => setCancelTarget(null)} onConfirm={handleCancelConfirm} loading={cancelLoading} />}
-      {replaceTarget && <ReplaceModal order={replaceTarget} onClose={() => setReplaceTarget(null)} onConfirm={async (id, reason, cb) => {
+      {returnTarget && <ReturnReplaceModal order={returnTarget} actionType="return" onClose={() => setReturnTarget(null)} onConfirm={async (id, reason, images, video, cb) => {
         setReplaceLoading(true);
         try {
-          await axios.put(`${API}/orders/${id}`, { 
-            status: "Replacement Requested",
-            cancelReason: reason,
-            replacementRequestedAt: new Date().toISOString()
-          });
+          const formData = new FormData();
+          formData.append("status", "Refund Tracking");
+          formData.append("cancelReason", reason);
+          formData.append("cancelledAt", new Date().toISOString());
+          images.forEach(img => formData.append("returnImages", img));
+          if (video) formData.append("returnVideo", video);
+
+          await axios.put(`${API}/orders/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+          setOrders(prev => prev.map(o => o._id === id ? { ...o, status: "Refund Tracking", cancelReason: reason, cancelledAt: new Date().toISOString() } : o));
+          cb();
+        } catch(e) { alert("Failed to process return."); } finally { setReplaceLoading(false); }
+      }} loading={replaceLoading} />}
+
+      {replaceTarget && <ReturnReplaceModal order={replaceTarget} actionType="replace" onClose={() => setReplaceTarget(null)} onConfirm={async (id, reason, images, video, cb) => {
+        setReplaceLoading(true);
+        try {
+          const formData = new FormData();
+          formData.append("status", "Replacement Requested");
+          formData.append("cancelReason", reason);
+          formData.append("replacementRequestedAt", new Date().toISOString());
+          images.forEach(img => formData.append("returnImages", img));
+          if (video) formData.append("returnVideo", video);
+
+          await axios.put(`${API}/orders/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
           setOrders(prev => prev.map(o => o._id === id ? { ...o, status: "Replacement Requested", cancelReason: reason, replacementRequestedAt: new Date().toISOString() } : o));
           cb();
         } catch(e) { alert("Failed to process replacement."); } finally { setReplaceLoading(false); }
@@ -632,10 +729,12 @@ export default function Orders() {
                       <div className="flex gap-2">
                         <button className="ord-action-btn ord-action-btn--primary flex-1" onClick={(e) => { 
                           e.stopPropagation(); 
-                          localStorage.setItem('exchangeContext', JSON.stringify({ oldOrderId: order._id, oldTotal: order.totalAmount }));
-                          navigate("/shop");
+                          setReplaceTarget(order);
                         }}>Replace Item</button>
-                        <button className="ord-action-btn ord-action-btn--ghost flex-1" onClick={(e) => { e.stopPropagation(); setReplaceTarget(order); }}>Return Item</button>
+                        <button className="ord-action-btn ord-action-btn--ghost flex-1" onClick={(e) => { 
+                          e.stopPropagation(); 
+                          setReturnTarget(order); 
+                        }}>Return Item</button>
                       </div>
                     )}
                     {status !== "Cancelled" && status !== "Refund Tracking" && status !== "Delivered" && !status.includes("Replacement") && (

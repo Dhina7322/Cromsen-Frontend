@@ -524,10 +524,26 @@ export default function OrdersTab() {
                       </div>
                     )}
 
-                    {selectedOrder.cancelReason && (
+                    {(selectedOrder.cancelReason || (selectedOrder.returnImages && selectedOrder.returnImages.length > 0) || selectedOrder.returnVideo) && (
                       <div style={{ marginTop:"24px",background:"#fef2f2",border:"1px solid #fee2e2",padding:"12px",borderRadius:"8px" }}>
                         <div className="om-section-title" style={{ color:"#ef4444",marginBottom:"8px" }}>Cancellation/Replace Reason</div>
-                        <div style={{ fontSize:"13px",color:"#b91c1c" }}>{selectedOrder.cancelReason}</div>
+                        {selectedOrder.cancelReason && <div style={{ fontSize:"13px",color:"#b91c1c", marginBottom: "8px" }}>{selectedOrder.cancelReason}</div>}
+                        
+                        {(selectedOrder.returnImages && selectedOrder.returnImages.length > 0) && (
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                            {selectedOrder.returnImages.map((img, idx) => (
+                              <a key={idx} href={getImageUrl(img)} target="_blank" rel="noreferrer">
+                                <img src={getImageUrl(img)} alt={`return-${idx}`} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #fca5a5' }} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {selectedOrder.returnVideo && (
+                          <div style={{ marginTop: '12px' }}>
+                            <video src={getImageUrl(selectedOrder.returnVideo)} controls style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', border: '1px solid #fca5a5' }} />
+                          </div>
+                        )}
                       </div>
                     )}
 
