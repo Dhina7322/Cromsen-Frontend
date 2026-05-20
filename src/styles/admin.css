@@ -925,10 +925,17 @@
   max-width: 400px;
 }
 
+.modal--lg {
+  max-width: 950px;
+  width: 95%;
+}
+
 .om-body {
   display: flex;
   gap: 24px;
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .om-left {
@@ -1318,5 +1325,16 @@
   .pending-pill {
     padding: 3px 8px;
     font-size: 10px;
+  }
+
+  .om-body {
+    flex-direction: column;
+  }
+
+  .om-right {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
   }
 }

@@ -452,7 +452,7 @@ export default function OrdersTab() {
             </div>
 
             <div className="modal-overlay no-print">
-              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal">
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal modal--lg">
                 <div className="modal-head">
                   <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
                   <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18}/></button>
