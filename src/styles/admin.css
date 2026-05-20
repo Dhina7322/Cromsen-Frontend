@@ -521,8 +521,8 @@
 
 .modal {
   background: #fff;
-  width: 90%;
-  max-width: 600px;
+  width: 95%;
+  max-width: 900px;
   border-radius: 0px;
   overflow: hidden;
   max-height: 90vh;
@@ -929,6 +929,8 @@
   display: flex;
   gap: 24px;
   padding: 20px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .om-left {
