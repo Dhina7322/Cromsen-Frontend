@@ -452,7 +452,7 @@ export default function OrdersTab() {
             </div>
 
             <div className="modal-overlay no-print">
-              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal modal--lg">
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal">
                 <div className="modal-head">
                   <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
                   <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18}/></button>
@@ -493,37 +493,6 @@ export default function OrdersTab() {
                         Phone: {selectedOrder.shippingAddress?.phone}
                       </div>
                     </div>
-
-                    {(selectedOrder.cancelReason || (selectedOrder.returnImages && selectedOrder.returnImages.length > 0) || selectedOrder.returnVideo) && (
-                      <div style={{ marginTop:"24px",background:"#fef2f2",border:"1px solid #fee2e2",padding:"16px",borderRadius:"8px" }}>
-                        <div className="om-section-title" style={{ color:"#ef4444",marginBottom:"8px" }}>Cancellation/Replace Reason</div>
-                        {selectedOrder.cancelReason && (
-                          <div style={{ fontSize:"14px",color:"#b91c1c", marginBottom: "16px", fontWeight: "500", lineHeight: "1.5" }}>
-                            {selectedOrder.cancelReason}
-                          </div>
-                        )}
-                        
-                        {(selectedOrder.returnImages && selectedOrder.returnImages.length > 0) && (
-                          <div style={{ marginTop: '16px' }}>
-                            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#991b1b', textTransform: 'uppercase', marginBottom: '8px' }}>Images</div>
-                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                              {selectedOrder.returnImages.map((img, idx) => (
-                                <a key={idx} href={getImageUrl(img)} target="_blank" rel="noreferrer" style={{ display: 'inline-block', transition: 'transform 0.2s' }}>
-                                  <img src={getImageUrl(img)} alt={`return-${idx}`} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #fca5a5', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {selectedOrder.returnVideo && (
-                          <div style={{ marginTop: '16px' }}>
-                            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#991b1b', textTransform: 'uppercase', marginBottom: '8px' }}>Video</div>
-                            <video src={getImageUrl(selectedOrder.returnVideo)} controls style={{ width: '100%', maxWidth: '500px', borderRadius: '6px', border: '1px solid #fca5a5', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   <div className="om-right">
@@ -550,6 +519,29 @@ export default function OrdersTab() {
                             <button onClick={() => { setSearchTerm(selectedOrder.replacementOrderId); setSelectedOrder(null); }} className="text-blue-600 font-bold hover:underline">
                               #{selectedOrder.replacementOrderId.slice(-8).toUpperCase()}
                             </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {(selectedOrder.cancelReason || (selectedOrder.returnImages && selectedOrder.returnImages.length > 0) || selectedOrder.returnVideo) && (
+                      <div style={{ marginTop:"24px",background:"#fef2f2",border:"1px solid #fee2e2",padding:"12px",borderRadius:"8px" }}>
+                        <div className="om-section-title" style={{ color:"#ef4444",marginBottom:"8px" }}>Cancellation/Replace Reason</div>
+                        {selectedOrder.cancelReason && <div style={{ fontSize:"13px",color:"#b91c1c", marginBottom: "8px" }}>{selectedOrder.cancelReason}</div>}
+                        
+                        {(selectedOrder.returnImages && selectedOrder.returnImages.length > 0) && (
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                            {selectedOrder.returnImages.map((img, idx) => (
+                              <a key={idx} href={getImageUrl(img)} target="_blank" rel="noreferrer">
+                                <img src={getImageUrl(img)} alt={`return-${idx}`} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #fca5a5' }} />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {selectedOrder.returnVideo && (
+                          <div style={{ marginTop: '12px' }}>
+                            <video src={getImageUrl(selectedOrder.returnVideo)} controls style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', border: '1px solid #fca5a5' }} />
                           </div>
                         )}
                       </div>
