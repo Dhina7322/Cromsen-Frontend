@@ -546,7 +546,7 @@ export default function Orders() {
           images.forEach(img => formData.append("returnImages", img));
           if (video) formData.append("returnVideo", video);
 
-          await axios.put(`${API}/orders/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+          await axios.put(`${API}/orders/${id}`, formData);
           setOrders(prev => prev.map(o => o._id === id ? { ...o, status: "Refund Tracking", cancelReason: reason, cancelledAt: new Date().toISOString() } : o));
           cb();
         } catch(e) { alert("Failed to process return."); } finally { setReplaceLoading(false); }
@@ -562,7 +562,7 @@ export default function Orders() {
           images.forEach(img => formData.append("returnImages", img));
           if (video) formData.append("returnVideo", video);
 
-          await axios.put(`${API}/orders/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+          await axios.put(`${API}/orders/${id}`, formData);
           setOrders(prev => prev.map(o => o._id === id ? { ...o, status: "Replacement Requested", cancelReason: reason, replacementRequestedAt: new Date().toISOString() } : o));
           cb();
         } catch(e) { alert("Failed to process replacement."); } finally { setReplaceLoading(false); }
