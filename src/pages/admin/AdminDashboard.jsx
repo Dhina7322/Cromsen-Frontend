@@ -193,7 +193,7 @@ export default function AdminDashboard() {
               <div>
                 <h4 className="font-bold text-gray-900 text-base">New Order Placed!</h4>
                 <p className="text-sm text-gray-500 mt-1">
-                   Order <span className="font-mono text-orange font-bold">#{newOrderNotify._id?.slice(-8).toUpperCase()}</span> just arrived.
+                   Order <span className="font-mono text-orange font-bold">{newOrderNotify.orderId ? newOrderNotify.orderId.replace('-', '-#') : '#' + newOrderNotify._id?.slice(-8).toUpperCase()}</span> just arrived.
                 </p>
                 <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
                   <div className="flex-1">
