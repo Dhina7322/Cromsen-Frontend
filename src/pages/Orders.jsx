@@ -126,20 +126,21 @@ function CancelModal({ order, onClose, onConfirm, loading }) {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
             <div><h3 className="ord-modal-title">Cancel Order</h3><p className="ord-modal-sub">Order #{order._id?.slice(-8).toUpperCase()}</p></div>
-            <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
-          <p className="ord-modal-body-text">Please tell us why you want to cancel this order</p>
-          <div className="ord-reason-list">
-            {CANCEL_REASONS.map((r) => (
-              <label key={r} className={`ord-reason-item${selected === r ? " ord-reason-item--selected" : ""}`}>
-                <input type="radio" name="cancel-reason" value={r} checked={selected === r} onChange={() => setSelected(r)} className="ord-reason-radio" />
-                <span className="ord-reason-custom-radio" /><span className="ord-reason-label">{r}</span>
-              </label>
-            ))}
+          <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
+            <p className="ord-modal-body-text">Please tell us why you want to cancel this order</p>
+            <div className="ord-reason-list">
+              {CANCEL_REASONS.map((r) => (
+                <label key={r} className={`ord-reason-item${selected === r ? " ord-reason-item--selected" : ""}`}>
+                  <input type="radio" name="cancel-reason" value={r} checked={selected === r} onChange={() => setSelected(r)} className="ord-reason-radio" />
+                  <span className="ord-reason-custom-radio" /><span className="ord-reason-label">{r}</span>
+                </label>
+              ))}
+            </div>
+            {selected === "Other reason" && (
+              <textarea className="ord-reason-textarea" placeholder="Please describe your reason..." value={other} onChange={e => setOther(e.target.value)} rows={3} />
+            )}
           </div>
-          {selected === "Other reason" && (
-            <textarea className="ord-reason-textarea" placeholder="Please describe your reason..." value={other} onChange={e => setOther(e.target.value)} rows={3} />
-          )}
           <div className="ord-modal-footer">
             <button className="ord-modal-btn ord-modal-btn--ghost" onClick={onClose}>Keep Order</button>
             <button className="ord-modal-btn ord-modal-btn--danger" disabled={!selected || (selected === "Other reason" && !other.trim())} onClick={() => setStep(2)}>Continue</button>
@@ -154,14 +155,16 @@ function CancelModal({ order, onClose, onConfirm, loading }) {
             <div><h3 className="ord-modal-title">Confirm Cancellation</h3><p className="ord-modal-sub">This action cannot be undone</p></div>
             <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
-          <div className="ord-confirm-box">
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Amount</span><span className="ord-confirm-val">Rs.{Number(order.totalAmount || 0).toLocaleString()}</span></div>
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
-            {order.paymentMethod !== "cod" && (
-              <div className="ord-refund-banner"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Refund of Rs.{Number(order.totalAmount || 0).toLocaleString()} will be processed in 5-7 business days</div>
-            )}
+          <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
+            <div className="ord-confirm-box">
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Amount</span><span className="ord-confirm-val">Rs.{Number(order.totalAmount || 0).toLocaleString()}</span></div>
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
+              {order.paymentMethod !== "cod" && (
+                <div className="ord-refund-banner"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Refund of Rs.{Number(order.totalAmount || 0).toLocaleString()} will be processed in 5-7 business days</div>
+              )}
+            </div>
           </div>
           <div className="ord-modal-footer">
             <button className="ord-modal-btn ord-modal-btn--ghost" onClick={() => setStep(1)}>Back</button>
@@ -230,20 +233,21 @@ function ReturnReplaceModal({ order, actionType, onClose, onConfirm, loading }) 
             <div><h3 className="ord-modal-title">{title}</h3><p className="ord-modal-sub">Order #{order._id?.slice(-8).toUpperCase()}</p></div>
             <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
-          <p className="ord-modal-body-text">Please select a reason for the {isReturn ? 'return' : 'replacement'}:</p>
-          <div className="ord-reason-list">
-            {reasons.map((r) => (
-              <label key={r} className={`ord-reason-item${selected === r ? " ord-reason-item--selected" : ""}`}>
-                <input type="radio" name={`${actionType}-reason`} value={r} checked={selected === r} onChange={() => setSelected(r)} className="ord-reason-radio" />
-                <span className="ord-reason-custom-radio" /><span className="ord-reason-label">{r}</span>
-              </label>
-            ))}
+          <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
+            <p className="ord-modal-body-text">Please select a reason for the {isReturn ? 'return' : 'replacement'}:</p>
+            <div className="ord-reason-list">
+              {reasons.map((r) => (
+                <label key={r} className={`ord-reason-item${selected === r ? " ord-reason-item--selected" : ""}`}>
+                  <input type="radio" name={`${actionType}-reason`} value={r} checked={selected === r} onChange={() => setSelected(r)} className="ord-reason-radio" />
+                  <span className="ord-reason-custom-radio" /><span className="ord-reason-label">{r}</span>
+                </label>
+              ))}
+            </div>
+            {selected === "Other reason" && (
+              <textarea className="ord-reason-textarea" placeholder="Please describe the issue..." value={other} onChange={e => setOther(e.target.value)} rows={3} />
+            )}
           </div>
-          {selected === "Other reason" && (
-            <textarea className="ord-reason-textarea" placeholder="Please describe the issue..." value={other} onChange={e => setOther(e.target.value)} rows={3} />
-          )}
-
-          <div className="ord-modal-footer" style={{ marginTop: '20px' }}>
+          <div className="ord-modal-footer">
             <button className="ord-modal-btn ord-modal-btn--ghost" onClick={onClose}>Cancel</button>
             <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={!selected || (selected === "Other reason" && !other.trim())} onClick={() => setStep(2)}>Continue</button>
           </div>
@@ -255,48 +259,48 @@ function ReturnReplaceModal({ order, actionType, onClose, onConfirm, loading }) 
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             </div>
             <div><h3 className="ord-modal-title">Confirm Request</h3><p className="ord-modal-sub">Review your {isReturn ? 'return' : 'replacement'} request</p></div>
-            <button className="ord-modal-close" onClick={onClose}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
-          <div className="ord-confirm-box">
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
-            <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
-          </div>
-
-          {/* Media Uploads */}
-          <div style={{ marginTop: '16px', padding: '16px', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #e5e7eb' }}>
-            <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Upload Images (Max 3)</p>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-              {images.map((img, idx) => (
-                <div key={idx} style={{ position: 'relative', width: '60px', height: '60px' }}>
-                  <img src={URL.createObjectURL(img)} alt={`upload-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
-                  <button type="button" onClick={() => removeImage(idx)} style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', border: 'none', cursor: 'pointer' }}>×</button>
-                </div>
-              ))}
-              {images.length < 3 && (
-                <label style={{ width: '60px', height: '60px', border: '1px dashed #9ca3af', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fff' }}>
-                  <span style={{ fontSize: '20px', color: '#9ca3af' }}>+</span>
-                  <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
-                </label>
-              )}
+          <div style={{ maxHeight: '50vh', overflowY: 'auto', paddingBottom: '16px' }}>
+            <div className="ord-confirm-box">
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Order</span><span className="ord-confirm-val">#{order._id?.slice(-8).toUpperCase()}</span></div>
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Items</span><span className="ord-confirm-val">{(order.items || order.products || []).length} item(s)</span></div>
+              <div className="ord-confirm-row"><span className="ord-confirm-label">Reason</span><span className="ord-confirm-val ord-confirm-val--reason">{reason}</span></div>
             </div>
 
-            <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Upload Video (Max 1, &lt;20MB)</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {video ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', padding: '4px 8px', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
-                  <span style={{ fontSize: '12px', color: '#4b5563', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{video.name}</span>
-                  <button type="button" onClick={() => setVideo(null)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>Remove</button>
-                </div>
-              ) : (
-                <label style={{ padding: '6px 12px', background: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', color: '#374151', fontWeight: 500 }}>
-                  Select Video
-                  <input type="file" accept="video/*" onChange={handleVideoChange} style={{ display: 'none' }} />
-                </label>
-              )}
+            {/* Media Uploads */}
+            <div style={{ marginTop: '16px', margin: '0 24px', padding: '16px', background: '#f9fafb', borderRadius: '8px', border: '1px dashed #e5e7eb' }}>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Upload Images (Max 3)</p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                {images.map((img, idx) => (
+                  <div key={idx} style={{ position: 'relative', width: '60px', height: '60px' }}>
+                    <img src={URL.createObjectURL(img)} alt={`upload-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                    <button type="button" onClick={() => removeImage(idx)} style={{ position: 'absolute', top: -5, right: -5, background: '#ef4444', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', border: 'none', cursor: 'pointer' }}>×</button>
+                  </div>
+                ))}
+                {images.length < 3 && (
+                  <label style={{ width: '60px', height: '60px', border: '1px dashed #9ca3af', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fff' }}>
+                    <span style={{ fontSize: '20px', color: '#9ca3af' }}>+</span>
+                    <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
+                  </label>
+                )}
+              </div>
+
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Upload Video (Max 1, &lt;20MB)</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {video ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', padding: '4px 8px', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                    <span style={{ fontSize: '12px', color: '#4b5563', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{video.name}</span>
+                    <button type="button" onClick={() => setVideo(null)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>Remove</button>
+                  </div>
+                ) : (
+                  <label style={{ padding: '6px 12px', background: '#fff', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', color: '#374151', fontWeight: 500 }}>
+                    Select Video
+                    <input type="file" accept="video/*" onChange={handleVideoChange} style={{ display: 'none' }} />
+                  </label>
+                )}
+              </div>
             </div>
           </div>
-
           <div className="ord-modal-footer" style={{ marginTop: '20px' }}>
             <button className="ord-modal-btn ord-modal-btn--ghost" onClick={() => setStep(1)}>Back</button>
             <button className="ord-modal-btn ord-modal-btn--primary" style={{ background: "#8b5cf6" }} disabled={loading} onClick={() => onConfirm(order._id, reason, images, video, () => setStep(3))}>{loading ? <span className="ord-modal-spinner" /> : "Submit Request"}</button>
