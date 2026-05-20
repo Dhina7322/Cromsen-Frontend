@@ -111,6 +111,13 @@ const fmtShort = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day:"numer
 const fmtDay   = (d) => d ? new Date(d).toLocaleDateString("en-IN", { weekday:"short", day:"numeric", month:"short" }) : "";
 const fmtTime  = (d) => d ? new Date(d).toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" }) : "";
 
+const toBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = (error) => reject(error);
+});
+
 function CancelModal({ order, onClose, onConfirm, loading }) {
   const [step, setStep] = useState(1);
   const [selected, setSelected] = useState("");
@@ -539,33 +546,47 @@ export default function Orders() {
       {returnTarget && <ReturnReplaceModal order={returnTarget} actionType="return" onClose={() => setReturnTarget(null)} onConfirm={async (id, reason, images, video, cb) => {
         setReplaceLoading(true);
         try {
-          const formData = new FormData();
-          formData.append("status", "Refund Tracking");
-          formData.append("cancelReason", reason);
-          formData.append("cancelledAt", new Date().toISOString());
-          images.forEach(img => formData.append("returnImages", img));
-          if (video) formData.append("returnVideo", video);
+          const returnImages = await Promise.all(images.map(img => toBase64(img)));
+          const returnVideo = video ? await toBase64(video) : null;
 
-          await axios.put(`${API}/orders/${id}`, formData);
-          setOrders(prev => prev.map(o => o._id === id ? { ...o, status: "Refund Tracking", cancelReason: reason, cancelledAt: new Date().toISOString() } : o));
+          const payload = {
+            status: "Refund Tracking",
+            cancelReason: reason,
+            cancelledAt: new Date().toISOString(),
+          };
+          if (returnImages.length > 0) payload.returnImages = returnImages;
+          if (returnVideo) payload.returnVideo = returnVideo;
+
+          await axios.put(`${API}/orders/${id}`, payload);
+          setOrders(prev => prev.map(o => o._id === id ? { ...o, ...payload } : o));
           cb();
-        } catch(e) { alert("Failed to process return."); } finally { setReplaceLoading(false); }
+        } catch(e) { 
+          const msg = e.response?.data?.message || e.response?.data || e.message;
+          alert("Failed to process return: " + msg); 
+        } finally { setReplaceLoading(false); }
       }} loading={replaceLoading} />}
 
       {replaceTarget && <ReturnReplaceModal order={replaceTarget} actionType="replace" onClose={() => setReplaceTarget(null)} onConfirm={async (id, reason, images, video, cb) => {
         setReplaceLoading(true);
         try {
-          const formData = new FormData();
-          formData.append("status", "Replacement Requested");
-          formData.append("cancelReason", reason);
-          formData.append("replacementRequestedAt", new Date().toISOString());
-          images.forEach(img => formData.append("returnImages", img));
-          if (video) formData.append("returnVideo", video);
+          const returnImages = await Promise.all(images.map(img => toBase64(img)));
+          const returnVideo = video ? await toBase64(video) : null;
 
-          await axios.put(`${API}/orders/${id}`, formData);
-          setOrders(prev => prev.map(o => o._id === id ? { ...o, status: "Replacement Requested", cancelReason: reason, replacementRequestedAt: new Date().toISOString() } : o));
+          const payload = {
+            status: "Replacement Requested",
+            cancelReason: reason,
+            replacementRequestedAt: new Date().toISOString(),
+          };
+          if (returnImages.length > 0) payload.returnImages = returnImages;
+          if (returnVideo) payload.returnVideo = returnVideo;
+
+          await axios.put(`${API}/orders/${id}`, payload);
+          setOrders(prev => prev.map(o => o._id === id ? { ...o, ...payload } : o));
           cb();
-        } catch(e) { alert("Failed to process replacement."); } finally { setReplaceLoading(false); }
+        } catch(e) { 
+          const msg = e.response?.data?.message || e.response?.data || e.message;
+          alert("Failed to process replacement: " + msg); 
+        } finally { setReplaceLoading(false); }
       }} loading={replaceLoading} />}
 
       <div className="ord-header">
