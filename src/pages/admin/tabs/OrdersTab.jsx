@@ -119,20 +119,20 @@ export default function OrdersTab() {
   const [searchParams] = useSearchParams();
   const initialStatus = searchParams.get("status") || "All";
 
-  const [allOrders,     setAllOrders]     = useState([]);
-  const [orders,        setOrders]        = useState([]);
-  const [loading,       setLoading]       = useState(false);
-  const [searchTerm,    setSearchTerm]    = useState("");
+  const [allOrders, setAllOrders] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [enrichedItems, setEnrichedItems] = useState([]);
-  const [statusFilter,  setStatusFilter]  = useState(initialStatus);
-  const [kpiStats,      setKpiStats]      = useState({
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
+  const [kpiStats, setKpiStats] = useState({
     totalRevenue: 0, totalProfit: 0, totalRefunds: 0,
     activeOrders: 0, totalUsers: 0, totalProducts: 0,
   });
 
-  const mainStatuses    = ["All", "Processing", "Shipped", "Delivered"];
-  const refundStatuses  = ["Refund Tracking", "Refund Processed", "Refund Completed"];
+  const mainStatuses = ["All", "Processing", "Shipped", "Delivered"];
+  const refundStatuses = ["Refund Tracking", "Refund Processed", "Refund Completed"];
   const replaceStatuses = ["Replacement Requested", "Replacement Processed", "Replacement Completed"];
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export default function OrdersTab() {
   useEffect(() => {
     axios.get(`${API}/orders`, { params: { limit: 1000 } })
       .then(res => setAllOrders(res.data.orders || []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => { fetchOrders(); }, [statusFilter]);
@@ -151,14 +151,14 @@ export default function OrdersTab() {
   useEffect(() => {
     axios.get(`${API}/admin/stats`).then(res => {
       setKpiStats({
-        totalRevenue:  res.data.totalRevenue  || 0,
-        totalProfit:   res.data.totalProfit   || 0,
-        totalRefunds:  res.data.totalRefunds  || 0,
-        activeOrders:  res.data.totalOrders   || 0,
-        totalUsers:    res.data.totalUsers    || 0,
+        totalRevenue: res.data.totalRevenue || 0,
+        totalProfit: res.data.totalProfit || 0,
+        totalRefunds: res.data.totalRefunds || 0,
+        activeOrders: res.data.totalOrders || 0,
+        totalUsers: res.data.totalUsers || 0,
         totalProducts: res.data.totalProducts || 0,
       });
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -220,7 +220,7 @@ export default function OrdersTab() {
       showToast("success", `Order marked as ${status}`);
       fetchOrders();
       axios.get(`${API}/orders`, { params: { limit: 1000 } })
-        .then(res => setAllOrders(res.data.orders || [])).catch(() => {});
+        .then(res => setAllOrders(res.data.orders || [])).catch(() => { });
       if (selectedOrder?._id === id) setSelectedOrder(p => ({ ...p, status }));
     } catch { showToast("error", "Failed to update order status"); }
   };
@@ -235,9 +235,9 @@ export default function OrdersTab() {
   };
 
   const getAvailableStatuses = (status) => {
-    if (status === "Abandoned")           return ["Processing", "Cancelled", "Abandoned"];
-    if (status?.includes("Refund"))       return refundStatuses;
-    if (status?.includes("Replacement"))  return replaceStatuses;
+    if (status === "Abandoned") return ["Processing", "Cancelled", "Abandoned"];
+    if (status?.includes("Refund")) return refundStatuses;
+    if (status?.includes("Replacement")) return replaceStatuses;
     return ["Processing", "Shipped", "Delivered", "Cancelled"];
   };
 
@@ -246,12 +246,12 @@ export default function OrdersTab() {
 
       {/* ── KPI Cards ── */}
       <div className="kpi-grid" style={{ marginBottom: "28px" }}>
-        <KPI label="Total Revenue"    value={`₹${kpiStats.totalRevenue}`}                        icon={<IndianRupee size={20}/>} color="#10b981" />
-        <KPI label="Total Profit"     value={`₹${Number(kpiStats.totalProfit).toFixed(0)}`}      icon={<TrendingUp size={20}/>}  color="#3b82f6" />
-        <KPI label="Refund Amount"    value={`₹${kpiStats.totalRefunds}`}                        icon={<RotateCcw size={20}/>}   color="#ef4444" />
-        <KPI label="Active Orders"    value={kpiStats.activeOrders}                              icon={<ShoppingCart size={20}/>} color="#f47121" />
-        <KPI label="Registered Users" value={kpiStats.totalUsers}                                icon={<Users size={20}/>}       color="#8b5cf6" />
-        <KPI label="Total Products"   value={kpiStats.totalProducts}                             icon={<Package size={20}/>}     color="#6366f1" />
+        <KPI label="Total Revenue" value={`₹${kpiStats.totalRevenue}`} icon={<IndianRupee size={20} />} color="#10b981" />
+        <KPI label="Total Profit" value={`₹${Number(kpiStats.totalProfit).toFixed(0)}`} icon={<TrendingUp size={20} />} color="#3b82f6" />
+        <KPI label="Refund Amount" value={`₹${kpiStats.totalRefunds}`} icon={<RotateCcw size={20} />} color="#ef4444" />
+        <KPI label="Active Orders" value={kpiStats.activeOrders} icon={<ShoppingCart size={20} />} color="#f47121" />
+        <KPI label="Registered Users" value={kpiStats.totalUsers} icon={<Users size={20} />} color="#8b5cf6" />
+        <KPI label="Total Products" value={kpiStats.totalProducts} icon={<Package size={20} />} color="#6366f1" />
       </div>
 
       {/* ── Filter bar ── */}
@@ -355,10 +355,10 @@ export default function OrdersTab() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredOrders.map(o => {
-                const isStruck  = o.status === "Cancelled" || o.status === "Replacement Completed";
-                const isLinked  = o.replacementFor || o.replacementOrderId;
-                const tdStyle   = isStruck ? { opacity: 0.6, textDecoration: "line-through" } : {};
-                const rowBg     = isLinked ? (o.replacementFor ? "rgba(124,58,237,0.05)" : "rgba(37,99,235,0.05)") : "";
+                const isStruck = o.status === "Cancelled" || o.status === "Replacement Completed";
+                const isLinked = o.replacementFor || o.replacementOrderId;
+                const tdStyle = isStruck ? { opacity: 0.6, textDecoration: "line-through" } : {};
+                const rowBg = isLinked ? (o.replacementFor ? "rgba(124,58,237,0.05)" : "rgba(37,99,235,0.05)") : "";
                 const available = getAvailableStatuses(o.status);
 
                 return (
@@ -400,7 +400,7 @@ export default function OrdersTab() {
                         )}
                         {o.replacementOrderId && (
                           <span className="text-[10px] text-blue-600 font-bold flex items-center gap-1">
-                            <ChevronRight size={10}/> Replaced by #{o.replacementOrderId.slice(-8).toUpperCase()}
+                            <ChevronRight size={10} /> Replaced by #{o.replacementOrderId.slice(-8).toUpperCase()}
                           </span>
                         )}
                       </div>
@@ -411,13 +411,13 @@ export default function OrdersTab() {
                           className="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
                           onClick={() => setSelectedOrder(o)} title="View Details"
                         >
-                          <Eye size={16}/>
+                          <Eye size={16} />
                         </button>
                         <button
                           className="h-9 w-9 flex items-center justify-center text-gray-400 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
                           onClick={() => { setSelectedOrder(o); setTimeout(() => window.print(), 300); }} title="Print Invoice"
                         >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
                         </button>
                         <div className="relative flex items-center">
                           <select
@@ -427,7 +427,7 @@ export default function OrdersTab() {
                           >
                             {available.map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
-                          <ChevronDown className="absolute right-2.5 text-gray-400 pointer-events-none" size={14}/>
+                          <ChevronDown className="absolute right-2.5 text-gray-400 pointer-events-none" size={14} />
                         </div>
                       </div>
                     </td>
@@ -452,63 +452,130 @@ export default function OrdersTab() {
             </div>
 
             <div className="modal-overlay no-print">
-              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="modal">
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                className="modal"
+              >
+                {/* ── Header ── */}
                 <div className="modal-head">
-                  <h2>Order Details <span className="order-id">#{selectedOrder._id.slice(-8)}</span></h2>
-                  <button className="icon-btn" onClick={() => setSelectedOrder(null)}><X size={18}/></button>
+                  <h2 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>
+                    Order Details{" "}
+                    <span style={{ color: "var(--orange)", fontFamily: "monospace" }}>
+                      #{selectedOrder._id.slice(-8).toUpperCase()}
+                    </span>
+                  </h2>
+                  <button className="icon-btn" onClick={() => setSelectedOrder(null)}>
+                    <X size={18} />
+                  </button>
                 </div>
+
+                {/* ── Two-column scrollable body ── */}
                 <div className="om-body">
+
+                  {/* ══ LEFT — Order items + Shipping ══ */}
                   <div className="om-left">
                     <div className="om-section-title">Order Items</div>
-                    <div className="activity-list" style={{ padding: 0 }}>
+                    <div style={{ padding: 0 }}>
                       {enrichedItems.map((item, idx) => (
                         <div key={idx} className="om-item">
                           <div className="om-item-ph" style={{ position: "relative", overflow: "hidden" }}>
                             {getImageUrl(item.image || item.images?.[0]) ? (
                               <>
-                                <img src={getImageUrl(item.image || item.images?.[0])} alt={item.name}
-                                  style={{ width:"100%",height:"100%",objectFit:"cover",position:"absolute",top:0,left:0,zIndex:10 }}
-                                  onError={e => { e.target.style.display = "none"; }} />
-                                <span style={{ position:"relative",zIndex:0 }}>{item.name?.[0]}</span>
+                                <img
+                                  src={getImageUrl(item.image || item.images?.[0])}
+                                  alt={item.name}
+                                  style={{
+                                    width: "100%", height: "100%", objectFit: "cover",
+                                    position: "absolute", top: 0, left: 0, zIndex: 10,
+                                  }}
+                                  onError={e => { e.target.style.display = "none"; }}
+                                />
+                                <span style={{ position: "relative", zIndex: 0 }}>{item.name?.[0]}</span>
                               </>
                             ) : item.name?.[0]}
                           </div>
                           <div className="om-item-info">
                             <div className="om-item-name">{item.name}</div>
-                            {item.variant && <div className="text-[10px] uppercase font-bold text-action tracking-wider mb-0.5">Variant: {item.variant}</div>}
-                            {item.customColor && <div className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-0.5">Color: {item.customColor}</div>}
+                            {item.variant && (
+                              <div className="text-[10px] uppercase font-bold text-action tracking-wider mb-0.5">
+                                Variant: {item.variant}
+                              </div>
+                            )}
+                            {item.customColor && (
+                              <div className="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-0.5">
+                                Color: {item.customColor}
+                              </div>
+                            )}
                             <div className="om-item-qty">Qty: {item.quantity} × ₹{item.price}</div>
                           </div>
                           <div className="om-item-total">₹{item.quantity * item.price}</div>
                         </div>
                       ))}
                     </div>
-                    <div style={{ marginTop:"24px" }}>
+
+                    {/* Shipping address */}
+                    <div style={{ marginTop: 24 }}>
                       <div className="om-section-title">Shipping Address</div>
-                      <div style={{ background:"#f8f9fa",padding:"12px",borderRadius:"8px",fontSize:"13px" }}>
-                        <strong>{selectedOrder.shippingAddress?.name}</strong><br/>
-                        {selectedOrder.shippingAddress?.address}<br/>
-                        {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state || ""} {selectedOrder.shippingAddress?.zip}<br/>
-                        {selectedOrder.shippingAddress?.country && <>{selectedOrder.shippingAddress.country}<br/></>}
+                      <div style={{
+                        background: "#f8f9fa", padding: "14px 16px",
+                        borderRadius: 8, fontSize: 13, lineHeight: 1.7,
+                        border: "1px solid var(--border)",
+                      }}>
+                        <strong>{selectedOrder.shippingAddress?.name}</strong><br />
+                        {selectedOrder.shippingAddress?.address}<br />
+                        {selectedOrder.shippingAddress?.city},&nbsp;
+                        {selectedOrder.shippingAddress?.state || ""}&nbsp;
+                        {selectedOrder.shippingAddress?.zip}<br />
+                        {selectedOrder.shippingAddress?.country && (
+                          <>{selectedOrder.shippingAddress.country}<br /></>
+                        )}
                         Phone: {selectedOrder.shippingAddress?.phone}
                       </div>
                     </div>
                   </div>
 
+                  {/* ══ RIGHT — Summary, linkage, cancel reason, delivery, status ══ */}
                   <div className="om-right">
-                    <div className="om-section-title">Order Summary</div>
-                    <div className="om-summary-row"><span>Subtotal</span><span>₹{selectedOrder.totalAmount}</span></div>
-                    <div className="om-summary-row"><span>Shipping</span><span>₹0.00</span></div>
-                    <div className="om-summary-row"><span>Payment Method</span><span className="font-bold text-action text-[11px] uppercase">{getPaymentLabel(selectedOrder)}</span></div>
-                    <div className="om-summary-total"><span>Total</span><span>₹{selectedOrder.totalAmount}</span></div>
 
+                    {/* Order Summary */}
+                    <div className="om-section-title">Order Summary</div>
+                    <div className="om-summary-row">
+                      <span>Subtotal</span>
+                      <span>₹{selectedOrder.totalAmount}</span>
+                    </div>
+                    <div className="om-summary-row">
+                      <span>Shipping</span>
+                      <span>₹0.00</span>
+                    </div>
+                    <div className="om-summary-row">
+                      <span>Payment Method</span>
+                      <span style={{ fontWeight: 700, color: "var(--orange)", fontSize: 11, textTransform: "uppercase" }}>
+                        {getPaymentLabel(selectedOrder)}
+                      </span>
+                    </div>
+                    <div className="om-summary-total">
+                      <span>Total</span>
+                      <span>₹{selectedOrder.totalAmount}</span>
+                    </div>
+
+                    {/* Order Linkage */}
                     {(selectedOrder.replacementFor || selectedOrder.replacementOrderId) && (
-                      <div style={{ marginTop:"24px",background:"#f5f3ff",border:"1px solid #ddd6fe",padding:"12px",borderRadius:"8px" }}>
-                        <div className="om-section-title" style={{ color:"#7c3aed",marginBottom:"8px" }}>Order Linkage</div>
+                      <div style={{
+                        marginTop: 24, background: "#f5f3ff",
+                        border: "1px solid #ddd6fe", padding: 14, borderRadius: 8,
+                      }}>
+                        <div className="om-section-title" style={{ color: "#7c3aed", marginBottom: 8 }}>
+                          Order Linkage
+                        </div>
                         {selectedOrder.replacementFor && (
                           <div className="flex justify-between items-center text-[13px] mb-2">
                             <span className="text-gray-500">Replacement for</span>
-                            <button onClick={() => { setSearchTerm(selectedOrder.replacementFor); setSelectedOrder(null); }} className="text-purple-600 font-bold hover:underline">
+                            <button
+                              onClick={() => { setSearchTerm(selectedOrder.replacementFor); setSelectedOrder(null); }}
+                              className="text-purple-600 font-bold hover:underline"
+                            >
                               #{selectedOrder.replacementFor.slice(-8).toUpperCase()}
                             </button>
                           </div>
@@ -516,7 +583,10 @@ export default function OrdersTab() {
                         {selectedOrder.replacementOrderId && (
                           <div className="flex justify-between items-center text-[13px]">
                             <span className="text-gray-500">Replaced by</span>
-                            <button onClick={() => { setSearchTerm(selectedOrder.replacementOrderId); setSelectedOrder(null); }} className="text-blue-600 font-bold hover:underline">
+                            <button
+                              onClick={() => { setSearchTerm(selectedOrder.replacementOrderId); setSelectedOrder(null); }}
+                              className="text-blue-600 font-bold hover:underline"
+                            >
                               #{selectedOrder.replacementOrderId.slice(-8).toUpperCase()}
                             </button>
                           </div>
@@ -524,44 +594,80 @@ export default function OrdersTab() {
                       </div>
                     )}
 
-                    {(selectedOrder.cancelReason || (selectedOrder.returnImages && selectedOrder.returnImages.length > 0) || selectedOrder.returnVideo) && (
-                      <div style={{ marginTop:"24px",background:"#fef2f2",border:"1px solid #fee2e2",padding:"12px",borderRadius:"8px" }}>
-                        <div className="om-section-title" style={{ color:"#ef4444",marginBottom:"8px" }}>Cancellation/Replace Reason</div>
-                        {selectedOrder.cancelReason && <div style={{ fontSize:"13px",color:"#b91c1c", marginBottom: "8px" }}>{selectedOrder.cancelReason}</div>}
-                        
-                        {(selectedOrder.returnImages && selectedOrder.returnImages.length > 0) && (
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-                            {selectedOrder.returnImages.map((img, idx) => (
-                              <a key={idx} href={getImageUrl(img)} target="_blank" rel="noreferrer">
-                                <img src={getImageUrl(img)} alt={`return-${idx}`} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #fca5a5' }} />
-                              </a>
-                            ))}
+                    {/* Cancellation / Replacement Reason + media */}
+                    {(selectedOrder.cancelReason ||
+                      (selectedOrder.returnImages && selectedOrder.returnImages.length > 0) ||
+                      selectedOrder.returnVideo) && (
+                        <div style={{
+                          marginTop: 24, background: "#fef2f2",
+                          border: "1px solid #fee2e2", padding: 14, borderRadius: 8,
+                        }}>
+                          <div className="om-section-title" style={{ color: "#ef4444", marginBottom: 8 }}>
+                            Cancellation / Replace Reason
                           </div>
-                        )}
-                        
-                        {selectedOrder.returnVideo && (
-                          <div style={{ marginTop: '12px' }}>
-                            <video src={getImageUrl(selectedOrder.returnVideo)} controls style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', border: '1px solid #fca5a5' }} />
-                          </div>
-                        )}
-                      </div>
-                    )}
 
-                    {selectedOrder.status !== "Delivered" && selectedOrder.status !== "Cancelled" &&
-                     !selectedOrder.status?.includes("Refund") && !selectedOrder.status?.includes("Replacement") &&
-                     selectedOrder.status !== "Abandoned" && (
-                      <div style={{ marginTop:"24px" }}>
-                        <div className="om-section-title">Expected Delivery Date</div>
-                        <input
-                          type="date"
-                          className="bg-white border border-gray-200 text-sm px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 transition-shadow"
-                          value={selectedOrder.expectedDelivery ? selectedOrder.expectedDelivery.split("T")[0] : ""}
-                          onChange={e => updateOrderDelivery(selectedOrder._id, e.target.value)}
-                        />
-                      </div>
-                    )}
+                          {selectedOrder.cancelReason && (
+                            <div style={{ fontSize: 13, color: "#b91c1c", marginBottom: 10, lineHeight: 1.5 }}>
+                              {selectedOrder.cancelReason}
+                            </div>
+                          )}
 
-                    <div style={{ marginTop:"24px" }}>
+                          {/* Return images — larger grid */}
+                          {selectedOrder.returnImages && selectedOrder.returnImages.length > 0 && (
+                            <div className="return-media-grid">
+                              {selectedOrder.returnImages.map((img, idx) => (
+                                <a key={idx} href={getImageUrl(img)} target="_blank" rel="noreferrer">
+                                  <img
+                                    src={getImageUrl(img)}
+                                    alt={`return-${idx}`}
+                                    style={{
+                                      width: 80, height: 80,
+                                      objectFit: "cover",
+                                      display: "block",
+                                    }}
+                                  />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Return video — full width */}
+                          {selectedOrder.returnVideo && (
+                            <div className="return-video-wrap" style={{ marginTop: selectedOrder.returnImages?.length ? 10 : 0 }}>
+                              <video
+                                src={getImageUrl(selectedOrder.returnVideo)}
+                                controls
+                                style={{ width: "100%", maxHeight: 200, display: "block", background: "#000" }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                    {/* Expected Delivery Date */}
+                    {selectedOrder.status !== "Delivered" &&
+                      selectedOrder.status !== "Cancelled" &&
+                      !selectedOrder.status?.includes("Refund") &&
+                      !selectedOrder.status?.includes("Replacement") &&
+                      selectedOrder.status !== "Abandoned" && (
+                        <div style={{ marginTop: 24 }}>
+                          <div className="om-section-title">Expected Delivery Date</div>
+                          <input
+                            type="date"
+                            style={{
+                              width: "100%", padding: "9px 12px",
+                              border: "1px solid var(--border)", borderRadius: 8,
+                              fontSize: 13, outline: "none",
+                            }}
+                            value={selectedOrder.expectedDelivery
+                              ? selectedOrder.expectedDelivery.split("T")[0] : ""}
+                            onChange={e => updateOrderDelivery(selectedOrder._id, e.target.value)}
+                          />
+                        </div>
+                      )}
+
+                    {/* Update Status */}
+                    <div style={{ marginTop: 24 }}>
                       <div className="om-section-title">Update Status</div>
                       <div className="om-status-btns">
                         {getAvailableStatuses(selectedOrder.status).map(s => (
@@ -576,12 +682,20 @@ export default function OrdersTab() {
                         ))}
                       </div>
                     </div>
-                  </div>
-                </div>
+
+                  </div>{/* /om-right */}
+                </div>{/* /om-body */}
+
+                {/* ── Footer ── */}
                 <div className="modal-foot">
-                  <button className="btn-secondary" onClick={() => window.print()}>Print Invoice</button>
-                  <button className="btn-primary" onClick={() => setSelectedOrder(null)}>Close</button>
+                  <button className="btn-secondary" onClick={() => window.print()}>
+                    Print Invoice
+                  </button>
+                  <button className="btn-primary" onClick={() => setSelectedOrder(null)}>
+                    Close
+                  </button>
                 </div>
+
               </motion.div>
             </div>
           </>
